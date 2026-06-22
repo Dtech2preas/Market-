@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - DTECH Hub</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>DTECH Admin Dashboard</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="admin-panel">
+            <div style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                <h3>Statistics</h3>
+                <p>Total Businesses: <span id="total-businesses">0</span></p>
+                <p>Pending: <span id="pending-count">0</span> | Approved: <span id="approved-count">0</span></p>
+            </div>
+
+            <h2>Pending Applications</h2>
+            <div id="pending-list" class="admin-list">
+                <p>Loading...</p>
+            </div>
+
+            <h2 style="margin-top: 30px;">Approved Businesses</h2>
+            <div id="approved-list" class="admin-list">
+                <p>Loading...</p>
+            </div>
+        </section>
+
+        <!-- Edit Modal -->
+        <div id="edit-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 100;">
+            <div class="form-card" style="width: 90%; max-width: 600px; margin: 50px auto; max-height: 80vh; overflow-y: auto;">
+                <h3>Edit Business</h3>
+                <form id="edit-form">
+                    <input type="hidden" id="edit-id">
+                    <div class="form-group">
+                        <label>Business Name</label>
+                        <input type="text" id="edit-business-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Student Name</label>
+                        <input type="text" id="edit-student-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="edit-description" required></textarea>
+                    </div>
+                    <div style="display:flex; gap: 10px;">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-danger" onclick="document.getElementById('edit-modal').style.display='none'">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

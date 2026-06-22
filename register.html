@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - DTECH Business Hub</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>DTECH Business Hub</h1>
+            <nav>
+                <a href="index.html">Directory</a>
+                <a href="register.html">Register Business</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2>Register Your Business</h2>
+        <p>Get a free mini-website and reach more customers.</p>
+
+        <form id="registration-form" class="form-card">
+            <div class="form-group">
+                <label for="student-name">Your Full Name</label>
+                <input type="text" id="student-name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="business-name">Business Name</label>
+                <input type="text" id="business-name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Services">Services</option>
+                    <option value="Products">Products</option>
+                    <option value="Food">Food & Beverages</option>
+                    <option value="Tech">Technology</option>
+                    <option value="Design">Art & Design</option>
+                    <option value="Fashion">Fashion & Clothing</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="province">Province</label>
+                <select id="province" required>
+                    <option value="">Select Province</option>
+                    <option value="Gauteng">Gauteng</option>
+                    <option value="Western Cape">Western Cape</option>
+                    <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                    <option value="Eastern Cape">Eastern Cape</option>
+                    <option value="Free State">Free State</option>
+                    <option value="Mpumalanga">Mpumalanga</option>
+                    <option value="Limpopo">Limpopo</option>
+                    <option value="North West">North West</option>
+                    <option value="Northern Cape">Northern Cape</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="school">School / College / University (Optional)</label>
+                <input type="text" id="school">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Short Description (max 150 chars)</label>
+                <textarea id="description" maxlength="150" rows="3" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="about">About the Business (Full Details)</label>
+                <textarea id="about" rows="5" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="services">Services / Products Offered</label>
+                <textarea id="services" rows="4" placeholder="List your key offerings..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="whatsapp">WhatsApp Number (e.g. 27812345678)</label>
+                <input type="tel" id="whatsapp" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="social-links">Social Links (e.g. Instagram, Facebook)</label>
+                <input type="text" id="social-links">
+            </div>
+
+            <div class="form-group">
+                <label for="logo">Business Logo (Image File)</label>
+                <input type="file" id="logo" accept="image/*" required>
+            </div>
+
+            <div class="form-group">
+                <label for="gallery">Gallery (Up to 5 images)</label>
+                <input type="file" id="gallery" accept="image/*" multiple max="5">
+            </div>
+
+            <button type="submit" id="submit-btn" class="btn btn-primary">Submit Application</button>
+            <div id="form-status" class="status-message"></div>
+        </form>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 DTECH Student Business Hub.</p>
+        </div>
+    </footer>
+
+    <script src="js/register.js"></script>
+</body>
+</html>

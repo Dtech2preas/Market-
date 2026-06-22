@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTECH Student Business Hub</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>DTECH Business Hub</h1>
+            <nav>
+                <a href="index.html">Directory</a>
+                <a href="register.html">Register Business</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h2>Support Student Entrepreneurs</h2>
+            <p>Discover and support local student-owned businesses across South Africa.</p>
+            <div class="search-filters">
+                <input type="text" id="search-input" placeholder="Search businesses...">
+                <select id="category-filter">
+                    <option value="">All Categories</option>
+                    <option value="Services">Services</option>
+                    <option value="Products">Products</option>
+                    <option value="Food">Food</option>
+                    <option value="Tech">Tech</option>
+                    <option value="Design">Design</option>
+                </select>
+                <select id="province-filter">
+                    <option value="">All Provinces</option>
+                    <option value="Gauteng">Gauteng</option>
+                    <option value="Western Cape">Western Cape</option>
+                    <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                    <option value="Eastern Cape">Eastern Cape</option>
+                    <option value="Free State">Free State</option>
+                    <option value="Mpumalanga">Mpumalanga</option>
+                    <option value="Limpopo">Limpopo</option>
+                    <option value="North West">North West</option>
+                    <option value="Northern Cape">Northern Cape</option>
+                </select>
+            </div>
+        </section>
+
+        <section id="business-directory" class="grid">
+            <!-- Business cards will be injected here by JS -->
+            <div class="loading">Loading businesses...</div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 DTECH Student Business Hub. Empowering student entrepreneurs.</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
