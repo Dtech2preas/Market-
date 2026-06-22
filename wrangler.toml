@@ -1,0 +1,8 @@
+name = "late-frost-770c"
+main = "worker.js"
+compatibility_date = "2024-06-22"
+
+[[kv_namespaces]]
+binding = "MARKET_KV"
+# REPLACE WITH YOUR KV NAMESPACE ID
+id = "YOUR_KV_NAMESPACE_ID"
