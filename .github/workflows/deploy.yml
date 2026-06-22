@@ -14,9 +14,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies (optional but safe)
-        run: npm install
-
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
         with:
