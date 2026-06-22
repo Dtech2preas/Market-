@@ -262,6 +262,85 @@ input[type="text"], input[type="tel"], input[type="email"], select, textarea {
     color: var(--primary-color);
 }
 
+/* Listings Grid for Profiles */
+.listings-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+@media (min-width: 600px) {
+    .listings-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+.listing-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.listing-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    background: #f8f9fa;
+}
+
+.listing-content {
+    padding: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.listing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    gap: 10px;
+}
+
+.listing-name {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.listing-price {
+    font-weight: bold;
+    color: var(--primary-color);
+    white-space: nowrap;
+}
+
+.listing-desc {
+    font-size: 0.9rem;
+    color: var(--light-text);
+    margin-bottom: 10px;
+    flex-grow: 1;
+}
+
+.listing-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: auto;
+}
+
+.listing-tag {
+    background: #e9ecef;
+    color: #495057;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
 /* Admin */
 .admin-item {
     background: #fff;

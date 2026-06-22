@@ -40,7 +40,97 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('biz-school-container').style.display = 'block';
         }
 
-        document.getElementById('biz-services').textContent = biz.services || 'Contact us for more details about our services and products.';
+        if (biz.listings && biz.listings.length > 0) {
+            document.getElementById('biz-listings-container').style.display = 'block';
+
+            // Set dynamic title based on category
+            let title = "Offerings";
+            switch(biz.category) {
+                case 'Service':
+                case 'Beauty':
+                case 'Creative':
+                    title = "Services & Pricing";
+                    break;
+                case 'Product':
+                    title = "Products";
+                    break;
+                case 'Food':
+                    title = "Menu";
+                    break;
+                case 'Tutoring':
+                    title = "Tutoring Subjects";
+                    break;
+            }
+            document.getElementById('biz-listings-title').textContent = title;
+
+            const listingsGrid = document.getElementById('biz-listings');
+            listingsGrid.innerHTML = '';
+
+            biz.listings.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'listing-card';
+
+                // Add image if available
+                if (item.imageUrl) {
+                    const img = document.createElement('img');
+                    img.src = item.imageUrl;
+                    img.alt = item.name;
+                    img.className = 'listing-image';
+                    card.appendChild(img);
+                }
+
+                const content = document.createElement('div');
+                content.className = 'listing-content';
+
+                const header = document.createElement('div');
+                header.className = 'listing-header';
+
+                const nameEl = document.createElement('h4');
+                nameEl.className = 'listing-name';
+                nameEl.textContent = item.name;
+
+                const priceEl = document.createElement('span');
+                priceEl.className = 'listing-price';
+                priceEl.textContent = item.price;
+
+                header.appendChild(nameEl);
+                header.appendChild(priceEl);
+                content.appendChild(header);
+
+                if (item.description) {
+                    const descEl = document.createElement('p');
+                    descEl.className = 'listing-desc';
+                    descEl.textContent = item.description;
+                    content.appendChild(descEl);
+                }
+
+                if (item.extra || item.extra2) {
+                    const meta = document.createElement('div');
+                    meta.className = 'listing-meta';
+
+                    if (item.extra) {
+                        const tag = document.createElement('span');
+                        tag.className = 'listing-tag';
+                        tag.textContent = item.extra;
+                        meta.appendChild(tag);
+                    }
+                    if (item.extra2) {
+                        const tag2 = document.createElement('span');
+                        tag2.className = 'listing-tag';
+                        tag2.textContent = item.extra2;
+                        meta.appendChild(tag2);
+                    }
+                    content.appendChild(meta);
+                }
+
+                card.appendChild(content);
+                listingsGrid.appendChild(card);
+            });
+        } else if (biz.services) {
+            // Fallback for legacy businesses
+            document.getElementById('biz-services').textContent = biz.services;
+            document.getElementById('biz-services-container').style.display = 'block';
+        }
 
         if (biz.socialLinks) {
             document.getElementById('biz-social').textContent = biz.socialLinks;

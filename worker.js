@@ -80,6 +80,17 @@ export default {
             }
         }
 
+        // Process listings images
+        if (data.listings && Array.isArray(data.listings)) {
+            for (let i = 0; i < data.listings.length; i++) {
+                if (data.listings[i].imageBase64) {
+                    const url = await uploadToImgBB(data.listings[i].imageBase64);
+                    data.listings[i].imageUrl = url || '';
+                    delete data.listings[i].imageBase64; // Don't bloat KV
+                }
+            }
+        }
+
         // Generate a URL-friendly ID from business name
         const baseId = data.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
         const id = `${baseId}-${Date.now().toString().slice(-4)}`;
@@ -103,7 +114,7 @@ export default {
         // Update metadata index
         const metadata = await env.MARKET_KV.get('businesses_metadata', { type: "json" }) || [];
         // Save only essential fields for index view to save space
-        const { about, services, whatsapp, email, school, ...metaInfo } = newBusiness;
+        const { about, listings, whatsapp, email, school, ...metaInfo } = newBusiness;
         metadata.push(metaInfo);
         await env.MARKET_KV.put('businesses_metadata', JSON.stringify(metadata));
 
