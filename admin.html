@@ -1,64 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - DTECH Hub</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - DTECH Hub</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .data-table th, .data-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table th {
+      background: var(--bg-offset);
+      font-weight: 600;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>DTECH Admin Dashboard</h1>
-        </div>
-    </header>
+  <nav class="navbar">
+    <div class="container" style="display: flex; justify-content: space-between;">
+      <a href="/" class="navbar-brand">DTECH Admin</a>
+      <div class="nav-links">
+        <a href="#" class="btn btn-outline" style="border: none;">Logout</a>
+      </div>
+    </div>
+  </nav>
 
-    <main class="container">
-        <section class="admin-panel">
-            <div style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                <h3>Statistics</h3>
-                <p>Total Businesses: <span id="total-businesses">0</span></p>
-                <p>Pending: <span id="pending-count">0</span> | Approved: <span id="approved-count">0</span></p>
-            </div>
+  <div class="container dashboard-layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="#overview" class="sidebar-link active">Overview</a>
+        <a href="#applications" class="sidebar-link">Applications</a>
+        <a href="#businesses" class="sidebar-link">Business Manager</a>
+      </nav>
+    </aside>
 
-            <h2>Pending Applications</h2>
-            <div id="pending-list" class="admin-list">
-                <p>Loading...</p>
-            </div>
+    <main class="dashboard-content">
+      <h2>Applications</h2>
+      <p style="margin-bottom: 24px; color: var(--text-light);">Review pending student business submissions.</p>
 
-            <h2 style="margin-top: 30px;">Approved Businesses</h2>
-            <div id="approved-list" class="admin-list">
-                <p>Loading...</p>
-            </div>
-        </section>
-
-        <!-- Edit Modal -->
-        <div id="edit-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 100;">
-            <div class="form-card" style="width: 90%; max-width: 600px; margin: 50px auto; max-height: 80vh; overflow-y: auto;">
-                <h3>Edit Business</h3>
-                <form id="edit-form">
-                    <input type="hidden" id="edit-id">
-                    <div class="form-group">
-                        <label>Business Name</label>
-                        <input type="text" id="edit-business-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Student Name</label>
-                        <input type="text" id="edit-student-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="edit-description" required></textarea>
-                    </div>
-                    <div style="display:flex; gap: 10px;">
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                        <button type="button" class="btn btn-danger" onclick="document.getElementById('edit-modal').style.display='none'">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Business Name</th>
+            <th>Owner</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>John Designs</td>
+            <td>john@student.com</td>
+            <td>Creative</td>
+            <td><span class="badge" style="background: var(--warning); color: #fff;">Pending</span></td>
+            <td>
+              <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.85rem;">Review</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </main>
-
-    <script src="js/admin.js"></script>
+  </div>
 </body>
 </html>

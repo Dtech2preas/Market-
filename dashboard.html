@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - DTECH Hub</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .stat-card {
+      background: var(--bg);
+      padding: 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .stat-card h3 {
+      font-size: 2rem;
+      color: var(--primary);
+    }
+    .status-banner {
+      background: #e6f4ea;
+      color: var(--success);
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+    }
+  </style>
+  <script src="/js/dashboard.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container" style="display: flex; justify-content: space-between;">
+      <a href="/" class="navbar-brand">DTECH Hub</a>
+      <div class="nav-links">
+        <a href="#" class="btn btn-outline" style="border: none;">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container dashboard-layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="#overview" class="sidebar-link active">Overview</a>
+        <a href="#editor" class="sidebar-link">Website Editor</a>
+        <a href="#listings" class="sidebar-link">Manage Listings</a>
+        <a href="#analytics" class="sidebar-link">Analytics</a>
+        <a href="#settings" class="sidebar-link">Settings</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <div class="status-banner">
+        <span>Status: Published</span>
+        <a href="#" class="btn btn-primary" style="padding: 4px 12px; font-size: 0.85rem;">View Live Site</a>
+      </div>
+
+      <h2>Overview</h2>
+      <div class="marketplace-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="stat-card">
+          <h3>142</h3>
+          <p>Profile Views (This Week)</p>
+        </div>
+        <div class="stat-card">
+          <h3>28</h3>
+          <p>Contact Clicks</p>
+        </div>
+        <div class="stat-card">
+          <h3>12</h3>
+          <p>Active Listings</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

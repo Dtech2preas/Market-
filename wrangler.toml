@@ -1,8 +1,11 @@
 name = "late-frost-770c"
-main = "worker.js"
+main = "dist/worker.js"
 compatibility_date = "2024-06-22"
 
 [[kv_namespaces]]
 binding = "MARKET_KV"
 # REPLACE WITH YOUR KV NAMESPACE ID
 id = "2afa9871d062421584b579b6768c1b63"
+
+[build]
+command = "node esbuild.mjs"
