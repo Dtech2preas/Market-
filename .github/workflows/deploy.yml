@@ -19,9 +19,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          secrets: |
-            IMGBB_API_KEY
-          command: deploy
-        env:
-          IMGBB_API_KEY: ${{ secrets.IMGBB_API_KEY }}
           ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
