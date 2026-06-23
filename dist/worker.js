@@ -3132,7 +3132,7 @@ var worker_default = {
     try {
       if (!path.startsWith("/api/") && !path.startsWith("/css/") && !path.startsWith("/js/") && !path.includes(".")) {
         if (path === "/") {
-          return new Response("Use static hosting for root", { status: 404 });
+          return new Response("Use static hosting for root", { status: 404, headers: corsHeaders });
         }
         const possibleSlug = path.substring(1);
         if (!["dashboard", "admin", "search", "category", "login", "register"].includes(possibleSlug.split("/")[0])) {
@@ -3817,7 +3817,7 @@ footer {
 
   <script>
      // Fetch actual data
-     fetch('/api/business/${possibleSlug}')
+     fetch('/api/business/' + '${possibleSlug}')
        .then(r => r.json())
        .then(data => {
           if(data.error) { document.body.innerHTML = '<h1>Not Found</h1>'; return; }
@@ -4009,7 +4009,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 <\/script>
 </body>
 </html>`;
-            return new Response(htmlContent, { headers: { "Content-Type": "text/html" } });
+            return new Response(htmlContent, { headers: { ...corsHeaders, "Content-Type": "text/html" } });
           }
         }
       }
@@ -4127,10 +4127,80 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         return jsonResponse({ success: true, businessId });
       }
-      if (path.startsWith("/api/")) {
+      if (request.method === "GET" && path === "/admin/businesses") {
+        const indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
+        let index = JSON.parse(indexStr);
+        try {
+          const listRes = await env.MARKET_KV.list({ prefix: "business:" });
+          const businesses = [];
+          for (const key of listRes.keys) {
+            const bizStr = await env.MARKET_KV.get(key.name);
+            if (bizStr) {
+              const b = JSON.parse(bizStr);
+              businesses.push({
+                id: b.id,
+                businessName: b.name,
+                studentName: b.ownerId,
+                // Typically we'd join with user data
+                category: b.category,
+                status: b.status,
+                description: b.content?.about || "",
+                timestamp: b.updatedAt || Date.now()
+              });
+            }
+          }
+          return jsonResponse(businesses);
+        } catch (e) {
+          return jsonResponse([]);
+        }
+      }
+      if (request.method === "POST" && path === "/admin/edit") {
+        const data = await getBody(request);
+        const { id, updates } = data;
+        if (!id || !updates) return errorResponse("Missing fields");
+        const existingBizStr = await env.MARKET_KV.get(id);
+        if (!existingBizStr) return errorResponse("Business not found", 404);
+        const existingBiz = JSON.parse(existingBizStr);
+        existingBiz.name = updates.businessName || existingBiz.name;
+        await env.MARKET_KV.put(id, JSON.stringify(existingBiz));
+        return jsonResponse({ success: true });
+      }
+      if (request.method === "POST" && path === "/admin/action") {
+        const data = await getBody(request);
+        const { id, action } = data;
+        if (!id || !action) return errorResponse("Missing fields");
+        const existingBizStr = await env.MARKET_KV.get(id);
+        if (!existingBizStr) return errorResponse("Business not found", 404);
+        const existingBiz = JSON.parse(existingBizStr);
+        if (action === "approve") existingBiz.status = "approved";
+        else if (action === "reject") existingBiz.status = "reject";
+        else if (action === "disable") existingBiz.status = "disable";
+        await env.MARKET_KV.put(id, JSON.stringify(existingBiz));
+        let indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
+        let index = JSON.parse(indexStr);
+        const idx = index.findIndex((b) => b.id === id);
+        if (existingBiz.status === "approved" || existingBiz.status === "verified") {
+          const entry = {
+            id: existingBiz.id,
+            slug: existingBiz.slug,
+            name: existingBiz.name,
+            category: existingBiz.category,
+            province: existingBiz.province,
+            status: existingBiz.status,
+            coverImage: existingBiz.content?.hero?.coverImage || null
+          };
+          if (idx >= 0) index[idx] = entry;
+          else index.push(entry);
+        } else {
+          if (idx >= 0) index.splice(idx, 1);
+        }
+        await env.MARKET_KV.put("marketplace:index", JSON.stringify(index));
+        return jsonResponse({ success: true, status: existingBiz.status });
+      }
+      if (path.startsWith("/api/") || path.startsWith("/admin/")) {
         return errorResponse("API Route Not Found", 404);
       }
-      return new Response("Not Found", { status: 404 });
+      return new Response("Not Found", { status: 404, headers: corsHeaders });
     } catch (error) {
       return jsonResponse({ error: error.message }, 500);
     }

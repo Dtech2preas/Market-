@@ -728,12 +728,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- js/marketplace.js ---
+const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
 document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('marketplace-container');
   if (!container) return;
 
   try {
-    const res = await fetch('/api/marketplace');
+    const res = await fetch(`${WORKER_URL}/api/marketplace`);
     const businesses = await res.json();
 
     if (businesses.length === 0) {
