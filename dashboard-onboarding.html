@@ -707,7 +707,9 @@ footer {
       <h2 style="margin-bottom: 8px;">Business Profile</h2>
       <p style="color: var(--text-light); margin-bottom: 24px;">Let's get your business set up on the directory.</p>
 
-      <form>
+      <form id="onboarding-form">
+        <input type="hidden" id="business-id">
+        <input type="hidden" id="business-status" value="draft">
         <div class="form-group">
           <label class="form-label">Business Name</label>
           <input type="text" class="form-control" placeholder="e.g. Sarah's Nails" required>
@@ -786,42 +788,73 @@ if(window.location.pathname.includes('admin')) {
 }
 
 // --- js/onboarding.js ---
-document.addEventListener('DOMContentLoaded', () => {
-  const nextBtn = document.querySelector('.btn-primary');
-  if (nextBtn && nextBtn.innerText === 'Next Step') {
-    nextBtn.addEventListener('click', async () => {
-      const form = document.querySelector('form');
-      const inputs = form.querySelectorAll('input, select');
+document.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('dtech_token');
+  if (!token) return; // handled by auth check above
 
+  const form = document.getElementById('onboarding-form');
+  const idInput = document.getElementById('business-id');
+  const statusInput = document.getElementById('business-status');
+  // Form inputs (skip the 2 hidden ones)
+  const inputs = form.querySelectorAll('input[type="text"], select');
+
+  // Attempt to fetch existing business
+  try {
+    const res = await fetch(`${WORKER_URL}/api/dashboard/my-business`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const bizData = await res.json();
+
+    if (!bizData.error) {
+      idInput.value = bizData.id || '';
+      statusInput.value = bizData.status || 'draft';
+      inputs[0].value = bizData.name || '';
+      inputs[1].value = bizData.slug || '';
+      inputs[2].value = bizData.category || '';
+      inputs[3].value = bizData.province || '';
+
+      const nextBtn = document.querySelector('.btn-primary');
+      if (nextBtn) nextBtn.innerText = 'Save Changes';
+    }
+  } catch (e) {
+    console.log("No existing business or error fetching");
+  }
+
+  const nextBtn = document.querySelector('.btn-primary');
+  if (nextBtn) {
+    nextBtn.addEventListener('click', async () => {
       const name = inputs[0].value;
       const slug = inputs[1].value;
       const category = inputs[2].value;
       const province = inputs[3].value;
+      const id = idInput.value;
+      const status = statusInput.value;
 
       if(!name || !slug || !category || !province) {
         alert("Please fill all fields");
         return;
       }
 
-      const token = localStorage.getItem('dtech_token');
-
       try {
+        const payload = {
+          name, slug, category, province, status
+        };
+        if (id) payload.id = id;
+
         const res = await fetch(`${WORKER_URL}/api/dashboard/business`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({
-            name, slug, category, province, status: 'draft'
-          })
+          body: JSON.stringify(payload)
         });
 
         const data = await res.json();
         if (data.error) {
           alert(data.error);
         } else {
-          alert('Business draft saved successfully!');
+          alert('Business saved successfully!');
           window.location.href = '/dashboard.html';
         }
       } catch (e) {
