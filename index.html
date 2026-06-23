@@ -1,63 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DTECH Student Business Hub</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DTECH Student Business Hub</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .hero {
+      text-align: center;
+      padding: 48px 16px;
+      background: linear-gradient(135deg, #0056b3, #002d62);
+      color: white;
+      border-radius: 0 0 24px 24px;
+    }
+    .hero h1 {
+      color: white;
+      margin-bottom: 16px;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>DTECH Business Hub</h1>
-            <nav>
-                <a href="index.html">Directory</a>
-                <a href="register.html">Register Business</a>
-            </nav>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">DTECH Hub</a>
+      <div class="nav-links">
+        <a href="/login.html" class="btn btn-outline">Log In</a>
+        <a href="/register.html" class="btn btn-primary">Sign Up</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="container">
+      <h1>Discover Student Businesses</h1>
+      <p>Support your peers and find amazing services on campus.</p>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="filter-bar">
+      <div class="filter-pill active">All</div>
+      <div class="filter-pill">Beauty</div>
+      <div class="filter-pill">Food</div>
+      <div class="filter-pill">Tutoring</div>
+      <div class="filter-pill">Tech</div>
+      <div class="filter-pill">Creative</div>
+      <select class="filter-pill" style="margin-left: auto;">
+        <option value="">All Provinces</option>
+        <option value="gauteng">Gauteng</option>
+        <option value="limpopo">Limpopo</option>
+      </select>
+    </div>
+
+    <div class="marketplace-grid" id="marketplace-container">
+      <!-- Cards injected via JS -->
+      <div class="card business-card">
+        <div class="cover" style="background-image: url('https://placehold.co/400x200')"></div>
+        <div class="content">
+          <div class="logo" style="background-image: url('https://placehold.co/100x100')"></div>
+          <h3 class="title">Sarah's Nails</h3>
+          <div class="category">Beauty • Gauteng</div>
+          <span class="badge badge-verified">✓ Verified Student</span>
+          <a href="/sarahs-nails" class="btn btn-outline" style="width: 100%; margin-top: 16px;">View Profile</a>
         </div>
-    </header>
+      </div>
+    </div>
+  </main>
 
-    <main class="container">
-        <section class="hero">
-            <h2>Support Student Entrepreneurs</h2>
-            <p>Discover and support local student-owned businesses across South Africa.</p>
-            <div class="search-filters">
-                <input type="text" id="search-input" placeholder="Search businesses...">
-                <select id="category-filter">
-                    <option value="">All Categories</option>
-                    <option value="Services">Services</option>
-                    <option value="Products">Products</option>
-                    <option value="Food">Food</option>
-                    <option value="Tech">Tech</option>
-                    <option value="Design">Design</option>
-                </select>
-                <select id="province-filter">
-                    <option value="">All Provinces</option>
-                    <option value="Gauteng">Gauteng</option>
-                    <option value="Western Cape">Western Cape</option>
-                    <option value="KwaZulu-Natal">KwaZulu-Natal</option>
-                    <option value="Eastern Cape">Eastern Cape</option>
-                    <option value="Free State">Free State</option>
-                    <option value="Mpumalanga">Mpumalanga</option>
-                    <option value="Limpopo">Limpopo</option>
-                    <option value="North West">North West</option>
-                    <option value="Northern Cape">Northern Cape</option>
-                </select>
-            </div>
-        </section>
-
-        <section id="business-directory" class="grid">
-            <!-- Business cards will be injected here by JS -->
-            <div class="loading">Loading businesses...</div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 DTECH Student Business Hub. Empowering student entrepreneurs.</p>
-        </div>
-    </footer>
-
-    <script src="js/main.js"></script>
+  <script src="/js/main.js"></script>
+  <script src="/js/marketplace.js"></script>
 </body>
 </html>
