@@ -75,7 +75,7 @@ export default {
           // Typically we'd fetch index.html from CF Pages/KV, but here we'll assume CF Pages serves it.
           // In this specific mock environment, we might just let it pass through or return a mock if needed.
           // For now, we will return a 404 to let static asset handler catch it if possible.
-          return new Response("Use static hosting for root", { status: 404 });
+          return new Response("Use static hosting for root", { status: 404, headers: corsHeaders });
         }
 
         const possibleSlug = path.substring(1); // remove leading slash
@@ -769,7 +769,7 @@ footer {
 
   <script>
      // Fetch actual data
-     fetch('/api/business/${possibleSlug}')
+     fetch('/api/business/' + '${possibleSlug}')
        .then(r => r.json())
        .then(data => {
           if(data.error) { document.body.innerHTML = '<h1>Not Found</h1>'; return; }
@@ -961,7 +961,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 </script>
 </body>
 </html>`;
-              return new Response(htmlContent, { headers: { "Content-Type": "text/html" } });
+              return new Response(htmlContent, { headers: { ...corsHeaders, "Content-Type": "text/html" } });
            }
         }
       }
@@ -1129,15 +1129,105 @@ document.addEventListener('DOMContentLoaded', async () => {
         return jsonResponse({ success: true, businessId });
       }
 
+      // --- ADMIN API ---
+
+      if (request.method === "GET" && path === "/admin/businesses") {
+        // In a real app we would paginate or use KV list, but we can return the marketplace index and other businesses
+        const indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
+        let index = JSON.parse(indexStr);
+
+        // Fetching all businesses could be slow if there are many. Since KV list is better, we'll try to list keys
+        try {
+          const listRes = await env.MARKET_KV.list({ prefix: "business:" });
+          const businesses = [];
+          for (const key of listRes.keys) {
+            const bizStr = await env.MARKET_KV.get(key.name);
+            if (bizStr) {
+              const b = JSON.parse(bizStr);
+              businesses.push({
+                id: b.id,
+                businessName: b.name,
+                studentName: b.ownerId, // Typically we'd join with user data
+                category: b.category,
+                status: b.status,
+                description: b.content?.about || "",
+                timestamp: b.updatedAt || Date.now()
+              });
+            }
+          }
+          return jsonResponse(businesses);
+        } catch (e) {
+          // fallback if listing fails
+          return jsonResponse([]);
+        }
+      }
+
+      if (request.method === "POST" && path === "/admin/edit") {
+        const data = await getBody(request);
+        const { id, updates } = data;
+        if (!id || !updates) return errorResponse("Missing fields");
+
+        const existingBizStr = await env.MARKET_KV.get(id);
+        if (!existingBizStr) return errorResponse("Business not found", 404);
+
+        const existingBiz = JSON.parse(existingBizStr);
+        existingBiz.name = updates.businessName || existingBiz.name;
+        // In a real app, we'd probably update the marketplace index as well here
+
+        await env.MARKET_KV.put(id, JSON.stringify(existingBiz));
+        return jsonResponse({ success: true });
+      }
+
+      if (request.method === "POST" && path === "/admin/action") {
+        const data = await getBody(request);
+        const { id, action } = data;
+        if (!id || !action) return errorResponse("Missing fields");
+
+        const existingBizStr = await env.MARKET_KV.get(id);
+        if (!existingBizStr) return errorResponse("Business not found", 404);
+
+        const existingBiz = JSON.parse(existingBizStr);
+
+        if (action === "approve") existingBiz.status = "approved";
+        else if (action === "reject") existingBiz.status = "reject";
+        else if (action === "disable") existingBiz.status = "disable";
+
+        await env.MARKET_KV.put(id, JSON.stringify(existingBiz));
+
+        // Update marketplace index
+        let indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
+        let index = JSON.parse(indexStr);
+        const idx = index.findIndex(b => b.id === id);
+
+        if (existingBiz.status === "approved" || existingBiz.status === "verified") {
+            const entry = {
+                id: existingBiz.id,
+                slug: existingBiz.slug,
+                name: existingBiz.name,
+                category: existingBiz.category,
+                province: existingBiz.province,
+                status: existingBiz.status,
+                coverImage: existingBiz.content?.hero?.coverImage || null
+            };
+            if (idx >= 0) index[idx] = entry;
+            else index.push(entry);
+        } else {
+            if (idx >= 0) index.splice(idx, 1);
+        }
+        await env.MARKET_KV.put("marketplace:index", JSON.stringify(index));
+
+        return jsonResponse({ success: true, status: existingBiz.status });
+      }
+
       // If we reach here, and it's an API route that wasn't found
-      if (path.startsWith('/api/')) {
+      if (path.startsWith('/api/') || path.startsWith('/admin/')) {
         return errorResponse("API Route Not Found", 404);
       }
 
       // Since this is a worker designed to handle both api AND static routing in this mock,
       // and we just started a local http-server for static files instead of Miniflare/Pages,
       // we'll just mock a 404 for any unhandled path that isn't a slug.
-      return new Response("Not Found", { status: 404 });
+      return new Response("Not Found", { status: 404, headers: corsHeaders });
 
     } catch (error) {
       return jsonResponse({ error: error.message }, 500);

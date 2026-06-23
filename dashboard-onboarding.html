@@ -747,6 +747,8 @@ footer {
   </div>
 <script>
 // --- js/dashboard.js ---
+const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
 // Common JS for Dashboard logic (Draft/Publish, Edit, etc)
 document.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem('dtech_token');
@@ -756,7 +758,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Load User Data
-  fetch('/api/auth/me', {
+  fetch(`${WORKER_URL}/api/auth/me`, {
     headers: { 'Authorization': `Bearer ${token}` }
   }).then(r => r.json()).then(data => {
     if(data.error) {
@@ -804,7 +806,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const token = localStorage.getItem('dtech_token');
 
       try {
-        const res = await fetch('/api/dashboard/business', {
+        const res = await fetch(`${WORKER_URL}/api/dashboard/business`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
