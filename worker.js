@@ -1060,6 +1060,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // --- DASHBOARD API (Requires Auth) ---
 
+      if (request.method === "GET" && path === "/api/dashboard/my-business") {
+        const authPayload = await getAuthUser(request);
+        if (!authPayload) return errorResponse("Unauthorized", 401);
+
+        const businessId = await env.MARKET_KV.get(`user_business:${authPayload.userId}`);
+        if (!businessId) return errorResponse("Business not found", 404);
+
+        const businessStr = await env.MARKET_KV.get(businessId);
+        if (!businessStr) return errorResponse("Business not found", 404);
+
+        return jsonResponse(JSON.parse(businessStr));
+      }
+
       if (request.method === "POST" && path === "/api/dashboard/business") {
         const authPayload = await getAuthUser(request);
         if (!authPayload) return errorResponse("Unauthorized", 401);
@@ -1104,6 +1117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         await env.MARKET_KV.put(businessId, JSON.stringify(businessData));
         await env.MARKET_KV.put(`slug:${slug}`, businessId);
+        await env.MARKET_KV.put(`user_business:${authPayload.userId}`, businessId);
 
         if (["published", "approved", "verified"].includes(businessData.status)) {
            let indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";

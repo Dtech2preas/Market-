@@ -685,7 +685,7 @@ footer {
     <aside class="sidebar">
       <nav class="sidebar-nav">
         <a href="#overview" class="sidebar-link active">Overview</a>
-        <a href="#editor" class="sidebar-link">Website Editor</a>
+        <a href="dashboard-onboarding.html" class="sidebar-link">Website Editor</a>
         <a href="#listings" class="sidebar-link">Manage Listings</a>
         <a href="#analytics" class="sidebar-link">Analytics</a>
         <a href="#settings" class="sidebar-link">Settings</a>
@@ -693,9 +693,9 @@ footer {
     </aside>
 
     <main class="dashboard-content">
-      <div class="status-banner">
-        <span>Status: Published</span>
-        <a href="#" class="btn btn-primary" style="padding: 4px 12px; font-size: 0.85rem;">View Live Site</a>
+      <div class="status-banner" id="status-banner" style="display: none;">
+        <span id="status-text">Status: Loading...</span>
+        <a href="#" id="view-live-site" class="btn btn-primary" target="_blank" style="padding: 4px 12px; font-size: 0.85rem;">View Live Site</a>
       </div>
 
       <h2>Overview</h2>
@@ -736,6 +736,34 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = '/login.html';
     } else {
       console.log('Logged in as:', data.user);
+
+      // Load user's business
+      fetch(`${WORKER_URL}/api/dashboard/my-business`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).then(r => r.json()).then(bizData => {
+        const banner = document.getElementById('status-banner');
+        if (!bizData.error) {
+          banner.style.display = 'flex';
+          const statusText = bizData.status.charAt(0).toUpperCase() + bizData.status.slice(1);
+          document.getElementById('status-text').innerText = `Status: ${statusText}`;
+          document.getElementById('view-live-site').href = `/${bizData.slug}`;
+
+          if (bizData.status === 'draft' || bizData.status === 'pending') {
+            document.getElementById('status-text').style.color = 'var(--warning)';
+            banner.style.background = '#fff8e1';
+          }
+        } else {
+          // No business found, suggest creating one
+          banner.style.display = 'flex';
+          document.getElementById('status-text').innerText = `Status: No Business Found`;
+          document.getElementById('status-text').style.color = 'var(--text)';
+          banner.style.background = 'var(--bg)';
+          const viewLiveSiteBtn = document.getElementById('view-live-site');
+          viewLiveSiteBtn.innerText = 'Create Listing';
+          viewLiveSiteBtn.href = 'dashboard-onboarding.html';
+          viewLiveSiteBtn.target = '_self';
+        }
+      });
     }
   });
 
