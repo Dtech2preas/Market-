@@ -707,164 +707,624 @@ footer {
       <h2 style="margin-bottom: 8px;">Business Profile</h2>
       <p style="color: var(--text-light); margin-bottom: 24px;">Let's get your business set up on the directory.</p>
 
-      <form id="onboarding-form">
-        <input type="hidden" id="business-id">
-        <input type="hidden" id="business-status" value="draft">
+  <div class="wizard-container">
+    <div class="wizard-sidebar">
+      <div class="step-item active" data-step="1">
+        <div class="step-circle">1</div>
+        <div>Basic Info</div>
+      </div>
+      <div class="step-item" data-step="2">
+        <div class="step-circle">2</div>
+        <div>Contact Info</div>
+      </div>
+      <div class="step-item" data-step="3">
+        <div class="step-circle">3</div>
+        <div>Branding</div>
+      </div>
+      <div class="step-item" data-step="4">
+        <div class="step-circle">4</div>
+        <div>Content</div>
+      </div>
+      <div class="step-item" data-step="5">
+        <div class="step-circle">5</div>
+        <div>Sections</div>
+      </div>
+      <div class="step-item" data-step="6">
+        <div class="step-circle">6</div>
+        <div>Preview</div>
+      </div>
+      <div class="step-item" data-step="7">
+        <div class="step-circle">7</div>
+        <div>Submit</div>
+      </div>
+    </div>
+
+    <div class="card wizard-content">
+
+      <!-- STEP 1: Basic Info -->
+      <div class="step-pane active" id="step-1">
+        <h2>Basic Business Information</h2>
+        <p style="color: var(--text-light); margin-bottom: 24px;">Start by telling us about your business.</p>
+
         <div class="form-group">
           <label class="form-label">Business Name</label>
-          <input type="text" class="form-control" placeholder="e.g. Sarah's Nails" required>
+          <input type="text" id="b-name" class="form-control" placeholder="e.g. DTECH Services" required>
         </div>
         <div class="form-group">
           <label class="form-label">Custom URL Slug</label>
-          <div style="display: flex; align-items: center;">
+          <div style="display: flex;">
             <span style="background: var(--bg-offset); padding: 10px; border: 1px solid var(--border); border-right: none; border-radius: var(--radius) 0 0 var(--radius); color: var(--text-light);">dtech.com/</span>
-            <input type="text" class="form-control" placeholder="sarahs-nails" style="border-radius: 0 var(--radius) var(--radius) 0;" required>
+            <input type="text" id="b-slug" class="form-control" placeholder="dtech-services" style="border-radius: 0 var(--radius) var(--radius) 0;" required>
           </div>
-          <small style="color: var(--text-light); display: block; margin-top: 4px;">This will be your unique website link.</small>
         </div>
         <div class="form-group">
-          <label class="form-label">Category</label>
-          <select class="form-control" required>
-            <option value="">Select a category...</option>
-            <option value="beauty">Beauty</option>
-            <option value="food">Food</option>
-            <option value="tutor">Tutoring</option>
-          </select>
+          <label class="form-label">Business Tagline</label>
+          <input type="text" id="b-tagline" class="form-control" placeholder="e.g. Affordable websites for local businesses">
         </div>
         <div class="form-group">
-          <label class="form-label">Province</label>
-          <select class="form-control" required>
-            <option value="">Select province...</option>
-            <option value="gauteng">Gauteng</option>
-            <option value="limpopo">Limpopo</option>
-          </select>
+          <label class="form-label">Business Description</label>
+          <textarea id="b-desc" class="form-control" rows="4" placeholder="Tell customers what you do..."></textarea>
+        </div>
+        <div style="display: flex; gap: 16px;">
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Category</label>
+            <select id="b-cat" class="form-control" required>
+              <option value="">Select...</option>
+              <option value="services">Services</option>
+              <option value="products">Products</option>
+              <option value="food">Food</option>
+              <option value="tutor">Tutoring</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Province</label>
+            <select id="b-prov" class="form-control" required>
+              <option value="">Select...</option>
+              <option value="limpopo">Limpopo</option>
+              <option value="gauteng">Gauteng</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">City/Town</label>
+          <input type="text" id="b-city" class="form-control" placeholder="e.g. Polokwane">
+        </div>
+      </div>
+
+      <!-- STEP 2: Contact Info -->
+      <div class="step-pane" id="step-2">
+        <h2>Contact Information</h2>
+        <p style="color: var(--text-light); margin-bottom: 24px;">How can customers reach you?</p>
+
+        <div style="display: flex; gap: 16px;">
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" id="c-phone" class="form-control" placeholder="012 345 6789">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">WhatsApp Number</label>
+            <input type="tel" id="c-whatsapp" class="form-control" placeholder="012 345 6789">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="c-email" class="form-control" placeholder="hello@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Physical Address (Optional)</label>
+          <input type="text" id="c-address" class="form-control" placeholder="123 Main St, Block A">
         </div>
 
-        <div style="display: flex; justify-content: space-between; margin-top: 32px;">
-          <button type="button" class="btn btn-outline">Back</button>
-          <button type="button" class="btn btn-primary">Next Step</button>
+        <h3 style="margin-top: 32px; margin-bottom: 16px;">Social Links</h3>
+        <div class="form-group">
+          <input type="url" class="form-control" placeholder="Facebook URL" style="margin-bottom: 8px;">
+          <input type="url" class="form-control" placeholder="Instagram URL" style="margin-bottom: 8px;">
+          <input type="url" class="form-control" placeholder="TikTok URL" style="margin-bottom: 8px;">
+          <input type="url" class="form-control" placeholder="LinkedIn URL" style="margin-bottom: 8px;">
+          <input type="url" class="form-control" placeholder="Website URL">
         </div>
-      </form>
+      </div>
+
+      <!-- STEP 3: Branding -->
+      <div class="step-pane" id="step-3">
+        <h2>Branding & Images</h2>
+        <p style="color: var(--text-light); margin-bottom: 24px;">Upload your logo and cover images to stand out.</p>
+
+        <div class="form-group">
+          <label class="form-label">Logo Upload</label>
+          <div class="upload-area" onclick="triggerUpload('logo')">
+            <p>Click to upload logo</p>
+            <small style="color: var(--text-light)">JPG, PNG or WEBP (Max 2MB)</small>
+          </div>
+          <div id="logo-progress" class="upload-progress-container">
+            <div class="upload-status-text"><span class="status-msg">Uploading logo...</span> <span class="pct">0%</span></div>
+            <div class="upload-progress-bar"><div class="upload-progress-fill"></div></div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 32px;">
+          <label class="form-label">Cover Image</label>
+          <div class="upload-area" onclick="triggerUpload('cover')">
+            <p>Click to upload cover image</p>
+            <small style="color: var(--text-light)">Recommended size: 1200x400px</small>
+          </div>
+          <div id="cover-progress" class="upload-progress-container">
+            <div class="upload-status-text"><span class="status-msg">Uploading cover image...</span> <span class="pct">0%</span></div>
+            <div class="upload-progress-bar"><div class="upload-progress-fill"></div></div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 32px;">
+          <label class="form-label">Gallery Images</label>
+          <div class="upload-area" onclick="triggerUpload('gallery')">
+            <p>Click to upload multiple gallery images</p>
+          </div>
+          <div id="gallery-progress" class="upload-progress-container">
+            <div class="upload-status-text"><span class="status-msg">Uploading gallery image 1...</span> <span class="pct">0%</span></div>
+            <div class="upload-progress-bar"><div class="upload-progress-fill"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: Content -->
+      <div class="step-pane" id="step-4">
+        <h2>Business Content</h2>
+        <p style="color: var(--text-light); margin-bottom: 24px;">Add your services, products, or menu items.</p>
+
+        <div id="listings-container">
+          <!-- Listing Items will go here -->
+          <div class="listing-item">
+            <button class="remove-listing">X</button>
+            <div class="form-group">
+              <label class="form-label">Item Name</label>
+              <input type="text" class="form-control" placeholder="e.g. Web Design Package">
+            </div>
+            <div style="display: flex; gap: 16px;">
+              <div class="form-group" style="flex: 2;">
+                <label class="form-label">Description</label>
+                <input type="text" class="form-control" placeholder="Brief description...">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label class="form-label">Price (R)</label>
+                <input type="text" class="form-control" placeholder="500">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-outline" style="width: 100%; border-style: dashed;" onclick="addListing()">+ Add Another Item</button>
+      </div>
+
+      <!-- STEP 5: Sections -->
+      <div class="step-pane" id="step-5">
+        <h2>Website Sections</h2>
+        <p style="color: var(--text-light); margin-bottom: 24px;">Choose what appears on your website.</p>
+
+        <div class="section-toggle-row">
+          <div><strong>Hero Section</strong><br><small style="color: var(--text-light)">Main banner with logo and tagline</small></div>
+          <label class="toggle-switch"><input type="checkbox" id="s-hero" checked onchange="saveDraft()"><span class="slider"></span></label>
+        </div>
+        <div class="section-toggle-row">
+          <div><strong>About Us</strong><br><small style="color: var(--text-light)">Business description</small></div>
+          <label class="toggle-switch"><input type="checkbox" id="s-about" checked onchange="saveDraft()"><span class="slider"></span></label>
+        </div>
+        <div class="section-toggle-row">
+          <div><strong>Services / Products</strong><br><small style="color: var(--text-light)">Your listings grid</small></div>
+          <label class="toggle-switch"><input type="checkbox" id="s-listings" checked onchange="saveDraft()"><span class="slider"></span></label>
+        </div>
+        <div class="section-toggle-row">
+          <div><strong>Gallery</strong><br><small style="color: var(--text-light)">Images of your work</small></div>
+          <label class="toggle-switch"><input type="checkbox" id="s-gallery" onchange="saveDraft()"><span class="slider"></span></label>
+        </div>
+        <div class="section-toggle-row">
+          <div><strong>Contact & Socials</strong><br><small style="color: var(--text-light)">Ways to reach you</small></div>
+          <label class="toggle-switch"><input type="checkbox" id="s-contact" checked onchange="saveDraft()"><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <!-- STEP 6: Preview -->
+      <div class="step-pane" id="step-6">
+        <h2 style="text-align: center;">Website Preview</h2>
+        <p style="color: var(--text-light); text-align: center; margin-bottom: 24px;">This is how your final website will look.</p>
+
+        <div class="preview-toggle">
+          <button class="preview-btn mobile active" onclick="togglePreview('mobile')">Mobile</button>
+          <button class="preview-btn desktop" onclick="togglePreview('desktop')">Desktop</button>
+        </div>
+
+        <div id="preview-frame" class="preview-frame-container mobile">
+          <div class="preview-content">
+            <div id="live-preview-content">
+              <div id="lp-cover" style="background: #eee; height: 150px; border-radius: 8px; margin-bottom: 40px; position: relative; background-size: cover;">
+                 <div id="lp-logo" style="width: 80px; height: 80px; background: #ddd; border: 4px solid white; border-radius: 50%; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); background-size: cover;"></div>
+              </div>
+              <h3 id="lp-title" style="text-align: center; margin-bottom: 8px;">Business Name</h3>
+              <p id="lp-tagline" style="text-align: center; color: var(--text-light); margin-bottom: 16px;">Tagline goes here</p>
+
+              <div id="lp-contact-sec" style="display: flex; gap: 8px; justify-content: center; margin-bottom: 24px;">
+                 <button class="btn btn-primary" style="font-size: 14px;">WhatsApp</button>
+                 <button class="btn btn-outline" style="font-size: 14px;">Email</button>
+              </div>
+
+              <div id="lp-about-sec">
+                <h4>About Us</h4>
+                <p id="lp-desc" style="font-size: 14px; margin-bottom: 24px;">Description goes here.</p>
+              </div>
+
+              <div id="lp-listings-sec">
+                <h4>Services / Products</h4>
+                <div id="lp-listings-container">
+                  <div style="border: 1px solid var(--border); padding: 12px; border-radius: 8px; margin-top: 8px;">
+                     <strong>Sample Item</strong> - R0
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 7: Submit -->
+      <div class="step-pane" id="step-7">
+        <div style="text-align: center; padding: 48px 0;">
+          <div style="width: 64px; height: 64px; background: var(--success); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 24px;">✓</div>
+          <h2>Ready to Submit!</h2>
+          <p style="color: var(--text-light); margin-top: 16px; margin-bottom: 32px; max-width: 400px; margin-left: auto; margin-right: auto;">
+            Your business profile is fully drafted. Once you submit, our admins will review your application.
+            You will be notified on your dashboard once approved.
+          </p>
+          <div style="background: var(--bg-offset); padding: 24px; border-radius: var(--radius); display: inline-block; text-align: left; margin-bottom: 32px;">
+             <p><strong>Current Status:</strong> Draft</p>
+             <p><strong>Next Status:</strong> Pending Review</p>
+          </div>
+          <br>
+          <button class="btn btn-success" style="padding: 12px 32px; font-size: 18px;" onclick="submitApplication()">Submit for Review</button>
+        </div>
+      </div>
+
+      <div class="wizard-footer">
+        <button class="btn btn-outline" id="btn-prev" onclick="changeStep(-1)" style="visibility: hidden;">Previous</button>
+        <div style="color: var(--text-light); font-size: 14px;" id="saving-indicator">Autosaved just now</div>
+        <button class="btn btn-primary" id="btn-next" onclick="changeStep(1)">Next Step</button>
+      </div>
     </div>
   </div>
-<script>
-// --- js/dashboard.js ---
-const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
 
-// Common JS for Dashboard logic (Draft/Publish, Edit, etc)
-document.addEventListener('DOMContentLoaded', () => {
-  const token = localStorage.getItem('dtech_token');
-  if (!token) {
-    window.location.href = '/login.html';
-    return;
-  }
+  <div class="auto-save-toast" id="toast">Draft saved automatically.</div>
 
-  // Load User Data
-  fetch(`${WORKER_URL}/api/auth/me`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  }).then(r => r.json()).then(data => {
-    if(data.error) {
-      localStorage.removeItem('dtech_token');
-      window.location.href = '/login.html';
-    } else {
-      console.log('Logged in as:', data.user);
-    }
-  });
+  <script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
 
-  const logoutBtn = document.querySelector('a.btn-outline[href="#"]');
-  if (logoutBtn && logoutBtn.innerText === 'Logout') {
-    logoutBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      localStorage.removeItem('dtech_token');
-      window.location.href = '/login.html';
-    });
-  }
-});
+    // We will mock the ImgBB upload locally to avoid exposing API keys in frontend JS.
+    let currentStep = 1;
+    const totalSteps = 7;
+    let businessId = null;
+    let uploadedImages = { logo: '', cover: '', gallery: [] };
+    let listings = [];
 
-// Admin logic mock (if admin page)
-if(window.location.pathname.includes('admin')) {
-    // Admin features will be wired here
-    console.log("Admin module loaded");
-}
-
-// --- js/onboarding.js ---
-document.addEventListener('DOMContentLoaded', async () => {
-  const token = localStorage.getItem('dtech_token');
-  if (!token) return; // handled by auth check above
-
-  const form = document.getElementById('onboarding-form');
-  const idInput = document.getElementById('business-id');
-  const statusInput = document.getElementById('business-status');
-  // Form inputs (skip the 2 hidden ones)
-  const inputs = form.querySelectorAll('input[type="text"], select');
-
-  // Attempt to fetch existing business
-  try {
-    const res = await fetch(`${WORKER_URL}/api/dashboard/my-business`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const bizData = await res.json();
-
-    if (!bizData.error) {
-      idInput.value = bizData.id || '';
-      statusInput.value = bizData.status || 'draft';
-      inputs[0].value = bizData.name || '';
-      inputs[1].value = bizData.slug || '';
-      inputs[2].value = bizData.category || '';
-      inputs[3].value = bizData.province || '';
-
-      const nextBtn = document.querySelector('.btn-primary');
-      if (nextBtn) nextBtn.innerText = 'Save Changes';
-    }
-  } catch (e) {
-    console.log("No existing business or error fetching");
-  }
-
-  const nextBtn = document.querySelector('.btn-primary');
-  if (nextBtn) {
-    nextBtn.addEventListener('click', async () => {
-      const name = inputs[0].value;
-      const slug = inputs[1].value;
-      const category = inputs[2].value;
-      const province = inputs[3].value;
-      const id = idInput.value;
-      const status = statusInput.value;
-
-      if(!name || !slug || !category || !province) {
-        alert("Please fill all fields");
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('dtech_token');
+      if (!token) {
+        window.location.href = '/login.html';
         return;
       }
 
       try {
-        const payload = {
-          name, slug, category, province, status
-        };
-        if (id) payload.id = id;
-
-        const res = await fetch(`${WORKER_URL}/api/dashboard/business`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
+        const res = await fetch(`${WORKER_URL}/api/dashboard/my-business`, {
+          headers: { 'Authorization': `Bearer ${token}` }
         });
+        const bizData = await res.json();
 
-        const data = await res.json();
-        if (data.error) {
-          alert(data.error);
-        } else {
-          alert('Business saved successfully!');
-          window.location.href = '/dashboard.html';
+        if (!bizData.error) {
+          businessId = bizData.id;
+          if (bizData.draftVersion) {
+             uploadedImages = bizData.draftVersion.branding || uploadedImages;
+             listings = bizData.draftVersion.listings || [];
+          }
+          populateForm(bizData.draftVersion || bizData);
+          renderListings();
         }
       } catch (e) {
-        alert("Network error");
+        console.error("Error fetching business:", e);
       }
+
+      setupAutoSave();
     });
-  }
-});
 
+    function populateForm(data) {
+        const basic = data.basic || data;
+        document.getElementById('b-name').value = basic.name || '';
+        document.getElementById('b-slug').value = basic.slug || '';
+        document.getElementById('b-tagline').value = basic.tagline || '';
+        document.getElementById('b-desc').value = basic.description || '';
+        document.getElementById('b-cat').value = basic.category || '';
+        document.getElementById('b-prov').value = basic.province || '';
+        document.getElementById('b-city').value = basic.city || '';
 
-</script>
+        if(data.contact) {
+            document.getElementById('c-phone').value = data.contact.phone || '';
+            document.getElementById('c-whatsapp').value = data.contact.whatsapp || '';
+            document.getElementById('c-email').value = data.contact.email || '';
+            document.getElementById('c-address').value = data.contact.address || '';
+        }
+
+        if(data.sections) {
+            document.getElementById('s-hero').checked = data.sections.hero;
+            document.getElementById('s-about').checked = data.sections.about;
+            document.getElementById('s-listings').checked = data.sections.listings;
+            document.getElementById('s-gallery').checked = data.sections.gallery;
+            document.getElementById('s-contact').checked = data.sections.contact;
+        }
+    }
+
+    function setupAutoSave() {
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('change', () => {
+                if (input.id.startsWith('s-')) return; // handled by toggles
+                saveDraft();
+            });
+        });
+    }
+
+    async function saveDraft(status = 'draft') {
+        const token = localStorage.getItem('dtech_token');
+        if(!token) return;
+
+        // Extract listings from DOM
+        const listingEls = document.querySelectorAll('.listing-item');
+        const currentListings = [];
+        listingEls.forEach(el => {
+            const name = el.querySelector('.l-name')?.value;
+            const desc = el.querySelector('.l-desc')?.value;
+            const price = el.querySelector('.l-price')?.value;
+            if (name) currentListings.push({ name, description: desc, price });
+        });
+
+        const payload = {
+            id: businessId,
+            status: status,
+            basic: {
+                name: document.getElementById('b-name').value,
+                slug: document.getElementById('b-slug').value,
+                tagline: document.getElementById('b-tagline').value,
+                description: document.getElementById('b-desc').value,
+                category: document.getElementById('b-cat').value,
+                province: document.getElementById('b-prov').value,
+                city: document.getElementById('b-city').value
+            },
+            contact: {
+                phone: document.getElementById('c-phone').value,
+                whatsapp: document.getElementById('c-whatsapp').value,
+                email: document.getElementById('c-email').value,
+                address: document.getElementById('c-address').value,
+                socials: {}
+            },
+            branding: uploadedImages,
+            listings: currentListings,
+            sections: {
+                hero: document.getElementById('s-hero')?.checked ?? true,
+                about: document.getElementById('s-about')?.checked ?? true,
+                listings: document.getElementById('s-listings')?.checked ?? true,
+                gallery: document.getElementById('s-gallery')?.checked ?? false,
+                contact: document.getElementById('s-contact')?.checked ?? true
+            }
+        };
+
+        if(!payload.basic.name || !payload.basic.slug) return; // Wait until required fields are somewhat filled
+
+        const indicator = document.getElementById('saving-indicator');
+        indicator.innerText = "Saving...";
+
+        try {
+            const res = await fetch(`${WORKER_URL}/api/dashboard/business`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if(!data.error) {
+                if(!businessId) businessId = data.businessId;
+                const toast = document.getElementById('toast');
+                indicator.innerText = "Autosaved just now";
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            } else {
+                indicator.innerText = "Save failed";
+            }
+        } catch(e) {
+            indicator.innerText = "Save failed (Network)";
+        }
+    }
+
+    function submitApplication() {
+        saveDraft('pending').then(() => {
+            window.location.href = 'dashboard.html';
+        });
+    }
+
+    function changeStep(dir) {
+      if (dir === 1 && currentStep < totalSteps) {
+        saveDraft();
+        currentStep++;
+      } else if (dir === -1 && currentStep > 1) {
+        currentStep--;
+      }
+      updateUI();
+    }
+
+    function updateUI() {
+      document.querySelectorAll('.step-item').forEach(el => {
+        const stepNum = parseInt(el.dataset.step);
+        el.classList.remove('active', 'completed');
+        if (stepNum === currentStep) el.classList.add('active');
+        if (stepNum < currentStep) el.classList.add('completed');
+      });
+
+      document.querySelectorAll('.step-pane').forEach((el, index) => {
+        if (index + 1 === currentStep) el.classList.add('active');
+        else el.classList.remove('active');
+      });
+
+      if(currentStep === 6) refreshPreview();
+      document.getElementById('btn-prev').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+
+      const nextBtn = document.getElementById('btn-next');
+      const footer = document.querySelector('.wizard-footer');
+
+      if (currentStep === totalSteps) {
+        footer.style.display = 'none';
+      } else {
+        footer.style.display = 'flex';
+        nextBtn.innerText = currentStep === 6 ? 'Continue to Submit' : 'Next Step';
+      }
+    }
+
+    // --- Media Upload Logic ---
+    function triggerUpload(type) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        if (type === 'gallery') input.multiple = true;
+
+        input.onchange = async e => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            const containerId = type === 'logo' ? 'logo-progress' : (type === 'cover' ? 'cover-progress' : 'gallery-progress');
+            const container = document.getElementById(containerId);
+            container.style.display = 'block';
+            const fill = container.querySelector('.upload-progress-fill');
+            const pct = container.querySelector('.pct');
+            const msg = container.querySelector('.status-msg');
+
+            msg.innerText = `Uploading ${files.length > 1 ? files.length + ' images' : type}...`;
+            fill.style.width = '10%';
+            pct.innerText = '10%';
+
+            for (let i = 0; i < files.length; i++) {
+                await new Promise(r => setTimeout(r, 500)); // Mock network delay
+
+                // Use a local blob URL for the mockup saving
+                const mockUrl = URL.createObjectURL(files[i]);
+
+                if (type === 'logo') uploadedImages.logo = mockUrl;
+                else if (type === 'cover') uploadedImages.cover = mockUrl;
+                else uploadedImages.gallery.push(mockUrl);
+
+                const progress = Math.round(((i + 1) / files.length) * 100);
+                fill.style.width = `${progress}%`;
+                pct.innerText = `${progress}%`;
+            }
+
+            msg.innerText = "Upload complete";
+            msg.style.color = "var(--success)";
+            saveDraft();
+        };
+        input.click();
+    }
+
+    // --- Listings Logic ---
+    function addListing() {
+        const container = document.getElementById('listings-container');
+        const div = document.createElement('div');
+        div.className = 'listing-item';
+        div.innerHTML = `
+            <button class="remove-listing" onclick="this.parentElement.remove(); saveDraft();">X</button>
+            <div class="form-group">
+              <label class="form-label">Item Name</label>
+              <input type="text" class="form-control l-name" placeholder="e.g. Web Design Package" onchange="saveDraft()">
+            </div>
+            <div style="display: flex; gap: 16px;">
+              <div class="form-group" style="flex: 2;">
+                <label class="form-label">Description</label>
+                <input type="text" class="form-control l-desc" placeholder="Brief description..." onchange="saveDraft()">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label class="form-label">Price (R)</label>
+                <input type="text" class="form-control l-price" placeholder="500" onchange="saveDraft()">
+              </div>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    function renderListings() {
+        const container = document.getElementById('listings-container');
+        container.innerHTML = '';
+        if (listings.length === 0) {
+            addListing(); // Add one empty one by default
+            return;
+        }
+
+        listings.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'listing-item';
+            div.innerHTML = `
+                <button class="remove-listing" onclick="this.parentElement.remove(); saveDraft();">X</button>
+                <div class="form-group">
+                  <label class="form-label">Item Name</label>
+                  <input type="text" class="form-control l-name" value="${item.name || ''}" onchange="saveDraft()">
+                </div>
+                <div style="display: flex; gap: 16px;">
+                  <div class="form-group" style="flex: 2;">
+                    <label class="form-label">Description</label>
+                    <input type="text" class="form-control l-desc" value="${item.description || ''}" onchange="saveDraft()">
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Price (R)</label>
+                    <input type="text" class="form-control l-price" value="${item.price || ''}" onchange="saveDraft()">
+                  </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function refreshPreview() {
+      document.getElementById('lp-title').innerText = document.getElementById('b-name').value || 'Business Name';
+      document.getElementById('lp-tagline').innerText = document.getElementById('b-tagline').value || 'Tagline goes here';
+      document.getElementById('lp-desc').innerText = document.getElementById('b-desc').value || 'Description goes here';
+
+      if(uploadedImages.cover) document.getElementById('lp-cover').style.backgroundImage = `url(${uploadedImages.cover})`;
+      if(uploadedImages.logo) document.getElementById('lp-logo').style.backgroundImage = `url(${uploadedImages.logo})`;
+
+      // Toggle sections based on switches
+      document.getElementById('lp-about-sec').style.display = document.getElementById('s-about')?.checked ? 'block' : 'none';
+      document.getElementById('lp-listings-sec').style.display = document.getElementById('s-listings')?.checked ? 'block' : 'none';
+      document.getElementById('lp-contact-sec').style.display = document.getElementById('s-contact')?.checked ? 'flex' : 'none';
+
+      // Update listings
+      const lGrid = document.getElementById('lp-listings-container');
+      lGrid.innerHTML = '';
+
+      const listingEls = document.querySelectorAll('.listing-item');
+      listingEls.forEach(el => {
+          const name = el.querySelector('.l-name')?.value;
+          const price = el.querySelector('.l-price')?.value;
+          if (name) {
+              const div = document.createElement('div');
+              div.style = 'border: 1px solid var(--border); padding: 12px; border-radius: 8px; margin-top: 8px;';
+              div.innerHTML = `<strong>${name}</strong> - R${price || 0}`;
+              lGrid.appendChild(div);
+          }
+      });
+    }
+
+    function togglePreview(type) {
+      document.querySelectorAll('.preview-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.preview-btn.${type}`).classList.add('active');
+
+      const frame = document.getElementById('preview-frame');
+      if(type === 'mobile') {
+        frame.classList.remove('desktop');
+        frame.classList.add('mobile');
+      } else {
+        frame.classList.remove('mobile');
+        frame.classList.add('desktop');
+      }
+    }
+  </script>
 </body>
 </html>

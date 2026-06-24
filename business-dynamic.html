@@ -1,910 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic Business - DTECH Hub</title>
-
-  <style>
-    .b-hero {
-      position: relative;
-      background-color: var(--primary);
-      color: white;
-      text-align: center;
-      padding: 80px 16px;
-      background-size: cover;
-      background-position: center;
-    }
-    .b-hero::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-    }
-    .b-hero-content {
-      position: relative;
-      z-index: 1;
-    }
-    .b-logo {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      border: 4px solid white;
-      margin: 0 auto 16px;
-      background: white;
-      background-size: cover;
-    }
-    .b-section {
-      padding: 48px 0;
-    }
-    .b-fab {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #25D366;
-      color: white;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
-      z-index: 1000;
-    }
-  </style>
-<style>
-:root {
-  --primary: #0056b3;
-  --secondary: #f8f9fa;
-  --text: #333;
-  --text-light: #6c757d;
-  --bg: #ffffff;
-  --bg-offset: #f4f6f8;
-  --border: #e9ecef;
-  --success: #28a745;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --radius: 8px;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --font: 'Inter', system-ui, -apple-system, sans-serif;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: var(--font);
-  color: var(--text);
-  background-color: var(--bg-offset);
-  line-height: 1.5;
-}
-
-a {
-  text-decoration: none;
-  color: var(--primary);
-}
-
-/* Typography */
-h1, h2, h3, h4 {
-  font-weight: 600;
-  color: #111;
-}
-
-/* Layout */
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-
-/* Header */
-.navbar {
-  background-color: var(--bg);
-  padding: 16px 0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.navbar .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.navbar-brand {
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: var(--primary);
-}
-.nav-links {
-  display: flex;
-  gap: 16px;
-}
-
-/* Buttons */
-.btn {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: var(--radius);
-  font-weight: 500;
-  text-align: center;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.2s;
-}
-.btn-primary {
-  background-color: var(--primary);
-  color: white;
-}
-.btn-primary:hover {
-  background-color: #004494;
-}
-.btn-outline {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: transparent;
-}
-.btn-outline:hover {
-  background-color: var(--primary);
-  color: white;
-}
-
-/* Forms */
-.form-group {
-  margin-bottom: 16px;
-}
-.form-label {
-  display: block;
-  margin-bottom: 4px;
-  font-weight: 500;
-}
-.form-control {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-family: var(--font);
-}
-.form-control:focus {
-  outline: none;
-  border-color: var(--primary);
-}
-
-/* Cards */
-.card {
-  background: var(--bg);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  transition: transform 0.2s;
-}
-.card:hover {
-  transform: translateY(-2px);
-}
-
-/* Marketplace Grid */
-.marketplace-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-  padding: 32px 0;
-}
-
-/* Business Card Specific */
-.business-card .cover {
-  height: 140px;
-  background-color: #ddd;
-  background-size: cover;
-  background-position: center;
-}
-.business-card .content {
-  padding: 16px;
-  position: relative;
-}
-.business-card .logo {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  border: 3px solid white;
-  position: absolute;
-  top: -32px;
-  background-color: white;
-  background-size: cover;
-}
-.business-card .title {
-  margin-top: 32px;
-  font-size: 1.1rem;
-}
-.business-card .category {
-  font-size: 0.85rem;
-  color: var(--text-light);
-  margin-bottom: 12px;
-}
-.badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: bold;
-}
-.badge-verified {
-  background-color: #e6f4ea;
-  color: var(--success);
-}
-
-/* Filter Bar */
-.filter-bar {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding: 16px 0;
-  scrollbar-width: none; /* Firefox */
-}
-.filter-bar::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
-}
-.filter-pill {
-  padding: 8px 16px;
-  border-radius: 20px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  white-space: nowrap;
-  cursor: pointer;
-}
-.filter-pill.active {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
-}
-
-/* Auth Screens */
-.auth-container {
-  max-width: 400px;
-  margin: 64px auto;
-  padding: 32px;
-  background: var(--bg);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}
-
-/* Dashboard Layout */
-.dashboard-layout {
-  display: flex;
-  min-height: calc(100vh - 60px);
-}
-.sidebar {
-  width: 250px;
-  background: var(--bg);
-  border-right: 1px solid var(--border);
-  padding: 24px 16px;
-}
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.sidebar-link {
-  padding: 10px 16px;
-  border-radius: var(--radius);
-  color: var(--text);
-  font-weight: 500;
-}
-.sidebar-link:hover, .sidebar-link.active {
-  background: var(--bg-offset);
-  color: var(--primary);
-}
-.dashboard-content {
-  flex: 1;
-  padding: 32px;
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
-  .dashboard-layout {
-    flex-direction: column;
-  }
-  .sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    padding: 16px;
-  }
-  .sidebar-nav {
-    flex-direction: row;
-    overflow-x: auto;
-  }
-  .dashboard-content {
-    padding: 16px;
-  }
-}
-:root {
-    --primary-color: #0056b3;
-    --secondary-color: #f8f9fa;
-    --text-color: #333;
-    --light-text: #666;
-    --border-color: #ddd;
-    --success-color: #28a745;
-    --danger-color: #dc3545;
-    --whatsapp-color: #25d366;
-    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: var(--font-family);
-    line-height: 1.6;
-    color: var(--text-color);
-    background-color: #f4f7f6;
-}
-
-.container {
-    width: 90%;
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-header {
-    background: var(--primary-color);
-    color: #fff;
-    padding: 1rem 0;
-}
-
-header .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-@media (min-width: 600px) {
-    header .container {
-        flex-direction: row;
-        justify-content: space-between;
-    }
-}
-
-nav a {
-    color: #fff;
-    text-decoration: none;
-    margin-left: 15px;
-    font-weight: bold;
-}
-
-nav a:hover {
-    text-decoration: underline;
-}
-
-.hero {
-    text-align: center;
-    padding: 2rem 0;
-}
-
-.search-filters {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-@media (min-width: 600px) {
-    .search-filters {
-        flex-direction: row;
-        justify-content: center;
-    }
-}
-
-input[type="text"], input[type="tel"], input[type="email"], select, textarea {
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-size: 1rem;
-    width: 100%;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    padding: 20px 0;
-}
-
-@media (min-width: 600px) {
-    .grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    }
-}
-
-.card {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.card-img-container {
-    width: 100%;
-    height: 180px;
-    background: #eee;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.card-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.card-content {
-    padding: 15px;
-    flex-grow: 1;
-}
-
-.card-title {
-    font-size: 1.2rem;
-    margin-bottom: 5px;
-}
-
-.card-meta {
-    font-size: 0.85rem;
-    color: var(--light-text);
-    margin-bottom: 10px;
-}
-
-.card-desc {
-    font-size: 0.95rem;
-    margin-bottom: 15px;
-}
-
-.badge {
-    background: var(--primary-color);
-    color: white;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-}
-
-.btn {
-    display: inline-block;
-    padding: 10px 15px;
-    text-align: center;
-    text-decoration: none;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    width: 100%;
-}
-
-.btn-primary {
-    background: var(--primary-color);
-    color: #fff;
-}
-
-.btn-whatsapp {
-    background: var(--whatsapp-color);
-    color: #fff;
-}
-
-.btn-success { background: var(--success-color); color: #fff; width: auto;}
-.btn-danger { background: var(--danger-color); color: #fff; width: auto;}
-
-/* Forms */
-.form-card {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    margin-bottom: 40px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-.status-message {
-    margin-top: 15px;
-    padding: 10px;
-    border-radius: 4px;
-    display: none;
-}
-.status-message.success { background: #d4edda; color: #155724; display: block; }
-.status-message.error { background: #f8d7da; color: #721c24; display: block; }
-
-.loading {
-    text-align: center;
-    padding: 40px;
-    color: var(--light-text);
-    font-style: italic;
-}
-
-/* Profile Page */
-.profile-container {
-    background: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    margin-top: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.profile-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 20px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-}
-
-@media (min-width: 600px) {
-    .profile-header {
-        flex-direction: row;
-        text-align: left;
-    }
-}
-
-.profile-logo {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--primary-color);
-}
-
-.profile-actions {
-    margin-bottom: 20px;
-}
-
-.profile-section {
-    margin-bottom: 25px;
-}
-
-.profile-section h3 {
-    margin-bottom: 10px;
-    color: var(--primary-color);
-}
-
-/* Listings Grid for Profiles */
-.listings-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 15px;
-    margin-top: 15px;
-}
-
-@media (min-width: 600px) {
-    .listings-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    }
-}
-
-.listing-card {
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.listing-image {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    background: #f8f9fa;
-}
-
-.listing-content {
-    padding: 15px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.listing-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 8px;
-    gap: 10px;
-}
-
-.listing-name {
-    font-size: 1.1rem;
-    color: var(--text-color);
-    margin: 0;
-}
-
-.listing-price {
-    font-weight: bold;
-    color: var(--primary-color);
-    white-space: nowrap;
-}
-
-.listing-desc {
-    font-size: 0.9rem;
-    color: var(--light-text);
-    margin-bottom: 10px;
-    flex-grow: 1;
-}
-
-.listing-meta {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: auto;
-}
-
-.listing-tag {
-    background: #e9ecef;
-    color: #495057;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-}
-
-/* Admin */
-.admin-item {
-    background: #fff;
-    padding: 15px;
-    border: 1px solid var(--border-color);
-    margin-bottom: 10px;
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-@media (min-width: 600px) {
-    .admin-item {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
-}
-
-footer {
-    text-align: center;
-    padding: 20px 0;
-    margin-top: 40px;
-    color: var(--light-text);
-    font-size: 0.9rem;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Profile - DTECH Hub</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #f8f9fa;
+            --text: #333;
+            --text-light: #6c757d;
+            --bg: #ffffff;
+            --bg-offset: #f4f6f8;
+            --border: #e9ecef;
+            --success: #28a745;
+            --whatsapp: #25d366;
+            --radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --font: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font); color: var(--text); background-color: var(--bg-offset); line-height: 1.6; }
+        a { text-decoration: none; color: var(--primary); }
+        h1, h2, h3, h4 { font-weight: 600; color: #111; }
+
+        .container { width: 100%; max-width: 1000px; margin: 0 auto; padding: 0 16px; }
+
+        .btn { display: inline-block; padding: 10px 20px; border-radius: 24px; font-weight: 600; text-align: center; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-whatsapp { background-color: var(--whatsapp); color: white; }
+        .btn-outline { border-color: var(--border); color: var(--text); background: white; }
+
+        /* Dynamic Sections */
+        section { padding: 60px 0; background: var(--bg); margin-bottom: 8px; }
+        section:nth-child(even) { background: var(--bg-offset); }
+
+        .section-title { text-align: center; margin-bottom: 40px; font-size: 28px; }
+
+        /* Hero Section */
+        .hero { padding: 0; margin-bottom: 8px; position: relative; }
+        .hero-cover { width: 100%; height: 300px; background: #ddd; background-size: cover; background-position: center; }
+        .hero-content { position: relative; padding: 0 20px 40px; text-align: center; background: white; border-bottom: 1px solid var(--border); }
+        .hero-logo { width: 120px; height: 120px; background: white; border: 4px solid white; border-radius: 50%; margin: -60px auto 20px; box-shadow: var(--shadow); object-fit: cover; }
+        .hero-title { font-size: 32px; margin-bottom: 8px; }
+        .hero-tagline { color: var(--text-light); font-size: 18px; margin-bottom: 24px; }
+        .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        /* About Section */
+        .about-text { max-width: 800px; margin: 0 auto; text-align: center; font-size: 16px; }
+
+        /* Listings Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+        .listing-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform 0.2s; }
+        .listing-card:hover { transform: translateY(-4px); }
+        .listing-img { width: 100%; height: 200px; background: #eee; object-fit: cover; }
+        .listing-content { padding: 20px; }
+        .listing-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .listing-title { font-size: 18px; margin: 0; }
+        .listing-price { font-weight: bold; color: var(--primary); font-size: 18px; }
+        .listing-desc { color: var(--text-light); font-size: 14px; margin-bottom: 16px; }
+
+        /* Gallery Grid */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+        .gallery-img { width: 100%; height: 200px; background: #eee; border-radius: var(--radius); object-fit: cover; cursor: pointer; transition: opacity 0.2s; }
+        .gallery-img:hover { opacity: 0.9; }
+
+        /* Contact Section */
+        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 800px; margin: 0 auto; }
+        @media (max-width: 768px) { .contact-grid { grid-template-columns: 1fr; } }
+        .contact-item { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+        .contact-icon { width: 48px; height: 48px; border-radius: 50%; background: var(--bg-offset); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .social-links { display: flex; gap: 12px; justify-content: center; margin-top: 32px; }
+        .social-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        footer { text-align: center; padding: 40px; color: var(--text-light); font-size: 14px; background: white; border-top: 1px solid var(--border); }
+    </style>
 </head>
 <body>
-  <!-- This file serves as the singular layout engine injected by the worker -->
-  <nav class="navbar" style="position: static;">
-    <div class="container">
-      <a href="/" style="color: var(--text-light); font-weight: 500;">← Back to Marketplace</a>
-    </div>
-  </nav>
 
-  <header class="b-hero" style="background-image: url('https://placehold.co/1200x400')">
-    <div class="container b-hero-content">
-      <div class="b-logo" style="background-image: url('https://placehold.co/200x200')"></div>
-      <h1>Loading Business...</h1>
-      <p style="font-size: 1.2rem; opacity: 0.9;">Description loading...</p>
-      <div style="margin-top: 16px;">
-        <span class="badge badge-verified">✓ Verified Student</span>
-      </div>
+    <!-- Hero Section (Dynamic) -->
+    <div class="hero" id="section-hero">
+        <div class="hero-cover" id="b-cover"></div>
+        <div class="hero-content">
+            <div class="hero-logo" id="b-logo"></div>
+            <h1 class="hero-title" id="h-title">DTECH Services</h1>
+            <p class="hero-tagline" id="h-tagline">Affordable websites for local businesses</p>
+            <div class="hero-actions">
+                <a href="#" class="btn btn-whatsapp" id="btn-wa">WhatsApp Us</a>
+                <a href="#" class="btn btn-outline">Call Now</a>
+            </div>
+        </div>
     </div>
-  </header>
 
-  <main class="container">
-    <section class="b-section" id="b-services">
-      <h2 style="margin-bottom: 24px;">Our Services</h2>
-      <div class="marketplace-grid">
-        <!-- Rendered via JS -->
-      </div>
+    <!-- About Section (Dynamic) -->
+    <section id="section-about">
+        <div class="container">
+            <h2 class="section-title">About Us</h2>
+            <p class="about-text" id="a-desc">
+                We are a dedicated team of student developers providing affordable, high-quality web design and digital marketing services to local businesses in the Limpopo area. Our goal is to help you establish a professional online presence that drives growth and attracts more customers.
+            </p>
+        </div>
     </section>
-  </main>
 
-  <a href="#" class="b-fab" title="Contact on WhatsApp">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-  </a>
-<script>
-// --- js/business.js ---
-const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+    <!-- Services/Products Section (Dynamic) -->
+    <section id="section-listings">
+        <div class="container">
+            <h2 class="section-title">Our Services</h2>
+            <div class="grid" id="listings-grid">
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get('id');
+                <div class="listing-card">
+                    <div class="listing-img"></div>
+                    <div class="listing-content">
+                        <div class="listing-header">
+                            <h3 class="listing-title">Starter Website</h3>
+                            <span class="listing-price">R500</span>
+                        </div>
+                        <p class="listing-desc">A professional 3-page website perfect for small businesses looking to get online quickly.</p>
+                        <a href="#" class="btn btn-outline" style="width: 100%;">Enquire</a>
+                    </div>
+                </div>
 
-    const loading = document.getElementById('loading');
-    const profile = document.getElementById('business-profile');
-    const errorMsg = document.getElementById('error-message');
+                <div class="listing-card">
+                    <div class="listing-img"></div>
+                    <div class="listing-content">
+                        <div class="listing-header">
+                            <h3 class="listing-title">E-Commerce Setup</h3>
+                            <span class="listing-price">R1200</span>
+                        </div>
+                        <p class="listing-desc">Full online store setup allowing you to sell products directly to customers securely.</p>
+                        <a href="#" class="btn btn-outline" style="width: 100%;">Enquire</a>
+                    </div>
+                </div>
 
-    if (!id) {
-        loading.style.display = 'none';
-        errorMsg.textContent = 'No business ID provided.';
-        errorMsg.style.display = 'block';
-        return;
-    }
+            </div>
+        </div>
+    </section>
 
-    try {
-        const response = await fetch(`${WORKER_URL}/business/${id}`);
+    <!-- Gallery Section (Dynamic) -->
+    <section id="section-gallery">
+        <div class="container">
+            <h2 class="section-title">Gallery</h2>
+            <div class="gallery-grid" id="gallery-grid">
+                <div class="gallery-img"></div>
+                <div class="gallery-img"></div>
+                <div class="gallery-img"></div>
+                <div class="gallery-img"></div>
+            </div>
+        </div>
+    </section>
 
-        if (!response.ok) {
-            throw new Error('Business not found or not approved.');
-        }
+    <!-- Contact Section (Dynamic) -->
+    <section id="section-contact">
+        <div class="container">
+            <h2 class="section-title">Get in Touch</h2>
 
-        const biz = await response.json();
+            <div class="contact-grid">
+                <div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📞</div>
+                        <div>
+                            <strong>Phone</strong><br>
+                            <span id="c-phone"></span>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📱</div>
+                        <div>
+                            <strong>WhatsApp</strong><br>
+                            <span id="c-whatsapp"></span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="contact-item">
+                        <div class="contact-icon">✉️</div>
+                        <div>
+                            <strong>Email</strong><br>
+                            <span id="c-email"></span>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📍</div>
+                        <div>
+                            <strong>Location</strong><br>
+                            <span id="c-location"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        // Populate DOM elements
-        document.title = `${biz.businessName} - DTECH Hub`;
+            <div class="social-links">
+                <a href="#" class="social-icon">F</a>
+                <a href="#" class="social-icon">I</a>
+                <a href="#" class="social-icon">T</a>
+            </div>
+        </div>
+    </section>
 
-        document.getElementById('biz-logo').src = biz.logoUrl || 'https://via.placeholder.com/150?text=No+Logo';
-        document.getElementById('biz-name').textContent = biz.businessName;
-        document.getElementById('biz-category').textContent = biz.category;
-        document.getElementById('biz-province').textContent = biz.province;
-        document.getElementById('biz-owner').textContent = biz.studentName;
+    <footer>
+        <p>Powered by DTECH Hub</p>
+    </footer>
 
-        document.getElementById('biz-about').textContent = biz.about || biz.description;
+    <script>
+        const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
 
-        if (biz.school) {
-            document.getElementById('biz-school').textContent = biz.school;
-            document.getElementById('biz-school-container').style.display = 'block';
-        }
-
-        if (biz.listings && biz.listings.length > 0) {
-            document.getElementById('biz-listings-container').style.display = 'block';
-
-            // Set dynamic title based on category
-            let title = "Offerings";
-            switch(biz.category) {
-                case 'Service':
-                case 'Beauty':
-                case 'Creative':
-                    title = "Services & Pricing";
-                    break;
-                case 'Product':
-                    title = "Products";
-                    break;
-                case 'Food':
-                    title = "Menu";
-                    break;
-                case 'Tutoring':
-                    title = "Tutoring Subjects";
-                    break;
+        document.addEventListener('DOMContentLoaded', async () => {
+            let slug = window.location.pathname.replace('/', '').replace('.html', '');
+            if (!slug || slug === 'business-dynamic') {
+                slug = new URLSearchParams(window.location.search).get('slug') || 'dtech-services';
             }
-            document.getElementById('biz-listings-title').textContent = title;
 
-            const listingsGrid = document.getElementById('biz-listings');
-            listingsGrid.innerHTML = '';
+            try {
+                const res = await fetch(`${WORKER_URL}/api/business/${slug}`);
+                const data = await res.json();
 
-            biz.listings.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'listing-card';
+                if (data && !data.error && data.publishedVersion) {
+                    const pub = data.publishedVersion;
 
-                // Add image if available
-                if (item.imageUrl) {
-                    const img = document.createElement('img');
-                    img.src = item.imageUrl;
-                    img.alt = item.name;
-                    img.className = 'listing-image';
-                    card.appendChild(img);
-                }
-
-                const content = document.createElement('div');
-                content.className = 'listing-content';
-
-                const header = document.createElement('div');
-                header.className = 'listing-header';
-
-                const nameEl = document.createElement('h4');
-                nameEl.className = 'listing-name';
-                nameEl.textContent = item.name;
-
-                const priceEl = document.createElement('span');
-                priceEl.className = 'listing-price';
-                priceEl.textContent = item.price;
-
-                header.appendChild(nameEl);
-                header.appendChild(priceEl);
-                content.appendChild(header);
-
-                if (item.description) {
-                    const descEl = document.createElement('p');
-                    descEl.className = 'listing-desc';
-                    descEl.textContent = item.description;
-                    content.appendChild(descEl);
-                }
-
-                if (item.extra || item.extra2) {
-                    const meta = document.createElement('div');
-                    meta.className = 'listing-meta';
-
-                    if (item.extra) {
-                        const tag = document.createElement('span');
-                        tag.className = 'listing-tag';
-                        tag.textContent = item.extra;
-                        meta.appendChild(tag);
+                    // Basic
+                    if(pub.basic) {
+                        document.getElementById('h-title').innerText = pub.basic.name || '';
+                        document.getElementById('h-tagline').innerText = pub.basic.tagline || '';
+                        document.getElementById('a-desc').innerText = pub.basic.description || '';
                     }
-                    if (item.extra2) {
-                        const tag2 = document.createElement('span');
-                        tag2.className = 'listing-tag';
-                        tag2.textContent = item.extra2;
-                        meta.appendChild(tag2);
+
+                    // Contact
+                    if(pub.contact) {
+                        document.getElementById('c-phone').innerText = pub.contact.phone || '';
+                        document.getElementById('c-whatsapp').innerText = pub.contact.whatsapp || '';
+                        document.getElementById('c-email').innerText = pub.contact.email || '';
+                        document.getElementById('c-location').innerText = pub.basic?.city || '';
+
+                        let waNumber = (pub.contact.whatsapp || '').replace(/[^0-9]/g, '');
+                        if (waNumber.startsWith('0')) waNumber = '27' + waNumber.substring(1);
+                        document.getElementById('btn-wa').href = `https://wa.me/${waNumber}`;
                     }
-                    content.appendChild(meta);
+
+                    // Branding
+                    if(pub.branding) {
+                        if(pub.branding.logo) document.getElementById('b-logo').style.backgroundImage = `url(${pub.branding.logo})`;
+                        if(pub.branding.cover) document.getElementById('b-cover').style.backgroundImage = `url(${pub.branding.cover})`;
+
+                        if(pub.branding.gallery && pub.branding.gallery.length > 0) {
+                            const galGrid = document.getElementById('gallery-grid');
+                            galGrid.innerHTML = '';
+                            pub.branding.gallery.forEach(url => {
+                                const div = document.createElement('div');
+                                div.className = 'gallery-img';
+                                div.style.backgroundImage = `url(${url})`;
+                                galGrid.appendChild(div);
+                            });
+                        }
+                    }
+
+                    // Listings
+                    if(pub.listings && pub.listings.length > 0) {
+                        const lGrid = document.getElementById('listings-grid');
+                        lGrid.innerHTML = '';
+                        pub.listings.forEach(item => {
+                            const card = document.createElement('div');
+                            card.className = 'listing-card';
+                            card.innerHTML = `
+                                <div class="listing-content">
+                                    <div class="listing-header">
+                                        <h3 class="listing-title">${item.name || ''}</h3>
+                                        <span class="listing-price">R${item.price || ''}</span>
+                                    </div>
+                                    <p class="listing-desc">${item.description || ''}</p>
+                                    <a href="javascript:document.getElementById('btn-wa').click()" class="btn btn-outline" style="width: 100%;">Enquire</a>
+                                </div>
+                            `;
+                            lGrid.appendChild(card);
+                        });
+                    }
+
+                    // Toggles
+                    if (pub.sections) {
+                        if (!pub.sections.hero) document.getElementById('section-hero').style.display = 'none';
+                        if (!pub.sections.about) document.getElementById('section-about').style.display = 'none';
+                        if (!pub.sections.listings) document.getElementById('section-listings').style.display = 'none';
+                        if (!pub.sections.gallery) document.getElementById('section-gallery').style.display = 'none';
+                        if (!pub.sections.contact) document.getElementById('section-contact').style.display = 'none';
+                    }
                 }
-
-                card.appendChild(content);
-                listingsGrid.appendChild(card);
-            });
-        } else if (biz.services) {
-            // Fallback for legacy businesses
-            document.getElementById('biz-services').textContent = biz.services;
-            document.getElementById('biz-services-container').style.display = 'block';
-        }
-
-        if (biz.socialLinks) {
-            document.getElementById('biz-social').textContent = biz.socialLinks;
-            document.getElementById('biz-social-container').style.display = 'block';
-        }
-
-        if (biz.galleryUrls && biz.galleryUrls.length > 0) {
-            const galleryContainer = document.getElementById('biz-gallery-container');
-            const gallery = document.getElementById('biz-gallery');
-            gallery.innerHTML = '';
-            biz.galleryUrls.forEach(url => {
-                const img = document.createElement('img');
-                img.src = url;
-                img.alt = 'Gallery image';
-                img.style.maxWidth = '200px';
-                img.style.maxHeight = '200px';
-                img.style.objectFit = 'cover';
-                img.style.borderRadius = '8px';
-                gallery.appendChild(img);
-            });
-            galleryContainer.style.display = 'block';
-        }
-
-        // Format WhatsApp link
-        let waNumber = biz.whatsapp.replace(/[^0-9]/g, '');
-        // If it starts with 0 (South African format), replace with 27
-        if (waNumber.startsWith('0')) {
-            waNumber = '27' + waNumber.substring(1);
-        }
-        const waText = encodeURIComponent(`Hi ${biz.studentName}, I found your business ${biz.businessName} on the DTECH Student Hub and I'm interested in your services.`);
-        document.getElementById('biz-whatsapp').href = `https://wa.me/${waNumber}?text=${waText}`;
-
-        // Hide loading, show profile
-        loading.style.display = 'none';
-        profile.style.display = 'block';
-
-    } catch (error) {
-        console.error('Error fetching business:', error);
-        loading.style.display = 'none';
-        errorMsg.textContent = error.message;
-        errorMsg.style.display = 'block';
-    }
-});
-
-
-</script>
+            } catch (e) {
+                console.error("Error fetching dynamic data:", e);
+            }
+        });
+    </script>
 </body>
 </html>
