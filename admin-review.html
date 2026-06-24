@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Review - DTECH Hub</title>
+  <style>
+    :root {
+      --primary: #0056b3;
+      --secondary: #f8f9fa;
+      --text: #333;
+      --text-light: #6c757d;
+      --bg: #ffffff;
+      --bg-offset: #f4f6f8;
+      --border: #e9ecef;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --radius: 8px;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); color: var(--text); background-color: var(--bg-offset); line-height: 1.5; }
+    a { text-decoration: none; color: var(--primary); }
+    h1, h2, h3, h4 { font-weight: 600; color: #111; margin-bottom: 12px; }
+
+    .navbar { background-color: var(--bg); padding: 16px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+    .navbar-brand { font-size: 1.25rem; font-weight: bold; color: var(--primary); }
+
+    .btn { display: inline-block; padding: 8px 16px; border-radius: var(--radius); font-weight: 500; text-align: center; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; font-size: 14px;}
+    .btn-primary { background-color: var(--primary); color: white; }
+    .btn-outline { border-color: var(--border); color: var(--text); background: transparent; }
+    .btn-success { background-color: var(--success); color: white; border-color: var(--success); }
+    .btn-warning { background-color: white; color: #856404; border-color: #856404; }
+    .btn-danger { background-color: white; color: var(--danger); border-color: var(--danger); }
+
+    .container { max-width: 1200px; margin: 32px auto; padding: 0 16px; display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+    @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+
+    .card { background: var(--bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; margin-bottom: 24px; }
+
+    .data-row { display: flex; border-bottom: 1px solid var(--border); padding: 12px 0; }
+    .data-row:last-child { border-bottom: none; }
+    .data-label { width: 150px; font-weight: 500; color: var(--text-light); flex-shrink: 0; }
+    .data-value { flex: 1; font-weight: 500; }
+
+    .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 12px; }
+    .image-thumb { width: 100%; height: 120px; background: #eee; border-radius: var(--radius); object-fit: cover; }
+
+    .listing-item { border: 1px solid var(--border); padding: 16px; border-radius: var(--radius); margin-bottom: 12px; }
+
+    .action-panel { position: sticky; top: 80px; }
+
+    .status-badge { display: inline-block; padding: 6px 12px; border-radius: 16px; font-size: 14px; font-weight: bold; background: #fff3cd; color: #856404; margin-bottom: 24px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
+    .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius); font-family: var(--font); font-size: 14px; resize: vertical; }
+    .form-control:focus { outline: none; border-color: var(--primary); }
+
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-content { background: white; padding: 32px; border-radius: var(--radius); max-width: 500px; width: 90%; }
+    .modal.active { display: flex; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <a href="admin.html" class="btn btn-outline" style="padding: 4px 12px;">← Back to Applications</a>
+      <span class="navbar-brand">Application Review</span>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Main Content -->
+    <div>
+      <div class="card">
+        <h3>Business Information</h3>
+        <div class="data-row"><div class="data-label">Business Name</div><div class="data-value" id="display-name">DTECH Services</div></div>
+        <div class="data-row"><div class="data-label">Slug</div><div class="data-value">/dtech-services</div></div>
+        <div class="data-row"><div class="data-label">Category</div><div class="data-value" id="display-category">Services</div></div>
+        <div class="data-row"><div class="data-label">Province</div><div class="data-value">Limpopo</div></div>
+        <div class="data-row"><div class="data-label">Description</div><div class="data-value" id="display-desc" style="font-weight: 400;">We help local businesses establish a professional online presence.</div></div>
+      </div>
+
+      <div class="card">
+        <h3>Contact Information</h3>
+        <div class="data-row"><div class="data-label">Phone</div><div class="data-value" id="display-phone">012 345 6789</div></div>
+        <div class="data-row"><div class="data-label">WhatsApp</div><div class="data-value" id="display-whatsapp">012 345 6789</div></div>
+        <div class="data-row"><div class="data-label">Email</div><div class="data-value" id="display-email">hello@dtech.com</div></div>
+        <div class="data-row"><div class="data-label">Instagram</div><div class="data-value"><a href="#">@dtechservices</a></div></div>
+      </div>
+
+      <div class="card">
+        <h3>Branding & Media</h3>
+        <div style="margin-bottom: 24px;">
+          <div class="data-label" style="margin-bottom: 8px;">Logo</div>
+          <div style="width: 80px; height: 80px; background: #ddd; border-radius: 50%; background-size: cover;" id="display-logo"></div>
+        </div>
+        <div style="margin-bottom: 24px;">
+          <div class="data-label" style="margin-bottom: 8px;">Cover Image</div>
+          <div style="width: 100%; height: 160px; background: #ddd; border-radius: var(--radius); background-size: cover;" id="display-cover"></div>
+        </div>
+        <div>
+          <div class="data-label">Gallery Images</div>
+          <div class="image-grid">
+            <div class="image-thumb"></div>
+            <div class="image-thumb"></div>
+            <div class="image-thumb"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Listings</h3>
+        <div class="listing-item">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <strong>Web Design Package</strong>
+            <strong style="color: var(--primary)">R500</strong>
+          </div>
+          <p style="color: var(--text-light); font-size: 14px;">Complete 5 page website setup.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Selected Sections</h3>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <span style="background: var(--bg-offset); padding: 4px 12px; border-radius: 16px; font-size: 14px; border: 1px solid var(--border);">Hero Banner</span>
+          <span style="background: var(--bg-offset); padding: 4px 12px; border-radius: 16px; font-size: 14px; border: 1px solid var(--border);">About Us</span>
+          <span style="background: var(--bg-offset); padding: 4px 12px; border-radius: 16px; font-size: 14px; border: 1px solid var(--border);">Services</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar Actions -->
+    <div>
+      <div class="card action-panel">
+        <div class="status-badge" id="badge-status">Status: Pending Review</div>
+
+        <h3>Review Actions</h3>
+        <p style="color: var(--text-light); font-size: 14px; margin-bottom: 24px;">Review the application thoroughly. Actions taken here are immediately visible to the student.</p>
+
+        <button class="btn btn-success" style="width: 100%; margin-bottom: 12px; padding: 12px;" onclick="submitAction('approve')">✓ Approve Application</button>
+        <button class="btn btn-warning" style="width: 100%; margin-bottom: 12px; padding: 12px;" onclick="openModal('changes')">⚠️ Request Changes</button>
+        <button class="btn btn-danger" style="width: 100%; padding: 12px;" onclick="openModal('decline')">⛔ Decline Application</button>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 24px 0;">
+
+        <button class="btn btn-outline" style="width: 100%;">View Website Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="actionModal">
+    <div class="modal-content">
+      <h3 id="modalTitle">Modal Title</h3>
+      <p style="color: var(--text-light); margin-bottom: 20px; font-size: 14px;" id="modalDesc">Description goes here.</p>
+
+      <div class="form-group">
+        <label class="form-label">Reason / Message to Student</label>
+        <textarea class="form-control" rows="4" placeholder="Enter reason here..." id="modalReason"></textarea>
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn" id="modalSubmitBtn">Submit Action</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+    let currentBusinessId = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      currentBusinessId = urlParams.get('id');
+
+      if (!currentBusinessId) {
+        alert("No business ID provided");
+        window.location.href = 'admin.html';
+        return;
+      }
+
+      try {
+        // Fetch specific business from admin scope. Note: The mock worker /admin/businesses returns a list.
+        // We'll fetch the list and find our ID since /admin/business/:id isn't implemented.
+        const res = await fetch(`${WORKER_URL}/admin/businesses`);
+        const businesses = await res.json();
+        const biz = businesses.find(b => b.id === currentBusinessId);
+
+        if (biz) {
+            document.getElementById('display-name').innerText = biz.businessName || 'N/A';
+            document.getElementById('display-category').innerText = biz.category || 'N/A';
+            document.getElementById('display-desc').innerText = biz.description || 'N/A';
+            document.getElementById('badge-status').innerText = `Status: ${biz.status}`;
+
+            if (biz.contact) {
+                document.getElementById('display-phone').innerText = biz.contact.phone || 'N/A';
+                document.getElementById('display-whatsapp').innerText = biz.contact.whatsapp || 'N/A';
+                document.getElementById('display-email').innerText = biz.contact.email || 'N/A';
+            }
+
+            if (biz.branding) {
+                if (biz.branding.logo) document.getElementById('display-logo').style.backgroundImage = `url(${biz.branding.logo})`;
+                if (biz.branding.cover) document.getElementById('display-cover').style.backgroundImage = `url(${biz.branding.cover})`;
+            }
+        }
+      } catch (e) {
+          console.error(e);
+      }
+    });
+
+    function openModal(type) {
+      const modal = document.getElementById('actionModal');
+      const title = document.getElementById('modalTitle');
+      const desc = document.getElementById('modalDesc');
+      const btn = document.getElementById('modalSubmitBtn');
+      const reason = document.getElementById('modalReason');
+
+      reason.value = '';
+
+      if (type === 'changes') {
+        title.innerText = 'Request Changes';
+        desc.innerText = 'The student will be notified and asked to update their application before resubmitting.';
+        btn.className = 'btn btn-warning';
+        btn.innerText = 'Send Request';
+        btn.onclick = () => { submitAction('request_changes', reason.value); };
+      } else if (type === 'decline') {
+        title.innerText = 'Decline Application';
+        desc.innerText = 'Declining is final. The student will be notified of the reason but cannot resubmit this specific application.';
+        btn.className = 'btn btn-danger';
+        btn.innerText = 'Decline Application';
+        btn.style.color = 'white';
+        btn.style.backgroundColor = 'var(--danger)';
+        btn.onclick = () => { submitAction('decline', reason.value); };
+      }
+
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('actionModal').classList.remove('active');
+    }
+
+    async function submitAction(action, reason = '') {
+      if (!currentBusinessId) return;
+
+      try {
+          const res = await fetch(`${WORKER_URL}/admin/action`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: currentBusinessId, action: action, reason: reason })
+          });
+          const data = await res.json();
+          if(!data.error) {
+              window.location.href = 'admin.html';
+          } else {
+              alert(data.error);
+          }
+      } catch(e) {
+          alert('Network Error');
+      }
+    }
+  </script>
+</body>
+</html>

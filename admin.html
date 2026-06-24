@@ -815,12 +815,9 @@ async function fetchAdminBusinesses() {
                     <small>Owner: ${escapeHTML(biz.studentName)} | Date: ${escapeHTML(date)} | Status: <span class="badge" style="background:${biz.status==='approved'?'var(--success-color)':biz.status==='pending'?'#ffc107':'#dc3545'}">${escapeHTML(biz.status)}</span></small>
                 </div>
                 <div style="display:flex; gap:10px; align-items:center;">
-                    <a href="business.html?id=${encodeURIComponent(biz.id)}" target="_blank" class="btn btn-primary" style="padding: 5px 10px; font-size: 0.8rem; width:auto;">View</a>
-                    <button onclick="openEditModal('${escapeHTML(biz.id)}', '${escapeHTML(biz.businessName).replace(/'/g, "\\'")}', '${escapeHTML(biz.studentName).replace(/'/g, "\\'")}', '${escapeHTML(biz.description).replace(/'/g, "\\'")}')" class="btn btn-primary" style="padding: 5px 10px; font-size: 0.8rem; background:#6c757d; width:auto;">Edit</button>
-                    ${biz.status === 'pending' ? `<button onclick="updateStatus('${escapeHTML(biz.id)}', 'approve')" class="btn btn-success" style="padding: 5px 10px; font-size: 0.8rem;">Approve</button>` : ''}
-                    ${biz.status === 'pending' ? `<button onclick="updateStatus('${escapeHTML(biz.id)}', 'reject')" class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;">Reject</button>` : ''}
-                    ${biz.status === 'approved' ? `<button onclick="updateStatus('${escapeHTML(biz.id)}', 'disable')" class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;">Disable</button>` : ''}
-                    ${biz.status === 'disable' || biz.status === 'reject' ? `<button onclick="updateStatus('${escapeHTML(biz.id)}', 'approve')" class="btn btn-success" style="padding: 5px 10px; font-size: 0.8rem;">Re-Approve</button>` : ''}
+                    ${biz.status === 'pending' ? `<a href="admin-review.html?id=${encodeURIComponent(biz.id)}" class="btn btn-primary" style="padding: 5px 10px; font-size: 0.8rem; width:auto;">Review Application</a>` : ''}
+                    ${biz.status === 'approved' ? `<button onclick="updateStatus('${escapeHTML(biz.id)}', 'disable')" class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;">Suspend</button>` : ''}
+                    ${biz.status === 'suspended' || biz.status === 'declined' ? `<button onclick="updateStatus('${escapeHTML(biz.id)}', 'approve')" class="btn btn-success" style="padding: 5px 10px; font-size: 0.8rem;">Approve</button>` : ''}
                 </div>
             `;
 

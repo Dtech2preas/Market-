@@ -4085,17 +4085,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         const authPayload = await getAuthUser(request);
         if (!authPayload) return errorResponse("Unauthorized", 401);
         const data = await getBody(request);
-        const { name, slug, category, province } = data;
+        const name = data.basic?.name || data.name;
+        const slug = data.basic?.slug || data.slug;
+        const category = data.basic?.category || data.category;
+        const province = data.basic?.province || data.province;
         if (!name || !slug) return errorResponse("Name and slug required");
         const existingSlugId = await env.MARKET_KV.get(`slug:${slug}`);
         let businessId = data.id;
+        let existingBiz = null;
         if (!businessId) {
           if (existingSlugId) return errorResponse("Slug already taken", 400);
           businessId = `business:${Date.now().toString(36)}`;
         } else {
           const existingBizStr = await env.MARKET_KV.get(businessId);
           if (!existingBizStr) return errorResponse("Business not found", 404);
-          const existingBiz = JSON.parse(existingBizStr);
+          existingBiz = JSON.parse(existingBizStr);
           if (existingBiz.ownerId !== authPayload.userId) {
             return errorResponse("Forbidden: You do not own this business", 403);
           }
@@ -4103,16 +4107,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             return errorResponse("Slug already taken by another business", 400);
           }
         }
+        const draftData = {
+          basic: data.basic || existingBiz?.draftVersion?.basic || { name, slug, category, province, tagline: "", description: "", city: "" },
+          contact: data.contact || existingBiz?.draftVersion?.contact || { phone: "", whatsapp: "", email: "", address: "", socials: {} },
+          branding: data.branding || existingBiz?.draftVersion?.branding || { logo: "", cover: "", gallery: [] },
+          listings: data.listings || existingBiz?.draftVersion?.listings || [],
+          sections: data.sections || existingBiz?.draftVersion?.sections || { hero: true, about: true, listings: true, gallery: false, contact: true }
+        };
         const businessData = {
           id: businessId,
           ownerId: authPayload.userId,
-          name,
-          slug,
-          category,
-          province,
-          status: data.status || "draft",
-          content: data.content || { hero: {}, sections: [] },
-          listings: data.listings || [],
+          slug: draftData.basic.slug,
+          status: data.status || existingBiz?.status || "draft",
+          draftVersion: draftData,
+          publishedVersion: existingBiz?.publishedVersion || null,
+          // Only updated on publish
           updatedAt: Date.now()
         };
         await env.MARKET_KV.put(businessId, JSON.stringify(businessData));
@@ -4123,12 +4132,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           let index = JSON.parse(indexStr);
           const indexEntry = {
             id: businessId,
-            slug,
-            name,
-            category,
-            province,
+            slug: businessData.slug,
+            name: businessData.publishedVersion?.basic?.name || businessData.draftVersion?.basic?.name,
+            category: businessData.publishedVersion?.basic?.category || businessData.draftVersion?.basic?.category,
+            province: businessData.publishedVersion?.basic?.province || businessData.draftVersion?.basic?.province,
             status: businessData.status,
-            coverImage: businessData.content?.hero?.coverImage || null
+            coverImage: businessData.publishedVersion?.branding?.cover || businessData.draftVersion?.branding?.cover || null
           };
           const existingIdx = index.findIndex((b) => b.id === businessId);
           if (existingIdx >= 0) index[existingIdx] = indexEntry;
@@ -4137,9 +4146,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         return jsonResponse({ success: true, businessId });
       }
-      if (request.method === "GET" && path === "/admin/businesses") {
-        const indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
+      if (request.method === "POST" && path === "/api/dashboard/publish") {
+        const authPayload = await getAuthUser(request);
+        if (!authPayload) return errorResponse("Unauthorized", 401);
+        const data = await getBody(request);
+        const { id } = data;
+        if (!id) return errorResponse("Business ID required");
+        const existingBizStr = await env.MARKET_KV.get(id);
+        if (!existingBizStr) return errorResponse("Business not found", 404);
+        const existingBiz = JSON.parse(existingBizStr);
+        if (existingBiz.ownerId !== authPayload.userId) {
+          return errorResponse("Forbidden: You do not own this business", 403);
+        }
+        if (!["approved", "verified"].includes(existingBiz.status)) {
+          return errorResponse("Business must be approved before publishing changes", 400);
+        }
+        existingBiz.publishedVersion = JSON.parse(JSON.stringify(existingBiz.draftVersion));
+        existingBiz.updatedAt = Date.now();
+        await env.MARKET_KV.put(id, JSON.stringify(existingBiz));
+        let indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
         let index = JSON.parse(indexStr);
+        const idx = index.findIndex((b) => b.id === id);
+        const entry = {
+          id: existingBiz.id,
+          slug: existingBiz.slug,
+          name: existingBiz.publishedVersion.basic.name,
+          category: existingBiz.publishedVersion.basic.category,
+          province: existingBiz.publishedVersion.basic.province,
+          status: existingBiz.status,
+          coverImage: existingBiz.publishedVersion.branding.cover || null
+        };
+        if (idx >= 0) index[idx] = entry;
+        else index.push(entry);
+        await env.MARKET_KV.put("marketplace:index", JSON.stringify(index));
+        return jsonResponse({ success: true });
+      }
+      if (request.method === "GET" && path === "/admin/businesses") {
         try {
           const listRes = await env.MARKET_KV.list({ prefix: "business:" });
           const businesses = [];
@@ -4149,13 +4191,16 @@ document.addEventListener('DOMContentLoaded', async () => {
               const b = JSON.parse(bizStr);
               businesses.push({
                 id: b.id,
-                businessName: b.name,
+                businessName: b.draftVersion?.basic?.name || b.name,
                 studentName: b.ownerId,
-                // Typically we'd join with user data
-                category: b.category,
+                category: b.draftVersion?.basic?.category || b.category,
                 status: b.status,
-                description: b.content?.about || "",
-                timestamp: b.updatedAt || Date.now()
+                description: b.draftVersion?.basic?.description || "",
+                timestamp: b.updatedAt || Date.now(),
+                contact: b.draftVersion?.contact || {},
+                branding: b.draftVersion?.branding || {},
+                listings: b.draftVersion?.listings || [],
+                sections: b.draftVersion?.sections || {}
               });
             }
           }
@@ -4182,9 +4227,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const existingBizStr = await env.MARKET_KV.get(id);
         if (!existingBizStr) return errorResponse("Business not found", 404);
         const existingBiz = JSON.parse(existingBizStr);
-        if (action === "approve") existingBiz.status = "approved";
-        else if (action === "reject") existingBiz.status = "reject";
-        else if (action === "disable") existingBiz.status = "disable";
+        if (action === "approve") {
+          existingBiz.status = "approved";
+          existingBiz.publishedVersion = JSON.parse(JSON.stringify(existingBiz.draftVersion));
+        } else if (action === "request_changes") {
+          existingBiz.status = "request_changes";
+          existingBiz.adminReason = data.reason || "";
+        } else if (action === "decline") {
+          existingBiz.status = "declined";
+          existingBiz.adminReason = data.reason || "";
+        } else if (action === "disable") {
+          existingBiz.status = "suspended";
+        }
         await env.MARKET_KV.put(id, JSON.stringify(existingBiz));
         let indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
         let index = JSON.parse(indexStr);
@@ -4193,11 +4247,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           const entry = {
             id: existingBiz.id,
             slug: existingBiz.slug,
-            name: existingBiz.name,
-            category: existingBiz.category,
-            province: existingBiz.province,
+            name: existingBiz.publishedVersion?.basic?.name || existingBiz.draftVersion?.basic?.name,
+            category: existingBiz.publishedVersion?.basic?.category || existingBiz.draftVersion?.basic?.category,
+            province: existingBiz.publishedVersion?.basic?.province || existingBiz.draftVersion?.basic?.province,
             status: existingBiz.status,
-            coverImage: existingBiz.content?.hero?.coverImage || null
+            coverImage: existingBiz.publishedVersion?.branding?.cover || existingBiz.draftVersion?.branding?.cover || null
           };
           if (idx >= 0) index[idx] = entry;
           else index.push(entry);
