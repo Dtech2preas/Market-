@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Branding - DTECH Hub</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .step-indicator { font-weight: bold; color: var(--text-light); margin-bottom: 8px; }
+    .page-title { margin-bottom: 24px; }
+    .btn-group { display: flex; justify-content: space-between; margin-top: 32px; }
+
+    .upload-box { border: 2px dashed var(--border); padding: 32px; text-align: center; cursor: pointer; transition: 0.2s; background: #fafafa; }
+    .upload-box:hover { border-color: var(--primary); background: #f0f0f0; }
+    .preview-img { max-width: 100%; max-height: 150px; margin-top: 16px; display: none; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">DTECH Hub Setup</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="onboarding-container">
+      <div class="step-indicator">STEP 3 OF 5</div>
+      <h2 class="page-title">Branding & Media</h2>
+
+      <div class="form-group">
+        <label class="form-label">Business Logo</label>
+        <div class="upload-box" onclick="document.getElementById('logo-upload').click()">
+          <p>Click to upload logo (Square)</p>
+          <img id="logo-preview" class="preview-img">
+        </div>
+        <input type="file" id="logo-upload" style="display:none" accept="image/*">
+      </div>
+
+      <div class="form-group" style="margin-top: 32px;">
+        <label class="form-label">Cover Image</label>
+        <div class="upload-box" onclick="document.getElementById('cover-upload').click()">
+          <p>Click to upload cover banner (Rectangle)</p>
+          <img id="cover-preview" class="preview-img">
+        </div>
+        <input type="file" id="cover-upload" style="display:none" accept="image/*">
+      </div>
+
+      <div class="btn-group">
+        <a href="onboarding-2-contact.html" class="btn btn-outline-dark">&larr; Back</a>
+        <button class="btn btn-primary" onclick="saveAndNext()">Next: Services / Products &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function handleUpload(inputId, previewId, storageKey) {
+      document.getElementById(inputId).addEventListener('change', function(e) {
+        if(e.target.files.length > 0) {
+          const file = e.target.files[0];
+          const url = URL.createObjectURL(file);
+          const img = document.getElementById(previewId);
+          img.src = url;
+          img.style.display = 'block';
+          localStorage.setItem(storageKey, url);
+        }
+      });
+    }
+
+    handleUpload('logo-upload', 'logo-preview', 'onboarding_logo');
+    handleUpload('cover-upload', 'cover-preview', 'onboarding_cover');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedLogo = localStorage.getItem('onboarding_logo');
+      const savedCover = localStorage.getItem('onboarding_cover');
+
+      if(savedLogo) {
+        const img = document.getElementById('logo-preview');
+        img.src = savedLogo;
+        img.style.display = 'block';
+      }
+      if(savedCover) {
+        const img = document.getElementById('cover-preview');
+        img.src = savedCover;
+        img.style.display = 'block';
+      }
+    });
+
+    function saveAndNext() {
+      window.location.href = 'onboarding-4-listings.html';
+    }
+  </script>
+</body>
+</html>

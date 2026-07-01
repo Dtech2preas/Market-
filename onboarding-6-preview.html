@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview - DTECH Hub</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); text-align: center; }
+    .page-title { margin-bottom: 24px; }
+    .preview-btns { display: flex; flex-direction: column; gap: 16px; margin: 32px 0; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">DTECH Hub Setup</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="onboarding-container">
+      <h2 class="page-title">Ready to Submit!</h2>
+      <p style="color: var(--text-light);">Before you submit your application, please preview how your business page will look.</p>
+
+      <div class="preview-btns">
+        <a href="onboarding-preview-desktop.html" target="_blank" class="btn btn-outline-dark">Preview Desktop Version</a>
+        <a href="onboarding-preview-mobile.html" target="_blank" class="btn btn-outline-dark">Preview Mobile Version</a>
+      </div>
+
+      <div style="border-top: 1px solid var(--border); padding-top: 24px; margin-top: 24px;">
+        <button class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem;" onclick="submitApplication()">Submit Application</button>
+        <div style="margin-top: 16px;">
+          <a href="onboarding-5-sections.html" style="color: var(--text-light); text-decoration: underline;">&larr; Go back to edit</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    async function submitApplication() {
+      const token = localStorage.getItem('dtech_token');
+      if (!token) { alert('You must be logged in to submit.'); return; }
+
+      const basic = JSON.parse(localStorage.getItem('onboarding_basic') || '{}');
+      const contact = JSON.parse(localStorage.getItem('onboarding_contact') || '{}');
+      const listings = JSON.parse(localStorage.getItem('onboarding_listings') || '[]');
+      const sections = JSON.parse(localStorage.getItem('onboarding_sections') || '{}');
+
+      const payload = { status: "pending",  id: localStorage.getItem("onboarding_bizId"),
+        basic: basic,
+        contact: contact,
+        listings: listings,
+        sections: sections,
+        // Branding would ideally be uploaded via API first, simulating here:
+        branding: {
+           logo: localStorage.getItem('onboarding_logo') || '',
+           cover: localStorage.getItem('onboarding_cover') || ''
+        }
+      };
+
+      try {
+        const res = await fetch(`${WORKER_URL}/api/dashboard/business`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        // Clear storage
+        ['onboarding_basic', 'onboarding_contact', 'onboarding_listings', 'onboarding_sections', 'onboarding_logo', 'onboarding_cover'].forEach(k => localStorage.removeItem(k));
+
+        window.location.href = 'dashboard.html';
+      } catch (e) {
+        alert('Failed to submit application. Please check your network connection.');
+      }
+    }
+  </script>
+</body>
+</html>

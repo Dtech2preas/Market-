@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pending Applications - Admin</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .admin-item { background: #fff; padding: 16px; border: 1px solid var(--border); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container" style="display: flex; justify-content: space-between;">
+      <a href="/" class="navbar-brand">DTECH Admin</a>
+      <div class="nav-links">
+        <a href="#" class="btn btn-outline" style="border: none;">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container dashboard-layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="admin.html" class="sidebar-link">Overview</a>
+        <a href="admin-pending.html" class="sidebar-link active">Pending Applications</a>
+        <a href="admin-approved.html" class="sidebar-link">Active Businesses</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <h2>Pending Applications</h2>
+      <p style="margin-bottom: 24px; color: var(--text-light);">Review applications waiting for approval.</p>
+
+      <div id="pending-list">
+        <p>Loading...</p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const response = await fetch(`${WORKER_URL}/admin/businesses`);
+        const businesses = await response.json();
+        const pending = businesses.filter(b => b.status === 'pending');
+
+        const list = document.getElementById('pending-list');
+        list.innerHTML = '';
+
+        if(pending.length === 0) {
+          list.innerHTML = '<p>No pending applications at this time.</p>';
+          return;
+        }
+
+        pending.forEach(biz => {
+          const item = document.createElement('div');
+          item.className = 'admin-item';
+          const date = new Date(biz.timestamp || Date.now()).toLocaleDateString();
+          item.innerHTML = `
+            <div>
+              <strong style="font-size: 1.1rem; color: var(--primary);">${biz.businessName || 'Unnamed'}</strong> (${biz.category || 'N/A'})<br>
+              <small style="color: var(--text-light);">Owner: ${biz.studentName || 'Unknown'} | Submitted: ${date}</small>
+            </div>
+            <div>
+              <a href="admin-review.html?id=${encodeURIComponent(biz.id)}" class="btn btn-primary">Review Application</a>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      } catch (error) {
+        document.getElementById('pending-list').innerHTML = '<p style="color: red;">Error loading applications.</p>';
+      }
+    });
+  </script>
+</body>
+</html>

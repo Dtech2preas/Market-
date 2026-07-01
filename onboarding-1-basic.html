@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic Info - DTECH Hub</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .step-indicator { font-weight: bold; color: var(--text-light); margin-bottom: 8px; }
+    .page-title { margin-bottom: 24px; }
+    .btn-group { display: flex; justify-content: space-between; margin-top: 32px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">DTECH Hub Setup</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="onboarding-container">
+      <div class="step-indicator">STEP 1 OF 5</div>
+      <h2 class="page-title">Basic Information</h2>
+
+      <div class="form-group">
+        <label class="form-label">Business Name</label>
+        <input type="text" id="b-name" class="form-control" placeholder="e.g. DTECH Services">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Profile Link (Slug)</label>
+        <input type="text" id="b-slug" class="form-control" placeholder="e.g. dtech-services">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select id="b-category" class="form-control">
+          <option>Tech</option>
+          <option>Beauty</option>
+          <option>Food</option>
+          <option>Tutoring</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Short Tagline</label>
+        <input type="text" id="b-tagline" class="form-control" placeholder="What do you do in one sentence?">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Full Description</label>
+        <textarea id="b-desc" class="form-control" rows="4" placeholder="Tell us about your business..."></textarea>
+      </div>
+
+      <div class="btn-group">
+        <a href="dashboard.html" class="btn btn-outline-dark">Cancel</a>
+        <button class="btn btn-primary" onclick="saveAndNext()">Next: Contact Info &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    function saveAndNext() {
+      const data = {
+        name: document.getElementById('b-name').value,
+        slug: document.getElementById('b-slug').value,
+        category: document.getElementById('b-category').value,
+        tagline: document.getElementById('b-tagline').value,
+        description: document.getElementById('b-desc').value
+      };
+      localStorage.setItem('onboarding_basic', JSON.stringify(data));
+      window.location.href = 'onboarding-2-contact.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('dtech_token');
+      if (token) {
+        try {
+          const res = await fetch(`${WORKER_URL}/api/dashboard/my-business`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const bizData = await res.json();
+          if (!bizData.error && bizData.basic) {
+             localStorage.setItem('onboarding_bizId', bizData.id);
+             if(!localStorage.getItem('onboarding_basic')) {
+                localStorage.setItem('onboarding_basic', JSON.stringify(bizData.basic));
+             }
+             if(!localStorage.getItem('onboarding_contact') && bizData.contact) {
+                localStorage.setItem('onboarding_contact', JSON.stringify(bizData.contact));
+             }
+             if(!localStorage.getItem('onboarding_listings') && bizData.listings) {
+                localStorage.setItem('onboarding_listings', JSON.stringify(bizData.listings));
+             }
+             if(!localStorage.getItem('onboarding_sections') && bizData.sections) {
+                localStorage.setItem('onboarding_sections', JSON.stringify(bizData.sections));
+             }
+          }
+        } catch(e) {
+            console.error(e);
+        }
+      }
+
+      const saved = JSON.parse(localStorage.getItem('onboarding_basic') || '{}');
+      if (saved.name) document.getElementById('b-name').value = saved.name;
+      if (saved.slug) document.getElementById('b-slug').value = saved.slug;
+      if (saved.category) document.getElementById('b-category').value = saved.category;
+      if (saved.tagline) document.getElementById('b-tagline').value = saved.tagline;
+      if (saved.description) document.getElementById('b-desc').value = saved.description;
+    });
+  </script>
+</body>
+</html>

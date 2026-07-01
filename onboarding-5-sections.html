@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sections - DTECH Hub</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .step-indicator { font-weight: bold; color: var(--text-light); margin-bottom: 8px; }
+    .page-title { margin-bottom: 24px; }
+    .btn-group { display: flex; justify-content: space-between; margin-top: 32px; }
+
+    .section-toggle { border: 1px solid var(--border); padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; background: #fafafa; }
+    .section-toggle input { width: 20px; height: 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">DTECH Hub Setup</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="onboarding-container">
+      <div class="step-indicator">STEP 5 OF 5</div>
+      <h2 class="page-title">Enable Page Sections</h2>
+      <p style="margin-bottom: 24px; color: var(--text-light);">Choose which sections should appear on your public business page.</p>
+
+      <div class="section-toggle">
+        <label for="s-hero">Hero Banner</label>
+        <input type="checkbox" id="s-hero" class="s-toggle" checked>
+      </div>
+      <div class="section-toggle">
+        <label for="s-about">About Us Section</label>
+        <input type="checkbox" id="s-about" class="s-toggle" checked>
+      </div>
+      <div class="section-toggle">
+        <label for="s-listings">Products / Services</label>
+        <input type="checkbox" id="s-listings" class="s-toggle" checked>
+      </div>
+      <div class="section-toggle">
+        <label for="s-gallery">Photo Gallery</label>
+        <input type="checkbox" id="s-gallery" class="s-toggle">
+      </div>
+      <div class="section-toggle">
+        <label for="s-contact">Contact Section</label>
+        <input type="checkbox" id="s-contact" class="s-toggle" checked disabled title="Always enabled">
+      </div>
+
+      <div class="btn-group">
+        <a href="onboarding-4-listings.html" class="btn btn-outline-dark">&larr; Back</a>
+        <button class="btn btn-primary" onclick="saveAndNext()">Review & Submit &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = JSON.parse(localStorage.getItem('onboarding_sections') || 'null');
+      if(saved) {
+        document.getElementById('s-hero').checked = saved.hero;
+        document.getElementById('s-about').checked = saved.about;
+        document.getElementById('s-listings').checked = saved.listings;
+        document.getElementById('s-gallery').checked = saved.gallery;
+      }
+    });
+
+    function saveAndNext() {
+      const data = {
+        hero: document.getElementById('s-hero').checked,
+        about: document.getElementById('s-about').checked,
+        listings: document.getElementById('s-listings').checked,
+        gallery: document.getElementById('s-gallery').checked,
+        contact: true
+      };
+      localStorage.setItem('onboarding_sections', JSON.stringify(data));
+      window.location.href = 'onboarding-6-preview.html';
+    }
+  </script>
+</body>
+</html>
