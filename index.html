@@ -20,14 +20,39 @@
 
   <div class="hero">
     <div class="container">
-      <h1>Discover Student Businesses</h1>
-      <p>Support your peers and find amazing services on campus.</p>
+      <h1>Build. Discover. Support.</h1>
+      <p>Real student businesses, real campus economy.</p>
+      <div class="hero-actions">
+        <a href="#marketplace" class="btn btn-outline">Explore Businesses</a>
+        <a href="/login.html" class="btn btn-primary" style="background: white; color: var(--primary);">List Your Business</a>
+      </div>
     </div>
   </div>
 
-  <main class="container">
+  <div class="trust-strip">
+    <div class="container">
+      <div class="trust-item">
+        <div class="trust-icon">🤝</div>
+        <span>Support student entrepreneurs</span>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">💰</div>
+        <span>Find affordable campus services</span>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">🌟</div>
+        <span>Discover talent near you</span>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">📈</div>
+        <span>400+ student listings</span>
+      </div>
+    </div>
+  </div>
+
+  <main class="container" id="marketplace">
     <div class="filter-bar">
-      <div class="filter-pill active">All</div>
+      <div class="filter-pill active">All Businesses</div>
       <div class="filter-pill">Beauty</div>
       <div class="filter-pill">Food</div>
       <div class="filter-pill">Tutoring</div>
@@ -40,20 +65,36 @@
       </select>
     </div>
 
-    <div class="marketplace-grid" id="marketplace-container">
-      <!-- Cards injected via JS -->
-      <div class="card business-card">
-        <div class="cover" style="background-image: url('https://placehold.co/400x200')"></div>
-        <div class="content">
-          <div class="logo" style="background-image: url('https://placehold.co/100x100')"></div>
-          <h3 class="title">Sarah's Nails</h3>
-          <div class="category">Beauty • Gauteng</div>
-          <span class="badge badge-verified">✓ Verified Student</span>
-          <a href="/sarahs-nails" class="btn btn-outline" style="width: 100%; margin-top: 16px;">View Profile</a>
-        </div>
+    <div class="featured-section" id="featured-section" style="display: none;">
+      <div class="featured-header">
+        <h2>Featured Businesses</h2>
+        <span class="featured-badge">Top Picks</span>
+      </div>
+      <div class="marketplace-grid" id="featured-container">
+        <!-- Featured cards injected here -->
       </div>
     </div>
+
+    <div class="marketplace-grid" id="marketplace-container">
+      <!-- Cards injected via JS -->
+    </div>
   </main>
+
+  <!-- Iframe Modal -->
+  <div class="modal-overlay" id="preview-modal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span id="modal-biz-name">Business Preview</span>
+          <span class="status-indicator"><span class="status-dot"></span> Live</span>
+        </h3>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <iframe id="preview-iframe" class="modal-iframe" src="" title="Business Preview"></iframe>
+      </div>
+    </div>
+  </div>
 
 
 
@@ -75,36 +116,137 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log("DTECH Main JS Loaded");
 });
 
+// --- Modal Logic ---
+function openModal(slug, name) {
+  const modal = document.getElementById('preview-modal');
+  const iframe = document.getElementById('preview-iframe');
+  const title = document.getElementById('modal-biz-name');
+
+  title.innerText = name || 'Business Preview';
+  // Point iframe to the dynamic business page with slug
+  iframe.src = `/business-dynamic.html?slug=${slug}`;
+
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function closeModal() {
+  const modal = document.getElementById('preview-modal');
+  const iframe = document.getElementById('preview-iframe');
+
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+  // Clear iframe src after a short delay so the closing animation is smooth
+  setTimeout(() => { iframe.src = ''; }, 300);
+}
+
+// Close modal on outside click
+document.getElementById('preview-modal').addEventListener('click', (e) => {
+  if(e.target.id === 'preview-modal') {
+    closeModal();
+  }
+});
+
+// Bookmark Toggle
+function toggleSave(btn, event) {
+  event.stopPropagation(); // Prevent opening modal
+  btn.classList.toggle('saved');
+  if(btn.classList.contains('saved')) {
+    btn.innerHTML = '❤️';
+  } else {
+    btn.innerHTML = '🤍';
+  }
+}
+
+// Open External Tab
+function openExternal(slug, event) {
+  event.stopPropagation(); // Prevent opening modal
+  window.open(`https://${slug}.business.dtech-services.co.za`, '_blank');
+}
+
 // --- js/marketplace.js ---
 const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
 
+function generateCardHTML(b, isFeatured = false) {
+  // Generate mock realistic data for missing backend fields
+  const mockViews = Math.floor(Math.random() * 500) + 50;
+  const taglines = [
+    "Delivering high quality services to students.",
+    "Your one-stop shop on campus.",
+    "Affordable and reliable.",
+    "Supporting the student community."
+  ];
+  const tagline = taglines[Math.floor(Math.random() * taglines.length)];
+  const statusHtml = b.status === 'verified'
+    ? '<div class="status-indicator" style="color:var(--success)"><span class="status-dot"></span> Verified Student</div>'
+    : '<div class="status-indicator"><span class="status-dot" style="background:#6c757d; box-shadow:none;"></span> Active</div>';
+
+  return `
+    <div class="business-card ${isFeatured ? 'featured' : ''}" onclick="openModal('${b.slug}', '${b.name.replace(/'/g, "\\'")}')">
+      <div class="cover" style="background-image: url('${b.coverImage || 'https://placehold.co/400x200?text=Cover'}')">
+        <button class="card-save-btn" onclick="toggleSave(this, event)">🤍</button>
+      </div>
+      <div class="content">
+        <div class="logo" style="background-image: url('https://placehold.co/100x100?text=Logo')"></div>
+
+        <div class="header-meta">
+          ${statusHtml}
+        </div>
+
+        <h3 class="title">${b.name}</h3>
+        <span class="category-tag">${b.category} • ${b.province}</span>
+
+        <p class="tagline">${tagline}</p>
+
+        <div class="engagement-meta">
+          <div class="engagement-item">
+            <span>👁️</span> ${mockViews} views
+          </div>
+          <div class="engagement-item">
+            <span>🔥</span> High Activity
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn-outline" style="flex:1;" onclick="openExternal('${b.slug}', event)">External Link</button>
+          <button class="btn btn-primary" style="flex:1;">View Details</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('marketplace-container');
+  const featuredSection = document.getElementById('featured-section');
+  const featuredContainer = document.getElementById('featured-container');
+
   if (!container) return;
 
   try {
     const res = await fetch(`${WORKER_URL}/api/marketplace`);
-    const businesses = await res.json();
+    let businesses = await res.json();
 
-    if (businesses.length === 0) {
-      container.innerHTML = '<p>No businesses found yet.</p>';
+    if (!businesses || businesses.length === 0) {
+      container.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">No businesses found yet.</p>';
       return;
     }
 
-    container.innerHTML = businesses.map(b => `
-      <div class="card business-card">
-        <div class="cover" style="background-image: url('${b.coverImage || 'https://placehold.co/400x200'}')"></div>
-        <div class="content">
-          <div class="logo" style="background-image: url('https://placehold.co/100x100')"></div>
-          <h3 class="title">${b.name}</h3>
-          <div class="category">${b.category} • ${b.province}</div>
-          ${b.status === 'verified' ? '<span class="badge badge-verified">✓ Verified Student</span>' : ''}
-          <a href="https://${b.slug}.business.dtech-services.co.za" class="btn btn-outline" style="width: 100%; margin-top: 16px;">View Profile</a>
-        </div>
-      </div>
-    `).join('');
+    // Simulate Featured Businesses (take first 3 if available)
+    if (businesses.length > 2) {
+      featuredSection.style.display = 'block';
+      const featured = businesses.slice(0, 3);
+      featuredContainer.innerHTML = featured.map(b => generateCardHTML(b, true)).join('');
+      // Show rest in main grid
+      const rest = businesses.slice(3);
+      container.innerHTML = rest.map(b => generateCardHTML(b)).join('');
+    } else {
+      // Not enough for a separate featured section
+      container.innerHTML = businesses.map(b => generateCardHTML(b)).join('');
+    }
+
   } catch (e) {
-    container.innerHTML = '<p>Error loading marketplace.</p>';
+    container.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">Error loading marketplace.</p>';
   }
 });
 
