@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Contact Info - DTECH Hub</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .step-indicator { font-weight: bold; color: var(--text-light); margin-bottom: 8px; }
+    .page-title { margin-bottom: 24px; }
+    .btn-group { display: flex; justify-content: space-between; margin-top: 32px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="dashboard.html" class="navbar-brand">DTECH Hub Editor</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="onboarding-container">
+      <div class="step-indicator">EDITOR</div>
+      <h2 class="page-title">Edit Contact & Location</h2>
+
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input type="text" id="c-phone" class="form-control" placeholder="e.g. 082 123 4567">
+      </div>
+      <div class="form-group">
+        <label class="form-label">WhatsApp Number</label>
+        <input type="text" id="c-whatsapp" class="form-control" placeholder="e.g. +27 82 123 4567">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Public Email</label>
+        <input type="email" id="c-email" class="form-control" placeholder="hello@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Province</label>
+        <select id="c-province" class="form-control">
+          <option>Gauteng</option>
+          <option>Limpopo</option>
+        </select>
+      </div>
+
+      <div class="btn-group">
+        <a href="editor-1-basic.html" class="btn btn-outline-dark">&larr; Back</a>
+        <button class="btn btn-primary" onclick="saveAndNext()">Save & Next: Branding &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function saveAndNext() {
+      const data = {
+        phone: document.getElementById('c-phone').value,
+        whatsapp: document.getElementById('c-whatsapp').value,
+        email: document.getElementById('c-email').value,
+        province: document.getElementById('c-province').value
+      };
+      localStorage.setItem('editor_contact', JSON.stringify(data));
+      window.location.href = 'editor-3-branding.html';
+    }
+
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('dtech_token');
+      if (!token) {
+          window.location.href = '/login.html';
+          return;
+      }
+
+      let serverData = {};
+      try {
+        const res = await fetch(`${WORKER_URL}/api/dashboard/my-business`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const bizData = await res.json();
+        if (!bizData.error && bizData.draftVersion && bizData.draftVersion.contact) {
+            serverData = bizData.draftVersion.contact;
+        }
+      } catch(e) {
+          console.error(e);
+      }
+
+      const saved = JSON.parse(localStorage.getItem('editor_contact')) || serverData || {};
+      if (saved.phone) document.getElementById('c-phone').value = saved.phone;
+      if (saved.whatsapp) document.getElementById('c-whatsapp').value = saved.whatsapp;
+      if (saved.email) document.getElementById('c-email').value = saved.email;
+      if (saved.province) document.getElementById('c-province').value = saved.province;
+    });
+  </script>
+</body>
+</html>

@@ -20,14 +20,25 @@
     <aside class="sidebar">
       <nav class="sidebar-nav">
         <a href="#overview" class="sidebar-link active">Overview</a>
-        <a href="dashboard-editor.html" class="sidebar-link">Website Editor</a>
+        <a href="editor-1-basic.html" class="sidebar-link" id="editor-link">Website Editor</a>
         <a href="#analytics" class="sidebar-link">Analytics</a>
         <a href="#settings" class="sidebar-link">Settings</a>
       </nav>
     </aside>
 
     <main class="dashboard-content">
-      <h2 style="margin-bottom: 24px;">Welcome back, User</h2>
+      <h2 style="margin-bottom: 24px;" id="welcome-msg">Welcome back</h2>
+
+      <!-- Banner: Create Business -->
+      <div class="banner info" id="banner-create" style="display: none;">
+        <div class="banner-header">
+          <div class="banner-title">🚀 Welcome to DTECH Hub!</div>
+          <a href="onboarding-1-basic.html" class="btn btn-primary">Create a Business Website</a>
+        </div>
+        <div class="banner-body">
+          It looks like you haven't set up a business profile yet. Get started by creating your website.
+        </div>
+      </div>
 
       <!-- Banner: Request Changes -->
       <div class="banner warning" id="banner-changes" style="display: none;">
@@ -73,7 +84,7 @@
         </div>
       </div>
 
-      <div class="stat-grid">
+      <div class="stat-grid" id="stat-grid">
         <div class="stat-card">
           <h3>142</h3>
           <p>Profile Views (This Week)</p>
@@ -85,6 +96,15 @@
         <div class="stat-card">
           <h3>12</h3>
           <p>Active Listings</p>
+        </div>
+      </div>
+
+      <div class="banner info" id="additional-features" style="margin-top: 24px; display: none;">
+        <div class="banner-header">
+          <div class="banner-title">✨ Additional Features (Coming Soon)</div>
+        </div>
+        <div class="banner-body">
+          We are working on bringing more tools and features to help you grow your business. Stay tuned!
         </div>
       </div>
     </main>
@@ -107,12 +127,32 @@
         const bizData = await res.json();
 
         // Hide all banners first
+        document.getElementById('banner-create').style.display = 'none';
         document.getElementById('banner-changes').style.display = 'none';
         document.getElementById('banner-declined').style.display = 'none';
         document.getElementById('banner-pending').style.display = 'none';
         document.getElementById('banner-approved').style.display = 'none';
+        document.getElementById('stat-grid').style.display = 'none';
+        document.getElementById('additional-features').style.display = 'none';
 
-        if (!bizData.error && bizData.status) {
+        // Update welcome message if name is available in token (mocked for now)
+        // document.getElementById('welcome-msg').innerText = `Welcome back`;
+
+        // Hide sidebar links if no business
+        const sidebarNav = document.querySelector('.sidebar-nav');
+        const editorLink = document.getElementById('editor-link');
+
+        if (bizData.error || !bizData.id) {
+            // No business found, show creation banner
+            document.getElementById('banner-create').style.display = 'flex';
+            if (editorLink) editorLink.style.display = 'none';
+            document.querySelector('a[href="#analytics"]').style.display = 'none';
+        } else if (bizData.status) {
+            document.getElementById('stat-grid').style.display = 'grid';
+            document.getElementById('additional-features').style.display = 'flex';
+            if (editorLink) editorLink.style.display = 'block';
+            document.querySelector('a[href="#analytics"]').style.display = 'block';
+
             if (bizData.status === 'request_changes') {
                 const banner = document.getElementById('banner-changes');
                 banner.style.display = 'flex';

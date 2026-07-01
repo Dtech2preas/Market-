@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Basic Info - DTECH Hub</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .step-indicator { font-weight: bold; color: var(--text-light); margin-bottom: 8px; }
+    .page-title { margin-bottom: 24px; }
+    .btn-group { display: flex; justify-content: space-between; margin-top: 32px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="dashboard.html" class="navbar-brand">DTECH Hub Editor</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="onboarding-container">
+      <div class="step-indicator">EDITOR</div>
+      <h2 class="page-title">Edit Basic Information</h2>
+
+      <div class="form-group">
+        <label class="form-label">Business Name</label>
+        <input type="text" id="b-name" class="form-control" placeholder="e.g. DTECH Services">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Profile Link (Slug)</label>
+        <input type="text" id="b-slug" class="form-control" placeholder="e.g. dtech-services">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select id="b-category" class="form-control">
+          <option>Tech</option>
+          <option>Beauty</option>
+          <option>Food</option>
+          <option>Tutoring</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Short Tagline</label>
+        <input type="text" id="b-tagline" class="form-control" placeholder="What do you do in one sentence?">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Full Description</label>
+        <textarea id="b-desc" class="form-control" rows="4" placeholder="Tell us about your business..."></textarea>
+      </div>
+
+      <div class="btn-group">
+        <a href="dashboard.html" class="btn btn-outline-dark">Cancel</a>
+        <button class="btn btn-primary" onclick="saveAndNext()">Save & Next: Contact Info &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    function saveAndNext() {
+      const data = {
+        name: document.getElementById('b-name').value,
+        slug: document.getElementById('b-slug').value,
+        category: document.getElementById('b-category').value,
+        tagline: document.getElementById('b-tagline').value,
+        description: document.getElementById('b-desc').value
+      };
+      localStorage.setItem('editor_basic', JSON.stringify(data));
+      window.location.href = 'editor-2-contact.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('dtech_token');
+      if (!token) {
+          window.location.href = '/login.html';
+          return;
+      }
+
+      try {
+        const res = await fetch(`${WORKER_URL}/api/dashboard/my-business`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const bizData = await res.json();
+        if (!bizData.error && bizData.draftVersion) {
+           localStorage.setItem('editor_bizId', bizData.id);
+
+           // Prefill form from draftVersion if no unsaved local changes exist
+           const saved = JSON.parse(localStorage.getItem('editor_basic')) || bizData.draftVersion.basic || {};
+
+           if (saved.name) document.getElementById('b-name').value = saved.name;
+           if (saved.slug) document.getElementById('b-slug').value = saved.slug;
+           if (saved.category) document.getElementById('b-category').value = saved.category;
+           if (saved.tagline) document.getElementById('b-tagline').value = saved.tagline;
+           if (saved.description) document.getElementById('b-desc').value = saved.description;
+        }
+      } catch(e) {
+          console.error(e);
+      }
+    });
+  </script>
+</body>
+</html>

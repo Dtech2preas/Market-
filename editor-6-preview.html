@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview & Publish - DTECH Hub Editor</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); text-align: center; }
+    .page-title { margin-bottom: 24px; }
+    .preview-btns { display: flex; flex-direction: column; gap: 16px; margin: 32px 0; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="dashboard.html" class="navbar-brand">DTECH Hub Editor</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="onboarding-container">
+      <div class="step-indicator">EDITOR</div>
+      <h2 class="page-title">Ready to Publish!</h2>
+      <p style="color: var(--text-light);">Before you publish your updates, please preview how your business page will look.</p>
+
+      <!-- We can reuse the preview pages, but ideally they'd read from editor_ localstorage instead of onboarding_ -->
+      <p style="color: var(--warning); margin-bottom: 24px;">Note: Preview feature will use your saved draft data.</p>
+
+      <div class="preview-btns">
+        <a href="onboarding-preview-desktop.html" target="_blank" class="btn btn-outline-dark">Preview Desktop Version</a>
+        <a href="onboarding-preview-mobile.html" target="_blank" class="btn btn-outline-dark">Preview Mobile Version</a>
+      </div>
+
+      <div style="border-top: 1px solid var(--border); padding-top: 24px; margin-top: 24px;">
+        <button class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem;" onclick="publishUpdates()">Publish Updates to Live Site</button>
+        <div style="margin-top: 16px;">
+          <a href="editor-5-sections.html" style="color: var(--text-light); text-decoration: underline;">&larr; Go back to edit sections</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    async function publishUpdates() {
+      const token = localStorage.getItem('dtech_token');
+      if (!token) { alert('You must be logged in to publish.'); return; }
+
+      // First, save the draft to the backend
+      const basic = JSON.parse(localStorage.getItem('editor_basic') || '{}');
+      const contact = JSON.parse(localStorage.getItem('editor_contact') || '{}');
+      const listings = JSON.parse(localStorage.getItem('editor_listings') || '[]');
+      const sections = JSON.parse(localStorage.getItem('editor_sections') || '{}');
+
+      const draftPayload = {
+        id: localStorage.getItem("editor_bizId"),
+        basic: basic,
+        contact: contact,
+        listings: listings,
+        sections: sections,
+        branding: {
+           logo: localStorage.getItem('editor_logo') || '',
+           cover: localStorage.getItem('editor_cover') || ''
+        }
+      };
+
+      try {
+        // Save to draftVersion
+        let res = await fetch(`${WORKER_URL}/api/dashboard/business`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(draftPayload)
+        });
+
+        let data = await res.json();
+        if(data.error) {
+           alert(data.error);
+           return;
+        }
+
+        // Publish to publishedVersion
+        res = await fetch(`${WORKER_URL}/api/dashboard/publish`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ id: localStorage.getItem("editor_bizId") })
+        });
+        data = await res.json();
+
+        if(!data.error) {
+            // Clear storage
+            ['editor_basic', 'editor_contact', 'editor_listings', 'editor_sections', 'editor_logo', 'editor_cover', 'editor_bizId'].forEach(k => localStorage.removeItem(k));
+            alert("Changes successfully published to live site!");
+            window.location.href = 'dashboard.html';
+        } else {
+            alert(data.error);
+        }
+      } catch (e) {
+        alert('Failed to publish updates. Please check your network connection.');
+      }
+    }
+  </script>
+</body>
+</html>
