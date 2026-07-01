@@ -49,10 +49,13 @@
   <script>
     // Exact same logic as desktop preview
     document.addEventListener('DOMContentLoaded', () => {
-      const basic = JSON.parse(localStorage.getItem('onboarding_basic') || '{}');
-      const contact = JSON.parse(localStorage.getItem('onboarding_contact') || '{}');
-      const listings = JSON.parse(localStorage.getItem('onboarding_listings') || '[]');
-      const sections = JSON.parse(localStorage.getItem('onboarding_sections') || '{}');
+      const isEditor = window.location.href.includes('editor') || document.referrer.includes('editor');
+      const prefix = isEditor ? 'editor_' : 'onboarding_';
+
+      const basic = JSON.parse(localStorage.getItem(prefix + 'basic') || '{}');
+      const contact = JSON.parse(localStorage.getItem(prefix + 'contact') || '{}');
+      const listings = JSON.parse(localStorage.getItem(prefix + 'listings') || '[]');
+      const sections = JSON.parse(localStorage.getItem(prefix + 'sections') || '{}');
 
       document.getElementById('p-name').innerText = basic.name || 'Business Name';
       document.getElementById('p-tagline').innerText = basic.tagline || 'Tagline';
@@ -61,8 +64,8 @@
       document.getElementById('p-phone').innerText = contact.phone || 'N/A';
       document.getElementById('p-email').innerText = contact.email || 'N/A';
 
-      const logo = localStorage.getItem('onboarding_logo');
-      const cover = localStorage.getItem('onboarding_cover');
+      const logo = localStorage.getItem(prefix + 'logo');
+      const cover = localStorage.getItem(prefix + 'cover');
       if(logo) document.getElementById('p-logo').style.backgroundImage = `url(${logo})`;
       if(cover) document.getElementById('p-cover').style.backgroundImage = `url(${cover})`;
 
