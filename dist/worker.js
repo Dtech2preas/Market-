@@ -3130,12 +3130,11 @@ var worker_default = {
       }
     };
     try {
-      if (!path.startsWith("/api/") && !path.startsWith("/css/") && !path.startsWith("/js/") && !path.includes(".")) {
-        if (path === "/") {
-          return new Response("Use static hosting for root", { status: 404, headers: corsHeaders });
-        }
-        const possibleSlug = path.substring(1);
-        if (!["dashboard", "admin", "search", "category", "login", "register"].includes(possibleSlug.split("/")[0])) {
+      const hostname = url.hostname;
+      const subdomainMatch = hostname.match(/^([^.]+)\.business\.dtech-services\.co\.za$/i);
+      if (subdomainMatch && !path.startsWith("/api/")) {
+        const possibleSlug = subdomainMatch[1].toLowerCase();
+        if (!["www", "api", "admin", "dashboard", "hub"].includes(possibleSlug)) {
           const businessId = await env.MARKET_KV.get(`slug:${possibleSlug}`);
           if (businessId) {
             const htmlContent = `
@@ -3816,8 +3815,9 @@ footer {
   </main>
 
   <script>
-     // Fetch actual data
-     fetch('/api/business/' + '${possibleSlug}')
+     // Fetch actual data using the absolute Worker URL since this is cross-origin
+     const DTECH_WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+     fetch(DTECH_WORKER_URL + '/api/business/' + '${possibleSlug}')
        .then(r => r.json())
        .then(data => {
           if(data.error) { document.body.innerHTML = '<h1>Not Found</h1>'; return; }
@@ -4064,8 +4064,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         return jsonResponse(published);
       }
       if (request.method === "GET" && path.startsWith("/api/business/")) {
-        const slug = path.split("/")[3];
-        if (!slug) return errorResponse("Slug required");
+        const rawSlug = path.split("/")[3];
+        if (!rawSlug) return errorResponse("Slug required");
+        const slug = rawSlug.toLowerCase();
         const businessId = await env.MARKET_KV.get(`slug:${slug}`);
         if (!businessId) return errorResponse("Business not found", 404);
         const businessStr = await env.MARKET_KV.get(businessId);
@@ -4086,7 +4087,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!authPayload) return errorResponse("Unauthorized", 401);
         const data = await getBody(request);
         const name = data.basic?.name || data.name;
-        const slug = data.basic?.slug || data.slug;
+        const rawSlug = data.basic?.slug || data.slug;
+        const slug = rawSlug ? rawSlug.toLowerCase().trim().replace(/[^a-z0-9-]/g, "-") : null;
         const category = data.basic?.category || data.category;
         const province = data.basic?.province || data.province;
         if (!name || !slug) return errorResponse("Name and slug required");
