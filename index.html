@@ -8,47 +8,10 @@
 
 </head>
 <body>
-  <nav class="navbar">
-    <div class="container">
-      <a href="/" class="navbar-brand">DTECH Hub</a>
-      <div class="nav-links">
-        <a href="/login.html" class="btn btn-outline">Log In</a>
-        <a href="/register.html" class="btn btn-primary">Sign Up</a>
-      </div>
-    </div>
-  </nav>
-
-  <div class="hero">
-    <div class="container">
-      <h1>Build. Discover. Support.</h1>
-      <p>Real student businesses, real campus economy.</p>
-      <div class="hero-actions">
-        <a href="#marketplace" class="btn btn-outline">Explore Businesses</a>
-        <a href="/login.html" class="btn btn-primary" style="background: white; color: var(--primary);">List Your Business</a>
-      </div>
-    </div>
-  </div>
-
-  <div class="trust-strip">
-    <div class="container">
-      <div class="trust-item">
-        <div class="trust-icon">🤝</div>
-        <span>Support student entrepreneurs</span>
-      </div>
-      <div class="trust-item">
-        <div class="trust-icon">💰</div>
-        <span>Find affordable campus services</span>
-      </div>
-      <div class="trust-item">
-        <div class="trust-icon">🌟</div>
-        <span>Discover talent near you</span>
-      </div>
-      <div class="trust-item">
-        <div class="trust-icon">📈</div>
-        <span>400+ student listings</span>
-      </div>
-    </div>
-  </div>
+  <header style="text-align: center; padding: 40px 20px; background: var(--surface); border-bottom: 1px solid var(--border);">
+    <h1 style="margin: 0 0 20px 0; font-size: 2rem; color: var(--text);">D-TECH STUDENT BUSINESSES</h1>
+    <a href="/login.html" class="btn btn-primary" style="display: inline-block;">List Your Business</a>
+  </header>
 
   <main class="container" id="marketplace">
     <div class="filter-bar">
@@ -83,13 +46,6 @@
   <!-- Iframe Modal -->
   <div class="modal-overlay" id="preview-modal">
     <div class="modal-container">
-      <div class="modal-header">
-        <h3 class="modal-title">
-          <span id="modal-biz-name">Business Preview</span>
-          <span class="status-indicator"><span class="status-dot"></span> Live</span>
-        </h3>
-        <button class="modal-close" onclick="closeModal()">×</button>
-      </div>
       <div class="modal-body">
         <iframe id="preview-iframe" class="modal-iframe" src="" title="Business Preview"></iframe>
       </div>
@@ -112,6 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Intercept back button for modal
+  window.addEventListener('popstate', (e) => {
+    const modal = document.getElementById('preview-modal');
+    if (modal.classList.contains('active')) {
+      closeModal(true);
+    }
+  });
+
   // Example script to mock dynamic data insertion later
   console.log("DTECH Main JS Loaded");
 });
@@ -120,17 +84,18 @@ document.addEventListener('DOMContentLoaded', () => {
 function openModal(slug, name) {
   const modal = document.getElementById('preview-modal');
   const iframe = document.getElementById('preview-iframe');
-  const title = document.getElementById('modal-biz-name');
 
-  title.innerText = name || 'Business Preview';
   // Point iframe to the dynamic business page with slug
   iframe.src = `/business-dynamic.html?slug=${slug}`;
 
   modal.classList.add('active');
   document.body.style.overflow = 'hidden'; // Prevent background scrolling
+
+  // Push a state to history so back button can be intercepted
+  history.pushState({ modalOpen: true }, '', '');
 }
 
-function closeModal() {
+function closeModal(fromPopState = false) {
   const modal = document.getElementById('preview-modal');
   const iframe = document.getElementById('preview-iframe');
 
@@ -138,6 +103,11 @@ function closeModal() {
   document.body.style.overflow = '';
   // Clear iframe src after a short delay so the closing animation is smooth
   setTimeout(() => { iframe.src = ''; }, 300);
+
+  // If closed programmatically (not by browser back button), go back to clear state
+  if (!fromPopState) {
+    history.back();
+  }
 }
 
 // Close modal on outside click
@@ -168,19 +138,6 @@ function openExternal(slug, event) {
 const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
 
 function generateCardHTML(b, isFeatured = false) {
-  // Generate mock realistic data for missing backend fields
-  const mockViews = Math.floor(Math.random() * 500) + 50;
-  const taglines = [
-    "Delivering high quality services to students.",
-    "Your one-stop shop on campus.",
-    "Affordable and reliable.",
-    "Supporting the student community."
-  ];
-  const tagline = taglines[Math.floor(Math.random() * taglines.length)];
-  const statusHtml = b.status === 'verified'
-    ? '<div class="status-indicator" style="color:var(--success)"><span class="status-dot"></span> Verified Student</div>'
-    : '<div class="status-indicator"><span class="status-dot" style="background:#6c757d; box-shadow:none;"></span> Active</div>';
-
   return `
     <div class="business-card ${isFeatured ? 'featured' : ''}" onclick="openModal('${b.slug}', '${b.name.replace(/'/g, "\\'")}')">
       <div class="cover" style="background-image: url('${b.coverImage || 'https://placehold.co/400x200?text=Cover'}')">
@@ -189,28 +146,10 @@ function generateCardHTML(b, isFeatured = false) {
       <div class="content">
         <div class="logo" style="background-image: url('https://placehold.co/100x100?text=Logo')"></div>
 
-        <div class="header-meta">
-          ${statusHtml}
-        </div>
-
         <h3 class="title">${b.name}</h3>
-        <span class="category-tag">${b.category} • ${b.province}</span>
+        <span class="category-tag">${b.category}</span>
 
-        <p class="tagline">${tagline}</p>
-
-        <div class="engagement-meta">
-          <div class="engagement-item">
-            <span>👁️</span> ${mockViews} views
-          </div>
-          <div class="engagement-item">
-            <span>🔥</span> High Activity
-          </div>
-        </div>
-
-        <div class="card-actions">
-          <button class="btn btn-outline" style="flex:1;" onclick="openExternal('${b.slug}', event)">External Link</button>
-          <button class="btn btn-primary" style="flex:1;">View Details</button>
-        </div>
+        <p class="tagline">${b.description || ''}</p>
       </div>
     </div>
   `;
