@@ -65,24 +65,16 @@ export default {
     };
 
     try {
-      // --- ROUTING LAYER (Slug Routing) ---
+      // --- ROUTING LAYER (Subdomain Slug Routing) ---
 
-      // If not an API route and not a static asset, try resolving a slug
-      if (!path.startsWith('/api/') && !path.startsWith('/css/') && !path.startsWith('/js/') && !path.includes('.')) {
+      const hostname = url.hostname;
+      const subdomainMatch = hostname.match(/^([^.]+)\.business\.dtech-services\.co\.za$/i);
 
-        // Handle root
-        if (path === '/') {
-          // Typically we'd fetch index.html from CF Pages/KV, but here we'll assume CF Pages serves it.
-          // In this specific mock environment, we might just let it pass through or return a mock if needed.
-          // For now, we will return a 404 to let static asset handler catch it if possible.
-          return new Response("Use static hosting for root", { status: 404, headers: corsHeaders });
-        }
+      if (subdomainMatch && !path.startsWith('/api/')) {
+        const possibleSlug = subdomainMatch[1].toLowerCase();
 
-        const possibleSlug = path.substring(1); // remove leading slash
-
-        // Don't intercept known dashboard/admin paths
-        if (!['dashboard', 'admin', 'search', 'category', 'login', 'register'].includes(possibleSlug.split('/')[0])) {
-
+        // Don't intercept known dashboard/admin subdomains if there are any
+        if (!['www', 'api', 'admin', 'dashboard', 'hub'].includes(possibleSlug)) {
            const businessId = await env.MARKET_KV.get(`slug:${possibleSlug}`);
 
            if (businessId) {
@@ -768,8 +760,9 @@ footer {
   </main>
 
   <script>
-     // Fetch actual data
-     fetch('/api/business/' + '${possibleSlug}')
+     // Fetch actual data using the absolute Worker URL since this is cross-origin
+     const DTECH_WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+     fetch(DTECH_WORKER_URL + '/api/business/' + '${possibleSlug}')
        .then(r => r.json())
        .then(data => {
           if(data.error) { document.body.innerHTML = '<h1>Not Found</h1>'; return; }
@@ -1046,8 +1039,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       if (request.method === "GET" && path.startsWith("/api/business/")) {
-        const slug = path.split("/")[3];
-        if (!slug) return errorResponse("Slug required");
+        const rawSlug = path.split("/")[3];
+        if (!rawSlug) return errorResponse("Slug required");
+        const slug = rawSlug.toLowerCase();
 
         const businessId = await env.MARKET_KV.get(`slug:${slug}`);
         if (!businessId) return errorResponse("Business not found", 404);
@@ -1080,7 +1074,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await getBody(request);
         // Support nested structure or old structure
         const name = data.basic?.name || data.name;
-        const slug = data.basic?.slug || data.slug;
+        const rawSlug = data.basic?.slug || data.slug;
+        const slug = rawSlug ? rawSlug.toLowerCase().trim().replace(/[^a-z0-9-]/g, '-') : null;
         const category = data.basic?.category || data.category;
         const province = data.basic?.province || data.province;
 
