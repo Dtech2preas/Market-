@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listings - DTECH Hub</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .step-indicator { font-weight: bold; color: var(--text-light); margin-bottom: 8px; }
+    .page-title { margin-bottom: 24px; }
+    .btn-group { display: flex; justify-content: space-between; margin-top: 32px; }
+
+    .listing-item { border: 1px solid var(--border); padding: 16px; margin-bottom: 16px; position: relative; background: #fafafa; }
+    .remove-btn { position: absolute; top: 8px; right: 8px; background: var(--danger); color: white; border: none; padding: 4px 8px; cursor: pointer; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">DTECH Hub Setup</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="onboarding-container">
+      <div class="step-indicator">STEP 4 OF 5</div>
+      <h2 class="page-title">Products / Services</h2>
+
+      <div id="listings-container"></div>
+
+      <button class="btn btn-outline-dark" onclick="addListing()" style="width: 100%;">+ Add Another Item</button>
+
+      <div class="btn-group">
+        <a href="onboarding-3-branding.html" class="btn btn-outline-dark">&larr; Back</a>
+        <button class="btn btn-primary" onclick="saveAndNext()">Next: Page Sections &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function addListing(name = '', price = '', desc = '') {
+      const container = document.getElementById('listings-container');
+      const div = document.createElement('div');
+      div.className = 'listing-item';
+      div.innerHTML = `
+        <button class="remove-btn" onclick="this.parentElement.remove()">X</button>
+        <div class="form-group">
+          <label class="form-label">Item Name</label>
+          <input type="text" class="form-control l-name" value="${name}" placeholder="e.g. Web Design Package">
+        </div>
+        <div style="display: flex; gap: 16px;">
+          <div class="form-group" style="flex: 2;">
+            <label class="form-label">Description</label>
+            <input type="text" class="form-control l-desc" value="${desc}" placeholder="Brief description...">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Price (R)</label>
+            <input type="number" class="form-control l-price" value="${price}" placeholder="500">
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = JSON.parse(localStorage.getItem('onboarding_listings') || '[]');
+      if(saved.length === 0) {
+        addListing();
+      } else {
+        saved.forEach(item => addListing(item.name, item.price, item.desc));
+      }
+    });
+
+    function saveAndNext() {
+      const items = Array.from(document.querySelectorAll('.listing-item')).map(el => ({
+        name: el.querySelector('.l-name').value,
+        desc: el.querySelector('.l-desc').value,
+        price: el.querySelector('.l-price').value
+      })).filter(item => item.name.trim() !== '');
+
+      localStorage.setItem('onboarding_listings', JSON.stringify(items));
+      window.location.href = 'onboarding-5-sections.html';
+    }
+  </script>
+</body>
+</html>

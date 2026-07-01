@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mobile Preview</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    body { background: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .preview-header { position: fixed; top: 0; left: 0; width: 100%; background: #333; color: white; padding: 12px; text-align: center; z-index: 999; }
+    .mobile-frame { width: 375px; height: 812px; background: white; border-radius: 40px; border: 12px solid #333; overflow-y: auto; overflow-x: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+
+    /* Mock styles inside frame */
+    .mock-hero { height: 200px; background: #ddd; background-size: cover; background-position: center; position: relative; }
+    .mock-logo { width: 80px; height: 80px; background: white; border: 3px solid white; position: absolute; bottom: -40px; left: 20px; background-size: cover; }
+    .mock-content { padding: 60px 20px 20px; }
+  </style>
+</head>
+<body>
+  <div class="preview-header">
+    Mobile Preview Mode <button onclick="window.close()" style="margin-left: 16px;">Close Preview</button>
+  </div>
+
+  <div class="mobile-frame">
+    <div class="mock-hero" id="p-cover">
+      <div class="mock-logo" id="p-logo"></div>
+    </div>
+    <div class="mock-content">
+      <h2 id="p-name">Business Name</h2>
+      <p style="color: var(--text-light); font-size: 1rem; margin-bottom: 24px;" id="p-tagline">Tagline goes here.</p>
+
+      <div id="sec-about">
+        <h4>About Us</h4>
+        <p id="p-desc" style="font-size: 0.95rem;">Description goes here.</p>
+      </div>
+
+      <div id="sec-listings" style="margin-top: 32px;">
+        <h4>Our Services</h4>
+        <div id="p-listings" style="display: grid; gap: 12px; margin-top: 12px;"></div>
+      </div>
+
+      <div class="card" style="padding: 16px; margin-top: 32px; background: #f9f9f9;">
+        <h4>Contact</h4>
+        <p style="font-size: 0.9rem;"><strong>Phone:</strong> <span id="p-phone"></span></p>
+        <p style="font-size: 0.9rem;"><strong>Email:</strong> <span id="p-email"></span></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Exact same logic as desktop preview
+    document.addEventListener('DOMContentLoaded', () => {
+      const basic = JSON.parse(localStorage.getItem('onboarding_basic') || '{}');
+      const contact = JSON.parse(localStorage.getItem('onboarding_contact') || '{}');
+      const listings = JSON.parse(localStorage.getItem('onboarding_listings') || '[]');
+      const sections = JSON.parse(localStorage.getItem('onboarding_sections') || '{}');
+
+      document.getElementById('p-name').innerText = basic.name || 'Business Name';
+      document.getElementById('p-tagline').innerText = basic.tagline || 'Tagline';
+      document.getElementById('p-desc').innerText = basic.description || 'Description';
+
+      document.getElementById('p-phone').innerText = contact.phone || 'N/A';
+      document.getElementById('p-email').innerText = contact.email || 'N/A';
+
+      const logo = localStorage.getItem('onboarding_logo');
+      const cover = localStorage.getItem('onboarding_cover');
+      if(logo) document.getElementById('p-logo').style.backgroundImage = `url(${logo})`;
+      if(cover) document.getElementById('p-cover').style.backgroundImage = `url(${cover})`;
+
+      if(sections.about === false) document.getElementById('sec-about').style.display = 'none';
+      if(sections.listings === false) document.getElementById('sec-listings').style.display = 'none';
+      if(sections.hero === false) document.getElementById('p-cover').style.display = 'none';
+
+      const lContainer = document.getElementById('p-listings');
+      listings.forEach(l => {
+        lContainer.innerHTML += `
+          <div style="border: 1px solid var(--border); padding: 12px; background: white;">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 0.9rem;">
+              <span>${l.name}</span>
+              <span style="color: var(--primary);">R${l.price}</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 4px;">${l.desc}</p>
+          </div>
+        `;
+      });
+    });
+  </script>
+</body>
+</html>

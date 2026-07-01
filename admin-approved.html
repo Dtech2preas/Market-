@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Active Businesses - Admin</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .admin-item { background: #fff; padding: 16px; border: 1px solid var(--border); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container" style="display: flex; justify-content: space-between;">
+      <a href="/" class="navbar-brand">DTECH Admin</a>
+      <div class="nav-links">
+        <a href="#" class="btn btn-outline" style="border: none;">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container dashboard-layout">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="admin.html" class="sidebar-link">Overview</a>
+        <a href="admin-pending.html" class="sidebar-link">Pending Applications</a>
+        <a href="admin-approved.html" class="sidebar-link active">Active Businesses</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-content">
+      <h2>Active & Verified Businesses</h2>
+      <p style="margin-bottom: 24px; color: var(--text-light);">Manage businesses currently visible on the directory.</p>
+
+      <div id="approved-list">
+        <p>Loading...</p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    document.addEventListener('DOMContentLoaded', fetchApproved);
+
+    async function fetchApproved() {
+      try {
+        const response = await fetch(`${WORKER_URL}/admin/businesses`);
+        const businesses = await response.json();
+        const active = businesses.filter(b => b.status === 'approved' || b.status === 'verified');
+
+        const list = document.getElementById('approved-list');
+        list.innerHTML = '';
+
+        if(active.length === 0) {
+          list.innerHTML = '<p>No active businesses found.</p>';
+          return;
+        }
+
+        active.forEach(biz => {
+          const item = document.createElement('div');
+          item.className = 'admin-item';
+          const date = new Date(biz.timestamp || Date.now()).toLocaleDateString();
+          item.innerHTML = `
+            <div>
+              <strong style="font-size: 1.1rem; color: var(--primary);">${biz.businessName || 'Unnamed'}</strong> <span class="badge badge-verified" style="margin-left: 8px;">Active</span><br>
+              <small style="color: var(--text-light);">Owner: ${biz.studentName || 'Unknown'} | Approved: ${date}</small>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button onclick="openEditModal('${biz.id}', '${escapeHTML(biz.businessName)}', '${escapeHTML(biz.studentName)}', '${escapeHTML(biz.description)}')" class="btn btn-outline-dark" style="margin-right: 8px;">Edit</button><a href="/${biz.slug || ''}" target="_blank" class="btn btn-outline-dark">View Site</a>
+              <button onclick="updateStatus('${biz.id}', 'disable')" class="btn" style="background: var(--danger); color: white;">Suspend</button>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      } catch (error) {
+        document.getElementById('approved-list').innerHTML = '<p style="color: red;">Error loading active businesses.</p>';
+      }
+    }
+
+    async function updateStatus(id, action) {
+      if (!confirm(`Are you sure you want to ${action} this business?`)) return;
+      try {
+          const res = await fetch(`${WORKER_URL}/admin/action`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id, action })
+          });
+          if(res.ok) fetchApproved();
+      } catch (error) {
+          alert('Error updating status');
+      }
+    }
+  </script>
+</body>
+</html>
+
+  <!-- Edit Modal (Restored) -->
+  <div id="edit-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:white; padding:20px; border: 1px solid var(--border); max-width:500px; width:90%; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);">
+      <h3>Edit Business</h3>
+      <form id="edit-form" style="margin-top: 15px;">
+        <input type="hidden" id="edit-id">
+        <div class="form-group">
+          <label>Business Name</label>
+          <input type="text" id="edit-business-name" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Student Name</label>
+          <input type="text" id="edit-student-name" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="edit-description" class="form-control" rows="3"></textarea>
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:15px;">
+          <button type="button" class="btn btn-outline-dark" onclick="document.getElementById('edit-modal').style.display='none'">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const editForm = document.getElementById('edit-form');
+        if(editForm) {
+            editForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('edit-id').value;
+                const updates = {
+                    businessName: document.getElementById('edit-business-name').value,
+                    studentName: document.getElementById('edit-student-name').value,
+                    description: document.getElementById('edit-description').value
+                };
+
+                try {
+                    const response = await fetch(`${WORKER_URL}/admin/edit`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id, updates })
+                    });
+                    if (!response.ok) throw new Error('Failed to update');
+
+                    document.getElementById('edit-modal').style.display = 'none';
+                    fetchApproved();
+                } catch (error) {
+                    alert('Error updating business: ' + error.message);
+                }
+            });
+        }
+    });
+
+    function openEditModal(id, bizName, studentName, description) {
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-business-name').value = bizName;
+        document.getElementById('edit-student-name').value = studentName;
+        document.getElementById('edit-description').value = description;
+        document.getElementById('edit-modal').style.display = 'block';
+    }
+  </script>
+<script>
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.toString().replace(/[&<>'"]/g,
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag)
+    );
+}
+</script>
