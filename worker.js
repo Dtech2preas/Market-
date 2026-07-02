@@ -1241,7 +1241,10 @@ document.addEventListener('DOMContentLoaded', async () => {
              category: businessData.publishedVersion?.basic?.category || businessData.draftVersion?.basic?.category,
              province: businessData.publishedVersion?.basic?.province || businessData.draftVersion?.basic?.province,
              status: businessData.status,
-             coverImage: businessData.publishedVersion?.branding?.cover || businessData.draftVersion?.branding?.cover || null
+             coverImage: businessData.publishedVersion?.branding?.cover || businessData.draftVersion?.branding?.cover || null,
+             logo: businessData.publishedVersion?.branding?.logo || businessData.draftVersion?.branding?.logo || null,
+             tagline: businessData.publishedVersion?.basic?.tagline || businessData.draftVersion?.basic?.tagline || "",
+             description: businessData.publishedVersion?.basic?.description || businessData.draftVersion?.basic?.description || ""
            };
 
            const existingIdx = index.findIndex(b => b.id === businessId);
@@ -1293,7 +1296,10 @@ document.addEventListener('DOMContentLoaded', async () => {
              category: existingBiz.publishedVersion.basic.category,
              province: existingBiz.publishedVersion.basic.province,
              status: existingBiz.status,
-             coverImage: existingBiz.publishedVersion.branding.cover || null
+             coverImage: existingBiz.publishedVersion.branding.cover || null,
+             logo: existingBiz.publishedVersion.branding.logo || null,
+             tagline: existingBiz.publishedVersion.basic.tagline || "",
+             description: existingBiz.publishedVersion.basic.description || ""
         };
 
         if (idx >= 0) index[idx] = entry;
@@ -1389,7 +1395,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 category: existingBiz.publishedVersion?.basic?.category || existingBiz.draftVersion?.basic?.category,
                 province: existingBiz.publishedVersion?.basic?.province || existingBiz.draftVersion?.basic?.province,
                 status: existingBiz.status,
-                coverImage: existingBiz.publishedVersion?.branding?.cover || existingBiz.draftVersion?.branding?.cover || null
+                coverImage: existingBiz.publishedVersion?.branding?.cover || existingBiz.draftVersion?.branding?.cover || null,
+                logo: existingBiz.publishedVersion?.branding?.logo || existingBiz.draftVersion?.branding?.logo || null,
+                tagline: existingBiz.publishedVersion?.basic?.tagline || existingBiz.draftVersion?.basic?.tagline || "",
+                description: existingBiz.publishedVersion?.basic?.description || existingBiz.draftVersion?.basic?.description || ""
             };
             if (idx >= 0) index[idx] = entry;
             else index.push(entry);
