@@ -43,11 +43,40 @@
     </div>
   </main>
 
-  <!-- Iframe Modal -->
-  <div class="modal-overlay" id="preview-modal">
-    <div class="modal-container">
-      <div class="modal-body">
-        <iframe id="preview-iframe" class="modal-iframe" src="" title="Business Preview"></iframe>
+  <!-- Full Screen Preview Overlay -->
+  <div class="fs-overlay" id="preview-modal">
+    <div class="fs-header">
+      <button class="fs-close" onclick="closeModal()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="fs-container">
+      <div class="mock-hero" id="p-cover">
+        <div class="mock-logo" id="p-logo"></div>
+      </div>
+
+      <div class="mock-content">
+        <h2 id="p-name">Business Name</h2>
+        <p id="p-tagline">Tagline goes here.</p>
+
+        <div id="sec-about">
+          <h4>About Us</h4>
+          <p id="p-desc" style="font-size:.95rem;">
+            Description goes here.
+          </p>
+        </div>
+
+        <div id="sec-listings">
+          <h4>Our Services</h4>
+          <div id="p-listings"></div>
+        </div>
+
+        <div class="card">
+          <h4>Contact</h4>
+          <p><strong>Phone:</strong> <span id="p-phone"></span></p>
+          <p><strong>Email:</strong> <span id="p-email"></span></p>
+        </div>
       </div>
     </div>
   </div>
@@ -81,28 +110,108 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- Modal Logic ---
-function openModal(slug, name) {
+async function openModal(slug, name) {
   const modal = document.getElementById('preview-modal');
-  const iframe = document.getElementById('preview-iframe');
-
-  // Point iframe to the dynamic business page with slug
-  iframe.src = `/business-dynamic.html?slug=${slug}`;
-
   modal.classList.add('active');
   document.body.style.overflow = 'hidden'; // Prevent background scrolling
 
+  // Reset content to loading state
+  document.getElementById('p-name').innerText = 'Loading...';
+  document.getElementById('p-tagline').innerText = '';
+  document.getElementById('p-desc').innerText = '';
+  document.getElementById('p-phone').innerText = '';
+  document.getElementById('p-email').innerText = '';
+  document.getElementById('p-logo').style.backgroundImage = 'none';
+  document.getElementById('p-cover').style.backgroundImage = 'none';
+  document.getElementById('p-listings').innerHTML = '';
+  document.getElementById('sec-about').style.display = 'block';
+  document.getElementById('sec-listings').style.display = 'block';
+  document.getElementById('p-cover').style.display = 'block';
+
   // Push a state to history so back button can be intercepted
   history.pushState({ modalOpen: true }, '', '');
+
+  try {
+    const res = await fetch(`${WORKER_URL}/api/business/${slug}`);
+    const data = await res.json();
+
+    if (data.error) {
+      document.getElementById('p-name').innerText = 'Business not found';
+      return;
+    }
+
+    const pub = data.publishedVersion || {};
+    const basic = pub.basic || {};
+    const contact = pub.contact || {};
+    const branding = pub.branding || {};
+    const listings = pub.listings || [];
+    const sections = pub.sections || {};
+
+    document.getElementById('p-name').innerText = basic.name || data.name || 'Business Name';
+    document.getElementById('p-tagline').innerText = basic.tagline || data.category || 'Tagline';
+    document.getElementById('p-desc').innerText = basic.description || 'Description';
+
+    document.getElementById('p-phone').innerText = contact.phone || 'N/A';
+    document.getElementById('p-email').innerText = contact.email || 'N/A';
+
+    if (branding.logo) {
+      document.getElementById('p-logo').style.backgroundImage = `url(${branding.logo})`;
+    } else {
+      document.getElementById('p-logo').style.backgroundImage = `url('https://placehold.co/100x100?text=Logo')`;
+    }
+
+    if (branding.cover) {
+      document.getElementById('p-cover').style.backgroundImage = `url(${branding.cover})`;
+    } else {
+      document.getElementById('p-cover').style.backgroundImage = `url('https://placehold.co/400x200?text=Cover')`;
+    }
+
+    if (sections.about === false) document.getElementById('sec-about').style.display = 'none';
+    if (sections.listings === false) document.getElementById('sec-listings').style.display = 'none';
+    if (sections.hero === false) document.getElementById('p-cover').style.display = 'none';
+
+    const container = document.getElementById('p-listings');
+    container.innerHTML = '';
+
+    if (listings.length > 0) {
+      listings.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'listing-card';
+
+        const header = document.createElement('div');
+        header.className = 'listing-header';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = item.name || item.title || 'Service';
+
+        const priceSpan = document.createElement('span');
+        priceSpan.className = 'listing-price';
+        priceSpan.textContent = 'R' + (item.price || '0');
+
+        header.appendChild(nameSpan);
+        header.appendChild(priceSpan);
+
+        const desc = document.createElement('div');
+        desc.className = 'listing-desc';
+        desc.textContent = item.desc || item.description || '';
+
+        card.appendChild(header);
+        card.appendChild(desc);
+
+        container.appendChild(card);
+      });
+    } else {
+      container.innerHTML = '<p>No services listed.</p>';
+    }
+  } catch (error) {
+    document.getElementById('p-name').innerText = 'Error loading profile';
+  }
 }
 
 function closeModal(fromPopState = false) {
   const modal = document.getElementById('preview-modal');
-  const iframe = document.getElementById('preview-iframe');
-
   modal.classList.remove('active');
   document.body.style.overflow = '';
-  // Clear iframe src after a short delay so the closing animation is smooth
-  setTimeout(() => { iframe.src = ''; }, 300);
 
   // If closed programmatically (not by browser back button), go back to clear state
   if (!fromPopState) {
