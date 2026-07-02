@@ -60,6 +60,8 @@
         <h2 id="p-name">Business Name</h2>
         <p id="p-tagline">Tagline goes here.</p>
 
+        <div id="p-actions" style="margin: 16px 0;"></div>
+
         <div id="sec-about">
           <h4>About Us</h4>
           <p id="p-desc" style="font-size:.95rem;">
@@ -67,14 +69,19 @@
           </p>
         </div>
 
-        <div id="sec-listings">
-          <h4>Our Services</h4>
-          <div id="p-listings"></div>
+        <div id="sec-gallery" style="margin-top: 24px; display: none;">
+          <h4>Gallery</h4>
+          <div id="p-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 8px;"></div>
         </div>
 
-        <div class="card">
+        <div id="sec-listings" style="margin-top: 24px;">
+          <h4>Our Services</h4>
+          <div id="p-listings" style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;"></div>
+        </div>
+
+        <div class="card" style="margin-top: 24px; padding: 16px;">
           <h4>Contact</h4>
-          <p><strong>Phone:</strong> <span id="p-phone"></span></p>
+          <p style="margin-bottom: 8px;"><strong>Phone:</strong> <span id="p-phone"></span></p>
           <p><strong>Email:</strong> <span id="p-email"></span></p>
         </div>
       </div>
@@ -127,6 +134,8 @@ async function openModal(slug, name) {
   document.getElementById('sec-about').style.display = 'block';
   document.getElementById('sec-listings').style.display = 'block';
   document.getElementById('p-cover').style.display = 'block';
+    document.getElementById('sec-gallery').style.display = 'none';
+    document.getElementById('p-actions').innerHTML = '';
 
   // Push a state to history so back button can be intercepted
   history.pushState({ modalOpen: true }, '', '');
@@ -166,38 +175,137 @@ async function openModal(slug, name) {
       document.getElementById('p-cover').style.backgroundImage = `url('https://placehold.co/400x200?text=Cover')`;
     }
 
+    const ctaType = (pub.cta && pub.cta.primary) ? pub.cta.primary : 'WhatsApp Us';
+    const waNumber = (contact.whatsapp || '').replace(/[^0-9]/g, '');
+    const emailAddress = contact.email || '';
+
+    let mainCtaLink = '';
+    let mainCtaColor = 'var(--primary)';
+
+    if (ctaType.toLowerCase().includes('whatsapp') && waNumber) {
+      const waMsg = encodeURIComponent(`Hi, I am interested in your business ${basic.name || data.name} listed on DTECH Student Business Hub.`);
+      mainCtaLink = `https://wa.me/${waNumber}?text=${waMsg}`;
+      mainCtaColor = '#25d366';
+    } else if (ctaType.toLowerCase().includes('email') && emailAddress) {
+      const emailSubj = encodeURIComponent(`Inquiry from DTECH Student Business Hub`);
+      const emailBody = encodeURIComponent(`Hi,\n\nI found your business ${basic.name || data.name} on DTECH Student Business Hub and I am interested in learning more.`);
+      mainCtaLink = `mailto:${emailAddress}?subject=${emailSubj}&body=${emailBody}`;
+    } else if (waNumber) {
+      // Fallback to WhatsApp if available but a different CTA was selected without matching logic
+      const waMsg = encodeURIComponent(`Hi, I am interested in your business ${basic.name || data.name} listed on DTECH Student Business Hub.`);
+      mainCtaLink = `https://wa.me/${waNumber}?text=${waMsg}`;
+      mainCtaColor = '#25d366';
+    } else if (emailAddress) {
+      // Fallback to Email
+      mainCtaLink = `mailto:${emailAddress}`;
+    }
+
+    if (mainCtaLink) {
+      const btn = document.createElement('a');
+      btn.href = mainCtaLink;
+      btn.target = "_blank";
+      btn.className = "btn btn-primary";
+      btn.style.cssText = `width: 100%; text-align: center; background-color: ${mainCtaColor}; border-color: ${mainCtaColor};`;
+      btn.textContent = ctaType;
+      document.getElementById('p-actions').appendChild(btn);
+    }
+
     if (sections.about === false) document.getElementById('sec-about').style.display = 'none';
     if (sections.listings === false) document.getElementById('sec-listings').style.display = 'none';
     if (sections.hero === false) document.getElementById('p-cover').style.display = 'none';
+
+    const galleryContainer = document.getElementById('p-gallery');
+    galleryContainer.innerHTML = '';
+    if (branding.gallery && branding.gallery.length > 0 && sections.gallery !== false) {
+      document.getElementById('sec-gallery').style.display = 'block';
+      branding.gallery.filter(Boolean).forEach(imgUrl => {
+        galleryContainer.innerHTML += `<div style="background-image: url('${imgUrl}'); background-size: cover; background-position: center; height: 100px; border-radius: var(--radius); border: 1px solid var(--border);"></div>`;
+      });
+    }
 
     const container = document.getElementById('p-listings');
     container.innerHTML = '';
 
     if (listings.length > 0) {
       listings.forEach(item => {
+        let priceDisplay = '';
+        if (item.priceType === 'Free Quote') priceDisplay = 'Free Quote';
+        else if (item.priceType === 'From') priceDisplay = `From R${item.price} - R${item.priceMax}`;
+        else if (item.priceType === 'Hourly') priceDisplay = `R${item.price} / hour`;
+        else priceDisplay = `R${item.price || '0'}`;
+
         const card = document.createElement('div');
         card.className = 'listing-card';
+        card.style.border = '1px solid var(--border)';
+        card.style.borderRadius = 'var(--radius)';
+        card.style.overflow = 'hidden';
+        card.style.backgroundColor = 'var(--bg)';
 
-        const header = document.createElement('div');
-        header.className = 'listing-header';
+        if (item.image) {
+          const imgDiv = document.createElement('div');
+          imgDiv.style.cssText = `width: 100%; height: 150px; background-image: url('${item.image.replace(/'/g, "%27")}'); background-size: cover; background-position: center; border-radius: var(--radius) var(--radius) 0 0;`;
+          card.appendChild(imgDiv);
+        }
 
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = item.name || item.title || 'Service';
+        const contentDiv = document.createElement('div');
+        contentDiv.style.padding = '16px';
+
+        const headerDiv = document.createElement('div');
+        headerDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;';
+
+        const titleStrong = document.createElement('strong');
+        titleStrong.style.fontSize = '1.05rem';
+        titleStrong.textContent = item.name || item.title || 'Service';
 
         const priceSpan = document.createElement('span');
-        priceSpan.className = 'listing-price';
-        priceSpan.textContent = 'R' + (item.price || '0');
+        priceSpan.style.cssText = 'color: var(--primary); font-weight: bold; white-space: nowrap; margin-left: 12px;';
+        priceSpan.textContent = priceDisplay;
 
-        header.appendChild(nameSpan);
-        header.appendChild(priceSpan);
+        headerDiv.appendChild(titleStrong);
+        headerDiv.appendChild(priceSpan);
+        contentDiv.appendChild(headerDiv);
 
-        const desc = document.createElement('div');
-        desc.className = 'listing-desc';
-        desc.textContent = item.desc || item.description || '';
+        if (item.category) {
+          const catSpan = document.createElement('span');
+          catSpan.className = 'badge';
+          catSpan.style.cssText = 'background: #e9ecef; color: #495057; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 8px; display: inline-block;';
+          catSpan.textContent = item.category;
+          contentDiv.appendChild(catSpan);
+        }
 
-        card.appendChild(header);
-        card.appendChild(desc);
+        const descDiv = document.createElement('div');
+        descDiv.style.cssText = 'font-size: 0.9rem; color: var(--text-light); margin-bottom: 8px;';
+        descDiv.textContent = item.desc || item.description || '';
+        contentDiv.appendChild(descDiv);
 
+        let itemCtaLink = '';
+        if (ctaType.toLowerCase().includes('whatsapp') && waNumber) {
+          const itemWaMsg = encodeURIComponent(`Hi, I am interested in ${item.name || 'this item'} (${priceDisplay}) listed on your DTECH profile.`);
+          itemCtaLink = `https://wa.me/${waNumber}?text=${itemWaMsg}`;
+        } else if (ctaType.toLowerCase().includes('email') && emailAddress) {
+          const itemEmailSubj = encodeURIComponent(`Inquiry regarding ${item.name || 'this item'}`);
+          const itemEmailBody = encodeURIComponent(`Hi,\n\nI saw ${item.name || 'this item'} (${priceDisplay}) on your DTECH profile and I would like more information.`);
+          itemCtaLink = `mailto:${emailAddress}?subject=${itemEmailSubj}&body=${itemEmailBody}`;
+        } else if (waNumber) {
+          const itemWaMsg = encodeURIComponent(`Hi, I am interested in ${item.name || 'this item'} (${priceDisplay}) listed on your DTECH profile.`);
+          itemCtaLink = `https://wa.me/${waNumber}?text=${itemWaMsg}`;
+        } else if (emailAddress) {
+          const itemEmailSubj = encodeURIComponent(`Inquiry regarding ${item.name || 'this item'}`);
+          const itemEmailBody = encodeURIComponent(`Hi,\n\nI saw ${item.name || 'this item'} (${priceDisplay}) on your DTECH profile and I would like more information.`);
+          itemCtaLink = `mailto:${emailAddress}?subject=${itemEmailSubj}&body=${itemEmailBody}`;
+        }
+
+        if (itemCtaLink) {
+          const ctaBtn = document.createElement('a');
+          ctaBtn.href = itemCtaLink;
+          ctaBtn.target = "_blank";
+          ctaBtn.className = "btn btn-outline";
+          ctaBtn.style.cssText = 'display: block; text-align: center; margin-top: 12px; font-size: 0.9rem;';
+          ctaBtn.textContent = ctaType;
+          contentDiv.appendChild(ctaBtn);
+        }
+
+        card.appendChild(contentDiv);
         container.appendChild(card);
       });
     } else {
@@ -247,18 +355,21 @@ function openExternal(slug, event) {
 const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
 
 function generateCardHTML(b, isFeatured = false) {
+  const shortDesc = b.description || b.tagline || '';
+  const displayDesc = shortDesc.length > 80 ? shortDesc.substring(0, 77) + '...' : shortDesc;
+
   return `
     <div class="business-card ${isFeatured ? 'featured' : ''}" onclick="openModal('${b.slug}', '${b.name.replace(/'/g, "\\'")}')">
       <div class="cover" style="background-image: url('${b.coverImage || 'https://placehold.co/400x200?text=Cover'}')">
         <button class="card-save-btn" onclick="toggleSave(this, event)">🤍</button>
       </div>
       <div class="content">
-        <div class="logo" style="background-image: url('https://placehold.co/100x100?text=Logo')"></div>
+        <div class="logo" style="background-image: url('${b.logo || 'https://placehold.co/100x100?text=Logo'}')"></div>
 
         <h3 class="title">${b.name}</h3>
         <span class="category-tag">${b.category}</span>
 
-        <p class="tagline">${b.description || ''}</p>
+        <p class="tagline" style="font-size: 0.9rem; color: var(--text-light); margin-top: 8px;">${displayDesc}</p>
       </div>
     </div>
   `;
