@@ -42,6 +42,20 @@
         </select>
       </div>
       <div class="form-group">
+        <label class="form-label">Business Type</label>
+        <select id="b-type" class="form-control">
+          <option>Individual</option>
+          <option>Team</option>
+          <option>Student Organization</option>
+          <option>Registered Business</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Owner Name (Optional)</label>
+        <input type="text" id="b-ownerName" class="form-control" placeholder="e.g. John Doe">
+      </div>
+
+      <div class="form-group">
         <label class="form-label">Short Tagline</label>
         <input type="text" id="b-tagline" class="form-control" placeholder="What do you do in one sentence?">
       </div>
@@ -66,6 +80,8 @@
         slug: document.getElementById('b-slug').value,
         category: document.getElementById('b-category').value,
         tagline: document.getElementById('b-tagline').value,
+        type: document.getElementById('b-type').value,
+        ownerName: document.getElementById('b-ownerName').value,
         description: document.getElementById('b-desc').value
       };
       localStorage.setItem('editor_basic', JSON.stringify(data));
@@ -94,6 +110,8 @@
            if (saved.slug) document.getElementById('b-slug').value = saved.slug;
            if (saved.category) document.getElementById('b-category').value = saved.category;
            if (saved.tagline) document.getElementById('b-tagline').value = saved.tagline;
+      if (saved.type) document.getElementById('b-type').value = saved.type;
+      if (saved.ownerName) document.getElementById('b-ownerName').value = saved.ownerName;
            if (saved.description) document.getElementById('b-desc').value = saved.description;
         }
       } catch(e) {

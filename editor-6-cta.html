@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Call to Action - DTECH Hub</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .step-indicator { font-weight: bold; color: var(--text-light); margin-bottom: 8px; }
+    .page-title { margin-bottom: 24px; }
+    .btn-group { display: flex; justify-content: space-between; margin-top: 32px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="dashboard.html" class="navbar-brand">DTECH Hub Editor</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="onboarding-container">
+      <div class="step-indicator">EDITOR</div>
+      <h2 class="page-title">Edit Call to Action</h2>
+
+      <div class="form-group">
+        <label class="form-label">Primary Button Text</label>
+        <select id="cta-primary" class="form-control">
+          <option>WhatsApp Us</option>
+          <option>Call Now</option>
+          <option>Book Now</option>
+          <option>Order Now</option>
+          <option>Get Quote</option>
+          <option>Message Us</option>
+        </select>
+      </div>
+
+      <div class="btn-group">
+        <a href="editor-5-sections.html" class="btn btn-outline-dark">&larr; Back</a>
+        <button class="btn btn-primary" onclick="saveAndNext()">Save & Next: Preview &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('dtech_token');
+      if (!token) {
+          window.location.href = '/login.html';
+          return;
+      }
+
+      let serverData = null;
+      try {
+        const res = await fetch(`${WORKER_URL}/api/dashboard/my-business`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const bizData = await res.json();
+        if (!bizData.error && bizData.draftVersion && bizData.draftVersion.cta) {
+            serverData = bizData.draftVersion.cta;
+        }
+      } catch(e) {
+          console.error(e);
+      }
+
+      const saved = JSON.parse(localStorage.getItem('editor_cta')) || serverData || { primary: 'WhatsApp Us' };
+      if(saved.primary) {
+        document.getElementById('cta-primary').value = saved.primary;
+      }
+    });
+
+    function saveAndNext() {
+      const data = {
+        primary: document.getElementById('cta-primary').value
+      };
+      localStorage.setItem('editor_cta', JSON.stringify(data));
+      window.location.href = 'editor-7-preview.html';
+    }
+  </script>
+</body>
+</html>

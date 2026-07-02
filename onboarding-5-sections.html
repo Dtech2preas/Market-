@@ -24,7 +24,7 @@
 
   <div class="container">
     <div class="onboarding-container">
-      <div class="step-indicator">STEP 5 OF 5</div>
+      <div class="step-indicator">STEP 5 OF 6</div>
       <h2 class="page-title">Enable Page Sections</h2>
       <p style="margin-bottom: 24px; color: var(--text-light);">Choose which sections should appear on your public business page.</p>
 
@@ -51,7 +51,7 @@
 
       <div class="btn-group">
         <a href="onboarding-4-listings.html" class="btn btn-outline-dark">&larr; Back</a>
-        <button class="btn btn-primary" onclick="saveAndNext()">Review & Submit &rarr;</button>
+        <button class="btn btn-primary" onclick="saveAndNext()">Next: Call to Action &rarr;</button>
       </div>
     </div>
   </div>
@@ -76,7 +76,7 @@
         contact: true
       };
       localStorage.setItem('onboarding_sections', JSON.stringify(data));
-      window.location.href = 'onboarding-6-preview.html';
+      window.location.href = 'onboarding-6-cta.html';
     }
   </script>
 </body>

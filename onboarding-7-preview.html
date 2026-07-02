@@ -31,7 +31,7 @@
       <div style="border-top: 1px solid var(--border); padding-top: 24px; margin-top: 24px;">
         <button class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem;" onclick="submitApplication()">Submit Application</button>
         <div style="margin-top: 16px;">
-          <a href="onboarding-5-sections.html" style="color: var(--text-light); text-decoration: underline;">&larr; Go back to edit</a>
+          <a href="onboarding-6-cta.html" style="color: var(--text-light); text-decoration: underline;">&larr; Go back to edit</a>
         </div>
       </div>
     </div>
@@ -48,16 +48,19 @@
       const contact = JSON.parse(localStorage.getItem('onboarding_contact') || '{}');
       const listings = JSON.parse(localStorage.getItem('onboarding_listings') || '[]');
       const sections = JSON.parse(localStorage.getItem('onboarding_sections') || '{}');
+      const cta = JSON.parse(localStorage.getItem('onboarding_cta') || '{ "primary": "WhatsApp Us" }');
 
       const payload = { status: "pending",  id: localStorage.getItem("onboarding_bizId"),
         basic: basic,
         contact: contact,
         listings: listings,
         sections: sections,
+        cta: cta,
         // Branding would ideally be uploaded via API first, simulating here:
         branding: {
            logo: localStorage.getItem('onboarding_logo') || '',
-           cover: localStorage.getItem('onboarding_cover') || ''
+           cover: localStorage.getItem('onboarding_cover') || '',
+           gallery: JSON.parse(localStorage.getItem('onboarding_gallery') || '[]')
         }
       };
 
@@ -70,7 +73,7 @@
         const data = await res.json();
 
         // Clear storage
-        ['onboarding_basic', 'onboarding_contact', 'onboarding_listings', 'onboarding_sections', 'onboarding_logo', 'onboarding_cover'].forEach(k => localStorage.removeItem(k));
+        ['onboarding_basic', 'onboarding_contact', 'onboarding_listings', 'onboarding_sections', 'onboarding_logo', 'onboarding_cover', 'onboarding_cta', 'onboarding_gallery'].forEach(k => localStorage.removeItem(k));
 
         window.location.href = 'dashboard.html';
       } catch (e) {
