@@ -3821,10 +3821,78 @@ footer {
        .then(r => r.json())
        .then(data => {
           if(data.error) { document.body.innerHTML = '<h1>Not Found</h1>'; return; }
-          document.getElementById('business-name').innerText = data.name;
-          document.getElementById('business-category').innerText = data.category;
-          if (data.content && data.content.hero && data.content.hero.coverImage) {
-              document.getElementById('hero-section').style.backgroundImage = \`url('\${data.content.hero.coverImage}')\`;
+          const pub = data.publishedVersion || data.draftVersion;
+          if (!pub) return;
+
+          document.getElementById('business-name').innerText = pub.basic.name;
+          let catText = pub.basic.category;
+          if (pub.basic.type) catText += " - " + pub.basic.type;
+          document.getElementById('business-category').innerText = catText;
+
+          if (pub.branding && pub.branding.cover) {
+              document.getElementById('hero-section').style.backgroundImage = \`url('\${pub.branding.cover}')\`;
+          }
+          if (pub.branding && pub.branding.logo) {
+              document.getElementById('logo-img').style.backgroundImage = \`url('\${pub.branding.logo}')\`;
+          }
+
+          let aboutHtml = \`<p>\${pub.basic.description}</p>\`;
+          if (pub.basic.ownerName) aboutHtml += \`<p><strong>Owner:</strong> \${pub.basic.ownerName}</p>\`;
+          if (pub.contact && pub.contact.address) aboutHtml += \`<p><strong>Address:</strong> \${pub.contact.address}</p>\`;
+          document.getElementById('business-desc').innerHTML = aboutHtml;
+
+          // Generate CTA Button
+          let ctaBtn = '';
+          const waNumber = (pub.contact && pub.contact.whatsapp) ? pub.contact.whatsapp.replace(/[^0-9]/g, '') : '';
+          const ctaType = pub.cta ? pub.cta.primary : 'WhatsApp Us';
+
+          if (waNumber) {
+             const waMsg = encodeURIComponent(\`Hi, I am interested in your business \${pub.basic.name} listed on DTECH Student Business Hub.\`);
+             const waLink = \`https://wa.me/\${waNumber}?text=\${waMsg}\`;
+             ctaBtn = \`<a href="\${waLink}" class="btn btn-whatsapp" style="margin-top:20px;">\${ctaType}</a>\`;
+             document.getElementById('hero-section').querySelector('.container').innerHTML += ctaBtn;
+          }
+
+          // Listings
+          if (pub.listings && pub.listings.length > 0) {
+             let listingsHtml = \`<section class="b-section container" id="listings-section"><h2>Products & Services</h2><div class="grid">\`;
+             pub.listings.forEach(item => {
+                let priceDisplay = '';
+                if (item.priceType === 'Free Quote') priceDisplay = 'Free Quote';
+                else if (item.priceType === 'From') priceDisplay = \`From R\${item.price} - R\${item.priceMax}\`;
+                else if (item.priceType === 'Hourly') priceDisplay = \`R\${item.price} / hour\`;
+                else priceDisplay = \`R\${item.price}\`;
+
+                let itemImg = item.image ? \`<div class="card-img-container"><img src="\${item.image}" class="card-img"></div>\` : '';
+                let itemCat = item.category ? \`<span class="badge">\${item.category}</span>\` : '';
+
+                let itemWaMsg = encodeURIComponent(\`Hi, I am interested in \${item.name} (\${priceDisplay}) listed on your DTECH profile.\`);
+                let itemWaLink = waNumber ? \`https://wa.me/\${waNumber}?text=\${itemWaMsg}\` : '#';
+
+                listingsHtml += \`
+                <div class="card">
+                   \${itemImg}
+                   <div class="card-content">
+                      \${itemCat}
+                      <h3 class="card-title" style="margin-top:8px;">\${item.name}</h3>
+                      <p class="card-desc">\${item.desc}</p>
+                      <p class="card-meta"><strong>\${priceDisplay}</strong></p>
+                      <a href="\${itemWaLink}" class="btn btn-outline" style="margin-top:10px; display:block; text-align:center;">\${ctaType}</a>
+                   </div>
+                </div>\`;
+             });
+             listingsHtml += \`</div></section>\`;
+             document.querySelector('main').innerHTML += listingsHtml;
+          }
+
+          // Gallery
+          if (pub.branding && pub.branding.gallery && pub.branding.gallery.length > 0) {
+             let galleryHtml = \`<section class="b-section container" id="gallery-section"><h2>Gallery</h2><div class="grid">\`;
+             pub.branding.gallery.filter(Boolean).forEach(img => {
+                 galleryHtml += \`<div class="card-img-container" style="border-radius:8px;"><img src="\${img}" class="card-img"></div>\`;
+             });
+             galleryHtml += \`</div></section>\`;
+             document.querySelector('main').innerHTML += galleryHtml;
           }
        });
   <\/script>
@@ -4073,6 +4141,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!businessStr) return errorResponse("Data error", 500);
         return jsonResponse(JSON.parse(businessStr));
       }
+      if (request.method === "POST" && path === "/api/upload") {
+        try {
+          const authPayload = await getAuthUser(request);
+          if (!authPayload) return errorResponse("Unauthorized", 401);
+          const formData = await request.formData();
+          const image = formData.get("image");
+          if (!image) return errorResponse("No image provided", 400);
+          const imgbbKey = env.IMGBB_API_KEY;
+          if (!imgbbKey) {
+            return jsonResponse({ success: true, url: "https://via.placeholder.com/300?text=Mock+Upload" });
+          }
+          const imgbbFormData = new FormData();
+          imgbbFormData.append("image", image);
+          const uploadRes = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, {
+            method: "POST",
+            body: imgbbFormData
+          });
+          const uploadData = await uploadRes.json();
+          if (uploadData.success) {
+            return jsonResponse({ success: true, url: uploadData.data.url });
+          } else {
+            return errorResponse("Upload failed", 500);
+          }
+        } catch (e) {
+          return errorResponse("Upload error: " + e.message, 500);
+        }
+      }
       if (request.method === "GET" && path === "/api/dashboard/my-business") {
         const authPayload = await getAuthUser(request);
         if (!authPayload) return errorResponse("Unauthorized", 401);
@@ -4110,11 +4205,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         }
         const draftData = {
-          basic: data.basic || existingBiz?.draftVersion?.basic || { name, slug, category, province, tagline: "", description: "", city: "" },
+          basic: data.basic || existingBiz?.draftVersion?.basic || { name, slug, category, province, tagline: "", description: "", city: "", type: "", ownerName: "" },
           contact: data.contact || existingBiz?.draftVersion?.contact || { phone: "", whatsapp: "", email: "", address: "", socials: {} },
           branding: data.branding || existingBiz?.draftVersion?.branding || { logo: "", cover: "", gallery: [] },
           listings: data.listings || existingBiz?.draftVersion?.listings || [],
-          sections: data.sections || existingBiz?.draftVersion?.sections || { hero: true, about: true, listings: true, gallery: false, contact: true }
+          sections: data.sections || existingBiz?.draftVersion?.sections || { hero: true, about: true, listings: true, gallery: false, contact: true },
+          cta: data.cta || existingBiz?.draftVersion?.cta || { primary: "WhatsApp Us" }
         };
         const businessData = {
           id: businessId,

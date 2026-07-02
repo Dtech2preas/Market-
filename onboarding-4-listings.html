@@ -24,7 +24,7 @@
 
   <div class="container">
     <div class="onboarding-container">
-      <div class="step-indicator">STEP 4 OF 5</div>
+      <div class="step-indicator">STEP 4 OF 6</div>
       <h2 class="page-title">Products / Services</h2>
 
       <div id="listings-container"></div>
@@ -39,49 +39,207 @@
   </div>
 
   <script>
-    function addListing(name = '', price = '', desc = '') {
+
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    async function uploadImage(file) {
+      const formData = new FormData();
+      formData.append('image', file);
+      const token = localStorage.getItem('dtech_token');
+      const res = await fetch(`${WORKER_URL}/api/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) return data.url;
+      throw new Error(data.error || 'Upload failed');
+    }
+
+    function addListing(data = {}) {
+      const name = data.name || '';
+      const price = data.price || '';
+      const priceMax = data.priceMax || '';
+      const desc = data.desc || '';
+      const category = data.category || 'Website';
+      const priceType = data.priceType || 'Fixed';
+      const image = data.image || '';
+
       const container = document.getElementById('listings-container');
       const div = document.createElement('div');
       div.className = 'listing-item';
+
+      const uniqueId = 'img-' + Date.now() + Math.floor(Math.random()*1000);
+
       div.innerHTML = `
         <button class="remove-btn" onclick="this.parentElement.remove()">X</button>
-        <div class="form-group">
-          <label class="form-label">Item Name</label>
-          <input type="text" class="form-control l-name" value="${name}" placeholder="e.g. Web Design Package">
+
+        <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+           <div class="upload-box" style="padding: 16px; flex: 1; text-align: center; cursor: pointer; border: 2px dashed #ccc; background: #fff;" onclick="document.getElementById('${uniqueId}-input').click()">
+              <p style="font-size: 0.8rem; margin-bottom: 8px;">Upload Image</p>
+              <img id="${uniqueId}-preview" class="preview-img l-image" src="${image}" style="display: ${image ? 'block' : 'none'}; margin: 0 auto; max-height: 80px;" data-url="${image}">
+           </div>
+           <input type="file" id="${uniqueId}-input" style="display:none" accept="image/*">
+
+           <div style="flex: 3; display: flex; flex-direction: column; gap: 8px;">
+               <div class="form-group" style="margin:0;">
+                 <label class="form-label" style="font-size: 0.85rem;">Item Name</label>
+                 <input type="text" class="form-control l-name" value="${name}" placeholder="e.g. Logo Design">
+               </div>
+               <div class="form-group" style="margin:0;">
+                 <label class="form-label" style="font-size: 0.85rem;">Category</label>
+                 <select class="form-control l-category">
+                   <option ${category === 'Website' ? 'selected' : ''}>Website</option>
+                   <option ${category === 'Logo Design' ? 'selected' : ''}>Logo Design</option>
+                   <option ${category === 'Repair' ? 'selected' : ''}>Repair</option>
+                   <option ${category === 'Food' ? 'selected' : ''}>Food</option>
+                   <option ${category === 'Tutoring' ? 'selected' : ''}>Tutoring</option>
+                   <option ${category === 'Fashion' ? 'selected' : ''}>Fashion</option>
+                   <option ${category === 'Beauty' ? 'selected' : ''}>Beauty</option>
+                   <option ${category === 'Other' ? 'selected' : ''}>Other</option>
+                 </select>
+               </div>
+           </div>
         </div>
-        <div style="display: flex; gap: 16px;">
-          <div class="form-group" style="flex: 2;">
-            <label class="form-label">Description</label>
-            <input type="text" class="form-control l-desc" value="${desc}" placeholder="Brief description...">
+
+        <div class="form-group">
+          <label class="form-label" style="font-size: 0.85rem;">Description</label>
+          <input type="text" class="form-control l-desc" value="${desc}" placeholder="Brief description...">
+        </div>
+
+        <div style="display: flex; gap: 16px; align-items: flex-end;">
+          <div class="form-group" style="flex: 1; margin:0;">
+            <label class="form-label" style="font-size: 0.85rem;">Price Type</label>
+            <select class="form-control l-priceType" onchange="updatePriceFields(this)">
+              <option ${priceType === 'Fixed' ? 'selected' : ''}>Fixed</option>
+              <option ${priceType === 'From' ? 'selected' : ''}>From</option>
+              <option ${priceType === 'Hourly' ? 'selected' : ''}>Hourly</option>
+              <option ${priceType === 'Free Quote' ? 'selected' : ''}>Free Quote</option>
+            </select>
           </div>
-          <div class="form-group" style="flex: 1;">
-            <label class="form-label">Price (R)</label>
-            <input type="number" class="form-control l-price" value="${price}" placeholder="500">
+
+          <div class="form-group price-field-1" style="flex: 1; margin:0; display: ${priceType === 'Free Quote' ? 'none' : 'block'};">
+            <label class="form-label" style="font-size: 0.85rem;">Price (R)</label>
+            <input type="number" class="form-control l-price" value="${price}" placeholder="e.g. 500">
+          </div>
+
+          <div class="form-group price-field-2" style="flex: 1; margin:0; display: ${priceType === 'From' ? 'block' : 'none'};">
+            <label class="form-label" style="font-size: 0.85rem;">Max Price (R)</label>
+            <input type="number" class="form-control l-priceMax" value="${priceMax}" placeholder="e.g. 1500">
           </div>
         </div>
       `;
       container.appendChild(div);
+
+      // Setup image upload
+      setTimeout(() => {
+          document.getElementById(`${uniqueId}-input`).addEventListener('change', async function(e) {
+             if(e.target.files.length > 0) {
+                const file = e.target.files[0];
+                try {
+                   const box = this.previousElementSibling;
+                   const p = box.querySelector('p');
+                   const origText = p.innerText;
+                   p.innerText = 'Uploading...';
+                   const url = await uploadImage(file);
+                   p.innerText = origText;
+                   const img = document.getElementById(`${uniqueId}-preview`);
+                   img.src = url;
+                   img.dataset.url = url;
+                   img.style.display = 'block';
+                } catch(err) {
+                   alert('Error uploading item image');
+                }
+             }
+          });
+      }, 0);
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const saved = JSON.parse(localStorage.getItem('onboarding_listings') || '[]');
+    // Must be global for inline onchange
+    window.updatePriceFields = function(selectEl) {
+        const type = selectEl.value;
+        const container = selectEl.parentElement.parentElement;
+        const p1 = container.querySelector('.price-field-1');
+        const p2 = container.querySelector('.price-field-2');
+
+        if (type === 'Free Quote') {
+            p1.style.display = 'none';
+            p2.style.display = 'none';
+        } else if (type === 'From') {
+            p1.style.display = 'block';
+            p2.style.display = 'block';
+            p1.querySelector('label').innerText = 'Min Price (R)';
+        } else {
+            p1.style.display = 'block';
+            p2.style.display = 'none';
+            p1.querySelector('label').innerText = 'Price (R)';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const isEditor = window.location.pathname.includes('editor');
+      const storageKey = isEditor ? 'editor_listings' : 'onboarding_listings';
+
+      let saved = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+      if (isEditor && saved.length === 0) {
+          const token = localStorage.getItem('dtech_token');
+          if (token) {
+              try {
+                  const res = await fetch(`${WORKER_URL}/api/dashboard/my-business`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                  const bizData = await res.json();
+                  if (!bizData.error && bizData.draftVersion && bizData.draftVersion.listings) {
+                      saved = bizData.draftVersion.listings;
+                  }
+              } catch(e) {
+                  console.error(e);
+              }
+          }
+      }
+
       if(saved.length === 0) {
         addListing();
       } else {
-        saved.forEach(item => addListing(item.name, item.price, item.desc));
+        // Handle legacy format fallback
+        saved.forEach(item => {
+           addListing({
+              name: item.name,
+              price: item.price,
+              priceMax: item.priceMax,
+              desc: item.desc,
+              category: item.category,
+              priceType: item.priceType,
+              image: item.image || item.imageUrl
+           });
+        });
       }
     });
 
     function saveAndNext() {
-      const items = Array.from(document.querySelectorAll('.listing-item')).map(el => ({
-        name: el.querySelector('.l-name').value,
-        desc: el.querySelector('.l-desc').value,
-        price: el.querySelector('.l-price').value
-      })).filter(item => item.name.trim() !== '');
+      const isEditor = window.location.pathname.includes('editor');
+      const storageKey = isEditor ? 'editor_listings' : 'onboarding_listings';
 
-      localStorage.setItem('onboarding_listings', JSON.stringify(items));
-      window.location.href = 'onboarding-5-sections.html';
+      const items = Array.from(document.querySelectorAll('.listing-item')).map(el => {
+        const p1 = el.querySelector('.l-price');
+        const p2 = el.querySelector('.l-priceMax');
+        const imgEl = el.querySelector('.l-image');
+        return {
+           name: el.querySelector('.l-name').value,
+           desc: el.querySelector('.l-desc').value,
+           category: el.querySelector('.l-category').value,
+           priceType: el.querySelector('.l-priceType').value,
+           price: p1 ? p1.value : '',
+           priceMax: p2 ? p2.value : '',
+           image: imgEl ? imgEl.dataset.url : ''
+        };
+      }).filter(item => item.name.trim() !== '');
+
+      localStorage.setItem(storageKey, JSON.stringify(items));
+      window.location.href = isEditor ? 'editor-5-sections.html' : 'onboarding-5-sections.html';
     }
+
   </script>
 </body>
 </html>

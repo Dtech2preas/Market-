@@ -43,6 +43,11 @@
           <option>Limpopo</option>
         </select>
       </div>
+      <div class="form-group">
+        <label class="form-label">Business Address (Optional)</label>
+        <textarea id="c-address" class="form-control" rows="3" placeholder="Enter your full business address"></textarea>
+      </div>
+
 
       <div class="btn-group">
         <a href="editor-1-basic.html" class="btn btn-outline-dark">&larr; Back</a>
@@ -57,6 +62,7 @@
         phone: document.getElementById('c-phone').value,
         whatsapp: document.getElementById('c-whatsapp').value,
         email: document.getElementById('c-email').value,
+        address: document.getElementById('c-address').value,
         province: document.getElementById('c-province').value
       };
       localStorage.setItem('editor_contact', JSON.stringify(data));
@@ -89,6 +95,7 @@
       if (saved.phone) document.getElementById('c-phone').value = saved.phone;
       if (saved.whatsapp) document.getElementById('c-whatsapp').value = saved.whatsapp;
       if (saved.email) document.getElementById('c-email').value = saved.email;
+      if (saved.address) document.getElementById('c-address').value = saved.address;
       if (saved.province) document.getElementById('c-province').value = saved.province;
     });
   </script>

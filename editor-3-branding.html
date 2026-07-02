@@ -46,6 +46,14 @@
         <input type="file" id="cover-upload" style="display:none" accept="image/*">
       </div>
 
+
+      <div class="form-group" style="margin-top: 32px;">
+        <label class="form-label">Gallery Images (Max 6)</label>
+        <div id="gallery-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+           <!-- Gallery inputs will be injected here -->
+        </div>
+      </div>
+
       <div class="btn-group">
         <a href="editor-2-contact.html" class="btn btn-outline-dark">&larr; Back</a>
         <button class="btn btn-primary" onclick="saveAndNext()">Save & Next: Services / Products &rarr;</button>
@@ -54,64 +62,129 @@
   </div>
 
   <script>
+
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    async function uploadImage(file) {
+      const formData = new FormData();
+      formData.append('image', file);
+      const token = localStorage.getItem('dtech_token');
+      const res = await fetch(`${WORKER_URL}/api/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) return data.url;
+      throw new Error(data.error || 'Upload failed');
+    }
+
     function handleUpload(inputId, previewId, storageKey) {
-      document.getElementById(inputId).addEventListener('change', function(e) {
+      document.getElementById(inputId).addEventListener('change', async function(e) {
         if(e.target.files.length > 0) {
           const file = e.target.files[0];
-          const url = URL.createObjectURL(file);
-          const img = document.getElementById(previewId);
-          img.src = url;
-          img.style.display = 'block';
-          localStorage.setItem(storageKey, url);
+          try {
+             // Show loading state
+             const box = this.parentElement;
+             const origText = box.querySelector('p').innerText;
+             box.querySelector('p').innerText = 'Uploading...';
+
+             const url = await uploadImage(file);
+
+             box.querySelector('p').innerText = origText;
+             const img = document.getElementById(previewId);
+             img.src = url;
+             img.style.display = 'block';
+             localStorage.setItem(storageKey, url);
+          } catch(err) {
+             alert('Error uploading image');
+          }
         }
       });
     }
 
-    handleUpload('logo-upload', 'logo-preview', 'editor_logo');
-    handleUpload('cover-upload', 'cover-preview', 'editor_cover');
+    handleUpload('logo-upload', 'logo-preview', 'onboarding_logo');
+    handleUpload('cover-upload', 'cover-preview', 'onboarding_cover');
 
-    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+    function renderGallery() {
+       const container = document.getElementById('gallery-container');
+       container.innerHTML = '';
+       let gallery = JSON.parse(localStorage.getItem('onboarding_gallery') || '[]');
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const token = localStorage.getItem('dtech_token');
-      if (!token) {
-          window.location.href = '/login.html';
-          return;
+       for(let i=0; i<6; i++) {
+          const url = gallery[i] || '';
+          const displayStyle = url ? 'block' : 'none';
+          const html = `
+            <div class="upload-box" onclick="document.getElementById('gallery-upload-${i}').click()" style="padding: 16px;">
+              <p style="font-size: 0.8rem; margin-bottom: 8px;">${url ? 'Change Image' : '+ Add Image'}</p>
+              <img id="gallery-preview-${i}" class="preview-img" src="${url}" style="display: ${displayStyle}; margin: 0 auto; max-height: 100px;">
+            </div>
+            <input type="file" id="gallery-upload-${i}" style="display:none" accept="image/*">
+          `;
+          container.insertAdjacentHTML('beforeend', html);
+       }
+
+       for(let i=0; i<6; i++) {
+          document.getElementById(`gallery-upload-${i}`).addEventListener('change', async function(e) {
+             if(e.target.files.length > 0) {
+                const file = e.target.files[0];
+                try {
+                   const box = this.previousElementSibling;
+                   box.querySelector('p').innerText = 'Uploading...';
+                   const newUrl = await uploadImage(file);
+                   let currentGallery = JSON.parse(localStorage.getItem('onboarding_gallery') || '[]');
+                   currentGallery[i] = newUrl;
+                   localStorage.setItem('onboarding_gallery', JSON.stringify(currentGallery));
+                   renderGallery();
+                } catch(err) {
+                   alert('Error uploading gallery image');
+                   renderGallery();
+                }
+             }
+          });
+       }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const isEditor = window.location.pathname.includes('editor');
+      if (isEditor) {
+         // Re-map storage keys for editor
+         ['logo', 'cover', 'gallery'].forEach(k => {
+             const val = localStorage.getItem(`editor_${k}`);
+             if (val) localStorage.setItem(`onboarding_${k}`, val);
+         });
       }
 
-      let serverData = {};
-      try {
-        const res = await fetch(`${WORKER_URL}/api/dashboard/my-business`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const bizData = await res.json();
-        if (!bizData.error && bizData.draftVersion && bizData.draftVersion.branding) {
-            serverData = bizData.draftVersion.branding;
-        }
-      } catch(e) {
-          console.error(e);
-      }
-
-      const savedLogo = localStorage.getItem('editor_logo') || serverData.logo;
-      const savedCover = localStorage.getItem('editor_cover') || serverData.cover;
+      const savedLogo = localStorage.getItem('onboarding_logo');
+      const savedCover = localStorage.getItem('onboarding_cover');
 
       if(savedLogo) {
         const img = document.getElementById('logo-preview');
         img.src = savedLogo;
         img.style.display = 'block';
-        localStorage.setItem('editor_logo', savedLogo);
       }
       if(savedCover) {
         const img = document.getElementById('cover-preview');
         img.src = savedCover;
         img.style.display = 'block';
-        localStorage.setItem('editor_cover', savedCover);
       }
+
+      renderGallery();
     });
 
     function saveAndNext() {
-      window.location.href = 'editor-4-listings.html';
+      const isEditor = window.location.pathname.includes('editor');
+      if (isEditor) {
+         ['logo', 'cover', 'gallery'].forEach(k => {
+             const val = localStorage.getItem(`onboarding_${k}`);
+             if (val) localStorage.setItem(`editor_${k}`, val);
+         });
+         window.location.href = 'editor-4-listings.html';
+      } else {
+         window.location.href = 'onboarding-4-listings.html';
+      }
     }
+
   </script>
 </body>
 </html>

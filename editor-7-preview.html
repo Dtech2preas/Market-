@@ -35,7 +35,7 @@
       <div style="border-top: 1px solid var(--border); padding-top: 24px; margin-top: 24px;">
         <button class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem;" onclick="publishUpdates()">Publish Updates to Live Site</button>
         <div style="margin-top: 16px;">
-          <a href="editor-5-sections.html" style="color: var(--text-light); text-decoration: underline;">&larr; Go back to edit sections</a>
+          <a href="editor-6-cta.html" style="color: var(--text-light); text-decoration: underline;">&larr; Go back to edit sections</a>
         </div>
       </div>
     </div>
@@ -53,6 +53,7 @@
       const contact = JSON.parse(localStorage.getItem('editor_contact') || '{}');
       const listings = JSON.parse(localStorage.getItem('editor_listings') || '[]');
       const sections = JSON.parse(localStorage.getItem('editor_sections') || '{}');
+      const cta = JSON.parse(localStorage.getItem('editor_cta') || '{ "primary": "WhatsApp Us" }');
 
       const draftPayload = {
         id: localStorage.getItem("editor_bizId"),
@@ -60,9 +61,11 @@
         contact: contact,
         listings: listings,
         sections: sections,
+        cta: cta,
         branding: {
            logo: localStorage.getItem('editor_logo') || '',
-           cover: localStorage.getItem('editor_cover') || ''
+           cover: localStorage.getItem('editor_cover') || '',
+           gallery: JSON.parse(localStorage.getItem('editor_gallery') || '[]')
         }
       };
 
@@ -90,7 +93,7 @@
 
         if(!data.error) {
             // Clear storage
-            ['editor_basic', 'editor_contact', 'editor_listings', 'editor_sections', 'editor_logo', 'editor_cover', 'editor_bizId'].forEach(k => localStorage.removeItem(k));
+            ['editor_basic', 'editor_contact', 'editor_listings', 'editor_sections', 'editor_logo', 'editor_cover', 'editor_bizId', 'editor_cta', 'editor_gallery'].forEach(k => localStorage.removeItem(k));
             alert("Changes successfully published to live site!");
             window.location.href = 'dashboard.html';
         } else {
