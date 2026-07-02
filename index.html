@@ -43,6 +43,14 @@
     </div>
   </main>
 
+  <!-- Image Lightbox Overlay -->
+  <div id="image-lightbox" class="lightbox-overlay" onclick="closeLightbox(event)">
+    <div class="lightbox-content">
+      <img id="lightbox-img" src="" alt="Full screen image">
+      <button class="lightbox-close" onclick="closeLightbox(event)">&times;</button>
+    </div>
+  </div>
+
   <!-- Full Screen Preview Overlay -->
   <div class="fs-overlay" id="preview-modal">
     <div class="fs-header">
@@ -81,8 +89,11 @@
 
         <div class="card" style="margin-top: 24px; padding: 16px;">
           <h4>Contact</h4>
-          <p style="margin-bottom: 8px;"><strong>Phone:</strong> <span id="p-phone"></span></p>
-          <p><strong>Email:</strong> <span id="p-email"></span></p>
+          <p style="margin-bottom: 8px;"><strong>The Owner:</strong> <span id="p-owner"></span></p>
+          <p style="margin-bottom: 8px;"><strong>Contact Call:</strong> <span id="p-phone"></span></p>
+          <p style="margin-bottom: 8px;"><strong>WhatsApp Number:</strong> <span id="p-whatsapp"></span></p>
+          <p style="margin-bottom: 8px;"><strong>Email:</strong> <span id="p-email"></span></p>
+          <p style="margin-bottom: 8px;"><strong>Business Address:</strong> <span id="p-address"></span></p>
         </div>
       </div>
     </div>
@@ -126,8 +137,11 @@ async function openModal(slug, name) {
   document.getElementById('p-name').innerText = 'Loading...';
   document.getElementById('p-tagline').innerText = '';
   document.getElementById('p-desc').innerText = '';
+  document.getElementById('p-owner').innerText = '';
   document.getElementById('p-phone').innerText = '';
+  document.getElementById('p-whatsapp').innerText = '';
   document.getElementById('p-email').innerText = '';
+  document.getElementById('p-address').innerText = '';
   document.getElementById('p-logo').style.backgroundImage = 'none';
   document.getElementById('p-cover').style.backgroundImage = 'none';
   document.getElementById('p-listings').innerHTML = '';
@@ -160,19 +174,32 @@ async function openModal(slug, name) {
     document.getElementById('p-tagline').innerText = basic.tagline || data.category || 'Tagline';
     document.getElementById('p-desc').innerText = basic.description || 'Description';
 
+    document.getElementById('p-owner').innerText = basic.ownerName || 'N/A';
     document.getElementById('p-phone').innerText = contact.phone || 'N/A';
+    document.getElementById('p-whatsapp').innerText = contact.whatsapp || 'N/A';
     document.getElementById('p-email').innerText = contact.email || 'N/A';
+    document.getElementById('p-address').innerText = contact.address || 'N/A';
 
     if (branding.logo) {
       document.getElementById('p-logo').style.backgroundImage = `url(${branding.logo})`;
+      document.getElementById('p-logo').onclick = () => openLightbox(branding.logo);
+      document.getElementById('p-logo').style.cursor = 'pointer';
     } else {
       document.getElementById('p-logo').style.backgroundImage = `url('https://placehold.co/100x100?text=Logo')`;
+      document.getElementById('p-logo').onclick = null;
+      document.getElementById('p-logo').style.cursor = 'default';
     }
 
     if (branding.cover) {
       document.getElementById('p-cover').style.backgroundImage = `url(${branding.cover})`;
+      document.getElementById('p-cover').onclick = (e) => {
+        if (e.target.id === 'p-cover') openLightbox(branding.cover);
+      };
+      document.getElementById('p-cover').style.cursor = 'pointer';
     } else {
       document.getElementById('p-cover').style.backgroundImage = `url('https://placehold.co/400x200?text=Cover')`;
+      document.getElementById('p-cover').onclick = null;
+      document.getElementById('p-cover').style.cursor = 'default';
     }
 
     const ctaType = (pub.cta && pub.cta.primary) ? pub.cta.primary : 'WhatsApp Us';
@@ -205,7 +232,8 @@ async function openModal(slug, name) {
       btn.href = mainCtaLink;
       btn.target = "_blank";
       btn.className = "btn btn-primary";
-      btn.style.cssText = `width: 100%; text-align: center; background-color: ${mainCtaColor}; border-color: ${mainCtaColor};`;
+      // Ensure text is white or another visible color regardless of button background
+      btn.style.cssText = `width: 100%; text-align: center; background-color: ${mainCtaColor}; border-color: ${mainCtaColor}; color: #ffffff;`;
       btn.textContent = ctaType;
       document.getElementById('p-actions').appendChild(btn);
     }
@@ -219,7 +247,7 @@ async function openModal(slug, name) {
     if (branding.gallery && branding.gallery.length > 0 && sections.gallery !== false) {
       document.getElementById('sec-gallery').style.display = 'block';
       branding.gallery.filter(Boolean).forEach(imgUrl => {
-        galleryContainer.innerHTML += `<div style="background-image: url('${imgUrl}'); background-size: cover; background-position: center; height: 100px; border-radius: var(--radius); border: 1px solid var(--border);"></div>`;
+        galleryContainer.innerHTML += `<div onclick="openLightbox('${imgUrl}')" style="background-image: url('${imgUrl}'); background-size: cover; background-position: center; height: 100px; border-radius: var(--radius); border: 1px solid var(--border); cursor: pointer;"></div>`;
       });
     }
 
@@ -243,7 +271,11 @@ async function openModal(slug, name) {
 
         if (item.image) {
           const imgDiv = document.createElement('div');
-          imgDiv.style.cssText = `width: 100%; height: 150px; background-image: url('${item.image.replace(/'/g, "%27")}'); background-size: cover; background-position: center; border-radius: var(--radius) var(--radius) 0 0;`;
+          imgDiv.style.cssText = `width: 100%; height: 150px; background-image: url('${item.image.replace(/'/g, "%27")}'); background-size: cover; background-position: center; border-radius: var(--radius) var(--radius) 0 0; cursor: pointer;`;
+          imgDiv.onclick = (e) => {
+             e.stopPropagation();
+             openLightbox(item.image);
+          };
           card.appendChild(imgDiv);
         }
 
@@ -299,7 +331,7 @@ async function openModal(slug, name) {
           const ctaBtn = document.createElement('a');
           ctaBtn.href = itemCtaLink;
           ctaBtn.target = "_blank";
-          ctaBtn.className = "btn btn-outline";
+          ctaBtn.className = "btn btn-outline-dark";
           ctaBtn.style.cssText = 'display: block; text-align: center; margin-top: 12px; font-size: 0.9rem;';
           ctaBtn.textContent = ctaType;
           contentDiv.appendChild(ctaBtn);
@@ -333,6 +365,23 @@ document.getElementById('preview-modal').addEventListener('click', (e) => {
     closeModal();
   }
 });
+
+// Lightbox Logic
+function openLightbox(imgSrc) {
+  const lightbox = document.getElementById('image-lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  lightboxImg.src = imgSrc;
+  lightbox.classList.add('active');
+}
+
+function closeLightbox(event) {
+  if (event) {
+    if (event.target.id === 'lightbox-img') return;
+  }
+  const lightbox = document.getElementById('image-lightbox');
+  lightbox.classList.remove('active');
+  document.getElementById('lightbox-img').src = '';
+}
 
 // Bookmark Toggle
 function toggleSave(btn, event) {
