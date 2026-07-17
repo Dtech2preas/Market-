@@ -93,13 +93,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const slug = urlParams.get('slug');
 
-  if (!slug) {
+  // Support both ?slug=name and ?name safely
+  let slugToFetch = slug;
+  if (!slugToFetch) {
+    // If 'slug' parameter isn't explicitly defined, assume the very first query parameter key is the slug
+    // This allows ?sammy&utm_source=facebook to correctly resolve 'sammy'
+    const firstParam = urlParams.keys().next().value;
+    if (firstParam && firstParam !== 'slug') {
+        slugToFetch = firstParam;
+    }
+  }
+
+  if (!slugToFetch) {
     document.getElementById('p-name').innerText = 'No business specified.';
     return;
   }
 
   try {
-    const res = await fetch(`${WORKER_URL}/api/business/${slug}`);
+    const res = await fetch(`${WORKER_URL}/api/business/${slugToFetch}`);
     const data = await res.json();
 
     if (data.error) {
@@ -114,9 +125,64 @@ document.addEventListener('DOMContentLoaded', async () => {
     const listings = pub.listings || [];
     const sections = pub.sections || {};
 
-    document.title = (basic.name || data.name || 'Business') + ' - DTECH Hub';
+    const businessName = basic.name || data.name || 'Business';
+    document.title = businessName + ' - DTECH Hub';
 
-    document.getElementById('p-name').innerText = basic.name || data.name || 'Business Name';
+    // --- SEO Optimization Engine ---
+    const seoDesc = basic.description || 'Check out this business on DTECH Student Business Hub.';
+    const seoUrl = `https://business.dtech-services.co.za/business-profile.html?${slugToFetch}`;
+    const seoImg = branding.cover || branding.logo || 'https://business.dtech-services.co.za/default-meta.png';
+
+    // Meta Tags (Securely created using DOM API to prevent XSS)
+    const head = document.head;
+
+    const metaTags = [
+        { name: 'description', content: seoDesc },
+        { property: 'og:title', content: `${businessName} - DTECH Hub` },
+        { property: 'og:description', content: seoDesc },
+        { property: 'og:image', content: seoImg },
+        { property: 'og:url', content: seoUrl },
+        { name: 'twitter:card', content: 'summary_large_image' }
+    ];
+
+    metaTags.forEach(tagData => {
+        const meta = document.createElement('meta');
+        if (tagData.name) meta.name = tagData.name;
+        if (tagData.property) meta.setAttribute('property', tagData.property);
+        meta.content = tagData.content;
+        head.appendChild(meta);
+    });
+
+    // Schema.org Structured Data
+    const schemaData = {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": businessName,
+        "image": seoImg,
+        "description": seoDesc,
+        "url": seoUrl,
+        "telephone": contact.phone || contact.whatsapp || "",
+        "email": contact.email || "",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": contact.address || "",
+            "addressRegion": basic.province || "",
+            "addressCountry": "ZA"
+        }
+    };
+    const scriptSchema = document.createElement('script');
+    scriptSchema.type = 'application/ld+json';
+    scriptSchema.text = JSON.stringify(schemaData);
+    head.appendChild(scriptSchema);
+
+    // Hidden SEO Footer text
+    const seoFooter = document.createElement('div');
+    seoFooter.style.cssText = 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;';
+    seoFooter.textContent = `This business profile for ${businessName} is proudly hosted on the DTECH Student Business Hub.`;
+    document.body.appendChild(seoFooter);
+    // --- End SEO Engine ---
+
+    document.getElementById('p-name').innerText = businessName;
     document.getElementById('p-tagline').innerText = basic.tagline || data.category || 'Tagline';
     document.getElementById('p-desc').innerText = basic.description || 'Description';
 

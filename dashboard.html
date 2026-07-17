@@ -77,10 +77,16 @@
       <div class="banner success" id="banner-approved" style="display: none;">
         <div class="banner-header">
           <div class="banner-title">✅ Business Approved</div>
-          <a href="#" class="btn" style="background: white; border: 1px solid #155724; color: #155724;">View Live Site</a>
+          <div>
+            <button id="copy-link-btn" class="btn" style="background: white; border: 1px solid #155724; color: #155724; margin-right: 8px;">Copy Link</button>
+            <a href="#" class="btn" style="background: white; border: 1px solid #155724; color: #155724;">View Live Site</a>
+          </div>
         </div>
         <div class="banner-body">
           Your business is live on the directory! You can manage your content in the Website Editor.
+          <div style="margin-top: 8px; font-size: 0.9em; background: rgba(255,255,255,0.5); padding: 4px 8px; border-radius: 4px; display: inline-block;">
+             <strong>Your URL:</strong> <span id="approved-url-display"></span>
+          </div>
         </div>
       </div>
 
@@ -166,8 +172,22 @@
             } else if (bizData.status === 'approved' || bizData.status === 'verified') {
                 const banner = document.getElementById('banner-approved');
                 banner.style.display = 'flex';
+                const liveUrl = `https://business.dtech-services.co.za/business-profile.html?${bizData.slug}`;
+
                 const link = banner.querySelector('a');
-                link.href = `https://${bizData.slug}.business.dtech-services.co.za`;
+                link.href = liveUrl;
+                link.target = '_blank';
+
+                document.getElementById('approved-url-display').innerText = liveUrl;
+
+                const copyBtn = document.getElementById('copy-link-btn');
+                copyBtn.onclick = () => {
+                    navigator.clipboard.writeText(liveUrl).then(() => {
+                        const origText = copyBtn.innerText;
+                        copyBtn.innerText = 'Copied!';
+                        setTimeout(() => copyBtn.innerText = origText, 2000);
+                    });
+                };
             }
         }
       } catch (e) {

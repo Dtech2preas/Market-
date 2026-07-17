@@ -4125,6 +4125,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         delete user.passwordHash;
         return jsonResponse({ user });
       }
+      if (request.method === "GET" && path === "/sitemap.xml") {
+        const indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
+        let index = JSON.parse(indexStr);
+        const published = index.filter((b) => ["published", "approved", "verified"].includes(b.status));
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>
+`;
+        xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+`;
+        xml += `  <url>
+    <loc>https://business.dtech-services.co.za/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+`;
+        published.forEach((b) => {
+          const safeSlug = encodeURIComponent(b.slug || "");
+          xml += `  <url>
+    <loc>https://business.dtech-services.co.za/business-profile.html?${safeSlug}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+`;
+        });
+        xml += `</urlset>`;
+        return new Response(xml, {
+          headers: { ...corsHeaders, "Content-Type": "application/xml" }
+        });
+      }
       if (request.method === "GET" && path === "/api/marketplace") {
         const indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
         let index = JSON.parse(indexStr);
