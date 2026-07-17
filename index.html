@@ -86,7 +86,7 @@ function generateCardHTML(b, isFeatured = false) {
   const displayDesc = shortDesc.length > 80 ? shortDesc.substring(0, 77) + '...' : shortDesc;
 
   return `
-    <div class="business-card ${isFeatured ? 'featured' : ''}" onclick="window.location.href='/business-profile.html?slug=${b.slug}'">
+    <div class="business-card ${isFeatured ? 'featured' : ''}" onclick="window.location.href='/business-profile.html?${b.slug}'">
       <div class="cover" style="background-image: url('${b.coverImage || 'https://placehold.co/400x200?text=Cover'}')">
         <button class="card-save-btn" onclick="toggleSave(this, event)">🤍</button>
       </div>

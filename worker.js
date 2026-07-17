@@ -1098,6 +1098,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // --- MARKETPLACE API ---
 
+      // --- SEO SITEMAP ---
+      if (request.method === "GET" && path === "/sitemap.xml") {
+        const indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
+        let index = JSON.parse(indexStr);
+        const published = index.filter(b => ["published", "approved", "verified"].includes(b.status));
+
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+        xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+        // Main marketplace page
+        xml += `  <url>\n    <loc>https://business.dtech-services.co.za/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+
+        // Business profiles
+        published.forEach(b => {
+            // Encode slug to ensure valid XML
+            const safeSlug = encodeURIComponent(b.slug || '');
+            xml += `  <url>\n    <loc>https://business.dtech-services.co.za/business-profile.html?${safeSlug}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+        });
+
+        xml += `</urlset>`;
+
+        return new Response(xml, {
+          headers: { ...corsHeaders, "Content-Type": "application/xml" }
+        });
+      }
+
+      // --- MARKETPLACE API ---
+
       if (request.method === "GET" && path === "/api/marketplace") {
         const indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
         let index = JSON.parse(indexStr);
