@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const branding = pub.branding || {};
     const listings = pub.listings || [];
     const sections = pub.sections || {};
+    const design = pub.design || {};
 
     const businessName = basic.name || data.name || 'Business';
     document.title = businessName + ' - DTECH Hub';
@@ -182,6 +183,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.appendChild(seoFooter);
     // --- End SEO Engine ---
 
+    // --- Dynamic Design Engine ---
+    const accent = design.color || 'var(--primary)';
+    let fontFam = 'var(--font)';
+    if (design.font === 'serif') fontFam = '"Merriweather", "Georgia", serif';
+    if (design.font === 'mono') fontFam = '"Fira Code", monospace';
+
+    const customStyles = document.createElement('style');
+    customStyles.innerHTML = `
+      :root {
+        --primary: ${accent};
+      }
+      .fs-container {
+        font-family: ${fontFam};
+      }
+      h1, h2, h3, h4, .listing-price {
+        color: ${accent} !important;
+      }
+      .btn-primary {
+        background-color: ${accent} !important;
+        border-color: ${accent} !important;
+      }
+      .listing-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-radius: ${design.cardStyle === 'minimal' ? '0' : 'var(--radius)'} !important;
+        border: ${design.cardStyle === 'minimal' ? 'none' : '1px solid var(--border)'} !important;
+        ${design.cardStyle === 'bold' ? `border: 2px solid ${accent} !important;` : ''}
+        ${design.cardStyle === 'glow' ? `box-shadow: 0 0 10px ${accent}40 !important; border-color: ${accent} !important;` : ''}
+      }
+      ${design.hover === 'glow' ? `.listing-card:hover { box-shadow: 0 0 15px ${accent}80 !important; }` : ''}
+      ${design.hover === 'lift' ? `.listing-card:hover { transform: translateY(-4px); }` : ''}
+    `;
+    head.appendChild(customStyles);
+    // --- End Dynamic Design Engine ---
+
     document.getElementById('p-name').innerText = businessName;
     document.getElementById('p-tagline').innerText = basic.tagline || data.category || 'Tagline';
     document.getElementById('p-desc').innerText = basic.description || 'Description';
@@ -209,7 +244,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
       document.getElementById('p-cover').style.cursor = 'pointer';
     } else {
-      document.getElementById('p-cover').style.backgroundImage = `url('https://placehold.co/400x200?text=Cover')`;
+      let coverStyle = `url('https://placehold.co/400x200?text=Cover')`;
+      if (design.pattern === 'dots') coverStyle = `radial-gradient(${accent} 2px, transparent 2px)`;
+      else if (design.pattern === 'waves') coverStyle = `repeating-radial-gradient(circle at 0 0, transparent 0, var(--secondary) 10px, transparent 10px, ${accent} 20px)`;
+      else if (design.pattern === 'grid') coverStyle = `linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px)`;
+
+      document.getElementById('p-cover').style.backgroundImage = coverStyle;
+      if (design.pattern && design.pattern !== 'solid') {
+         document.getElementById('p-cover').style.backgroundSize = '20px 20px';
+      }
+      if (design.pattern === 'solid') {
+         document.getElementById('p-cover').style.background = accent;
+      }
+
       document.getElementById('p-cover').onclick = null;
       document.getElementById('p-cover').style.cursor = 'default';
     }

@@ -54,6 +54,7 @@
       const listings = JSON.parse(localStorage.getItem('editor_listings') || '[]');
       const sections = JSON.parse(localStorage.getItem('editor_sections') || '{}');
       const cta = JSON.parse(localStorage.getItem('editor_cta') || '{ "primary": "WhatsApp Us" }');
+      const design = JSON.parse(localStorage.getItem('editor_design') || '{}');
 
       const draftPayload = {
         id: localStorage.getItem("editor_bizId"),
@@ -62,6 +63,7 @@
         listings: listings,
         sections: sections,
         cta: cta,
+        design: design,
         branding: {
            logo: localStorage.getItem('editor_logo') || '',
            cover: localStorage.getItem('editor_cover') || '',
@@ -93,7 +95,7 @@
 
         if(!data.error) {
             // Clear storage
-            ['editor_basic', 'editor_contact', 'editor_listings', 'editor_sections', 'editor_logo', 'editor_cover', 'editor_bizId', 'editor_cta', 'editor_gallery'].forEach(k => localStorage.removeItem(k));
+            ['editor_basic', 'editor_contact', 'editor_listings', 'editor_sections', 'editor_logo', 'editor_cover', 'editor_bizId', 'editor_cta', 'editor_gallery', 'editor_design'].forEach(k => localStorage.removeItem(k));
             alert("Changes successfully published to live site!");
             window.location.href = 'dashboard.html';
         } else {

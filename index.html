@@ -16,15 +16,28 @@
   <main class="container" id="marketplace">
     <div class="filter-bar">
       <div class="filter-pill active">All Businesses</div>
-      <div class="filter-pill">Beauty</div>
-      <div class="filter-pill">Food</div>
-      <div class="filter-pill">Tutoring</div>
-      <div class="filter-pill">Tech</div>
-      <div class="filter-pill">Creative</div>
-      <select class="filter-pill" style="margin-left: auto;">
+      <div class="filter-pill">Food & Drinks</div>
+      <div class="filter-pill">Creative Services</div>
+      <div class="filter-pill">Technology</div>
+      <div class="filter-pill">Education</div>
+      <div class="filter-pill">Fashion & Beauty</div>
+      <div class="filter-pill">Home & Lifestyle</div>
+      <div class="filter-pill">Transport</div>
+      <div class="filter-pill">Digital Services</div>
+      <div class="filter-pill">Professional Services</div>
+      <div class="filter-pill">Events</div>
+      <div class="filter-pill">Other</div>
+      <select class="filter-pill" id="province-filter" style="margin-left: auto;">
         <option value="">All Provinces</option>
-        <option value="gauteng">Gauteng</option>
-        <option value="limpopo">Limpopo</option>
+        <option value="Eastern Cape">Eastern Cape</option>
+        <option value="Free State">Free State</option>
+        <option value="Gauteng">Gauteng</option>
+        <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+        <option value="Limpopo">Limpopo</option>
+        <option value="Mpumalanga">Mpumalanga</option>
+        <option value="Northern Cape">Northern Cape</option>
+        <option value="North West">North West</option>
+        <option value="Western Cape">Western Cape</option>
       </select>
     </div>
 
@@ -48,16 +61,38 @@
 // Basic logic for the marketplace UI
 document.addEventListener('DOMContentLoaded', () => {
   const filterPills = document.querySelectorAll('.filter-pill:not(select)');
+  const provinceFilter = document.getElementById('province-filter');
+
+  function applyFilters() {
+    const activePill = document.querySelector('.filter-pill.active');
+    const category = activePill ? activePill.textContent.trim() : 'All Businesses';
+    const province = provinceFilter.value.trim();
+
+    let filtered = allBusinesses;
+
+    if (category !== 'All Businesses') {
+      filtered = filtered.filter(b => b.category === category);
+    }
+
+    if (province !== '') {
+      filtered = filtered.filter(b => b.province === province);
+    }
+
+    renderMarketplace(filtered);
+  }
 
   filterPills.forEach(pill => {
     pill.addEventListener('click', (e) => {
       filterPills.forEach(p => p.classList.remove('active'));
       e.target.classList.add('active');
-      // Later: trigger fetch/filter logic here based on pill text
+      applyFilters();
     });
   });
 
-    // Example script to mock dynamic data insertion later
+  provinceFilter.addEventListener('change', () => {
+    applyFilters();
+  });
+
   console.log("DTECH Main JS Loaded");
 });
 
@@ -85,15 +120,45 @@ function generateCardHTML(b, isFeatured = false) {
   const shortDesc = b.description || b.tagline || '';
   const displayDesc = shortDesc.length > 80 ? shortDesc.substring(0, 77) + '...' : shortDesc;
 
+  const d = b.design || {};
+  const accent = d.color || 'var(--primary)';
+
+  let fontFam = 'var(--font)';
+  if (d.font === 'serif') fontFam = '"Merriweather", "Georgia", serif';
+  if (d.font === 'mono') fontFam = '"Fira Code", monospace';
+
+  let customStyles = ``;
+  if (d.cardStyle === 'minimal') {
+    customStyles += `border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.2);`;
+  } else if (d.cardStyle === 'bold') {
+    customStyles += `border: 2px solid ${accent};`;
+  } else if (d.cardStyle === 'glow') {
+    customStyles += `box-shadow: 0 0 15px ${accent}40; border-color: ${accent};`;
+  }
+
+  let hoverClass = '';
+  if (d.hover === 'glow') hoverClass = 'hover-glow';
+  else if (d.hover === 'zoom') hoverClass = 'hover-zoom';
+
+  let coverStyle = `background-image: url('${b.coverImage || 'https://placehold.co/400x200?text=Cover'}');`;
+
+  // Pattern fallback if no cover
+  if (!b.coverImage) {
+    if (d.pattern === 'dots') coverStyle = `background-image: radial-gradient(${accent} 2px, transparent 2px); background-size: 20px 20px; background-color: var(--secondary);`;
+    else if (d.pattern === 'waves') coverStyle = `background: repeating-radial-gradient(circle at 0 0, transparent 0, var(--secondary) 10px, transparent 10px, ${accent} 20px);`;
+    else if (d.pattern === 'grid') coverStyle = `background-image: linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px); background-size: 20px 20px; background-color: var(--secondary);`;
+    else coverStyle = `background-color: ${accent};`;
+  }
+
   return `
-    <div class="business-card ${isFeatured ? 'featured' : ''}" onclick="window.location.href='/business-profile.html?${b.slug}'">
-      <div class="cover" style="background-image: url('${b.coverImage || 'https://placehold.co/400x200?text=Cover'}')">
+    <div class="business-card ${isFeatured ? 'featured' : ''} ${hoverClass}" style="${customStyles}" onmouseover="this.style.borderColor='${accent}'" onmouseout="this.style.borderColor=''" onclick="window.location.href='/business-profile.html?${b.slug}'">
+      <div class="cover" style="${coverStyle}">
         <button class="card-save-btn" onclick="toggleSave(this, event)">🤍</button>
       </div>
       <div class="content">
         <div class="logo" style="background-image: url('${b.logo || 'https://placehold.co/100x100?text=Logo'}')"></div>
 
-        <h3 class="title">${b.name}</h3>
+        <h3 class="title" style="font-family: ${fontFam}; color: ${accent};">${b.name}</h3>
         <span class="category-tag">${b.category}</span>
 
         <p class="tagline" style="font-size: 0.9rem; color: var(--text-light); margin-top: 8px;">${displayDesc}</p>
@@ -101,6 +166,8 @@ function generateCardHTML(b, isFeatured = false) {
     </div>
   `;
 }
+
+let allBusinesses = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('marketplace-container');
@@ -111,30 +178,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const res = await fetch(`${WORKER_URL}/api/marketplace`);
-    let businesses = await res.json();
+    allBusinesses = await res.json();
 
-    if (!businesses || businesses.length === 0) {
-      container.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">No businesses found yet.</p>';
-      return;
-    }
-
-    // Simulate Featured Businesses (take first 3 if available)
-    if (businesses.length > 2) {
-      featuredSection.style.display = 'block';
-      const featured = businesses.slice(0, 3);
-      featuredContainer.innerHTML = featured.map(b => generateCardHTML(b, true)).join('');
-      // Show rest in main grid
-      const rest = businesses.slice(3);
-      container.innerHTML = rest.map(b => generateCardHTML(b)).join('');
-    } else {
-      // Not enough for a separate featured section
-      container.innerHTML = businesses.map(b => generateCardHTML(b)).join('');
-    }
+    renderMarketplace(allBusinesses);
 
   } catch (e) {
     container.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">Error loading marketplace.</p>';
   }
 });
+
+function renderMarketplace(businesses) {
+  const container = document.getElementById('marketplace-container');
+  const featuredSection = document.getElementById('featured-section');
+  const featuredContainer = document.getElementById('featured-container');
+
+  if (!businesses || businesses.length === 0) {
+    featuredSection.style.display = 'none';
+    container.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">No businesses found for this filter.</p>';
+    return;
+  }
+
+  // Simulate Featured Businesses (take first 3 if available)
+  if (businesses.length > 2) {
+    featuredSection.style.display = 'block';
+    const featured = businesses.slice(0, 3);
+    featuredContainer.innerHTML = featured.map(b => generateCardHTML(b, true)).join('');
+    // Show rest in main grid
+    const rest = businesses.slice(3);
+    container.innerHTML = rest.map(b => generateCardHTML(b)).join('');
+  } else {
+    // Not enough for a separate featured section
+    featuredSection.style.display = 'none';
+    container.innerHTML = businesses.map(b => generateCardHTML(b)).join('');
+  }
+}
 
 
 </script>

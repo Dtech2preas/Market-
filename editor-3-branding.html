@@ -25,8 +25,8 @@
 
   <div class="container">
     <div class="onboarding-container">
-      <div class="step-indicator">EDITOR</div>
-      <h2 class="page-title">Edit Branding & Media</h2>
+      <div class="step-indicator">EDIT 3 OF 6</div>
+      <h2 class="page-title">Branding & Media</h2>
 
       <div class="form-group">
         <label class="form-label">Business Logo</label>
@@ -54,9 +54,56 @@
         </div>
       </div>
 
+      <div style="margin: 32px 0; border-top: 1px solid var(--border); padding-top: 32px;">
+        <h3 class="page-title" style="font-size: 1.2rem; margin-bottom: 16px;">Design Customizations</h3>
+
+        <div class="form-group">
+          <label class="form-label">Brand Accent Color</label>
+          <input type="color" id="d-color" class="form-control" style="height: 50px; padding: 4px;" value="#3b82f6">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Card Style</label>
+          <select id="d-cardStyle" class="form-control">
+            <option value="minimal">Minimal (No borders)</option>
+            <option value="default" selected>Default (Standard)</option>
+            <option value="bold">Bold (High contrast)</option>
+            <option value="glow">Neon Glow</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Background Pattern (Fallback if no cover)</label>
+          <select id="d-pattern" class="form-control">
+            <option value="solid" selected>Solid Color</option>
+            <option value="dots">Dots</option>
+            <option value="waves">Waves</option>
+            <option value="grid">Grid Lines</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Typography Style</label>
+          <select id="d-font" class="form-control">
+            <option value="sans" selected>Modern Sans-Serif</option>
+            <option value="serif">Elegant Serif</option>
+            <option value="mono">Tech Mono</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Card Hover Effect</label>
+          <select id="d-hover" class="form-control">
+            <option value="lift" selected>Lift Up</option>
+            <option value="glow">Glow Effect</option>
+            <option value="zoom">Zoom Image</option>
+          </select>
+        </div>
+      </div>
+
       <div class="btn-group">
         <a href="editor-2-contact.html" class="btn btn-outline-dark">&larr; Back</a>
-        <button class="btn btn-primary" onclick="saveAndNext()">Save & Next: Services / Products &rarr;</button>
+        <button class="btn btn-primary" onclick="saveAndNext()">Next: Services / Products &rarr;</button>
       </div>
     </div>
   </div>
@@ -149,7 +196,7 @@
       const isEditor = window.location.pathname.includes('editor');
       if (isEditor) {
          // Re-map storage keys for editor
-         ['logo', 'cover', 'gallery'].forEach(k => {
+         ['logo', 'cover', 'gallery', 'design'].forEach(k => {
              const val = localStorage.getItem(`editor_${k}`);
              if (val) localStorage.setItem(`onboarding_${k}`, val);
          });
@@ -157,6 +204,7 @@
 
       const savedLogo = localStorage.getItem('onboarding_logo');
       const savedCover = localStorage.getItem('onboarding_cover');
+      const savedDesign = JSON.parse(localStorage.getItem('onboarding_design') || '{}');
 
       if(savedLogo) {
         const img = document.getElementById('logo-preview');
@@ -169,13 +217,28 @@
         img.style.display = 'block';
       }
 
+      if(savedDesign.color) document.getElementById('d-color').value = savedDesign.color;
+      if(savedDesign.cardStyle) document.getElementById('d-cardStyle').value = savedDesign.cardStyle;
+      if(savedDesign.pattern) document.getElementById('d-pattern').value = savedDesign.pattern;
+      if(savedDesign.font) document.getElementById('d-font').value = savedDesign.font;
+      if(savedDesign.hover) document.getElementById('d-hover').value = savedDesign.hover;
+
       renderGallery();
     });
 
     function saveAndNext() {
+      const designData = {
+         color: document.getElementById('d-color').value,
+         cardStyle: document.getElementById('d-cardStyle').value,
+         pattern: document.getElementById('d-pattern').value,
+         font: document.getElementById('d-font').value,
+         hover: document.getElementById('d-hover').value
+      };
+      localStorage.setItem('onboarding_design', JSON.stringify(designData));
+
       const isEditor = window.location.pathname.includes('editor');
       if (isEditor) {
-         ['logo', 'cover', 'gallery'].forEach(k => {
+         ['logo', 'cover', 'gallery', 'design'].forEach(k => {
              const val = localStorage.getItem(`onboarding_${k}`);
              if (val) localStorage.setItem(`editor_${k}`, val);
          });
