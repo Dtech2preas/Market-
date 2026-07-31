@@ -1209,7 +1209,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const rawSlug = data.basic?.slug || data.slug;
         const slug = rawSlug ? rawSlug.toLowerCase().trim().replace(/[^a-z0-9-]/g, '-') : null;
         const category = data.basic?.category || data.category;
-        const province = data.basic?.province || data.province;
+        const province = data.contact?.province || data.province;
 
         if (!name || !slug) return errorResponse("Name and slug required");
 
@@ -1239,6 +1239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           basic: data.basic || existingBiz?.draftVersion?.basic || { name, slug, category, province, tagline: "", description: "", city: "", type: "", ownerName: "" },
           contact: data.contact || existingBiz?.draftVersion?.contact || { phone: "", whatsapp: "", email: "", address: "", socials: {} },
           branding: data.branding || existingBiz?.draftVersion?.branding || { logo: "", cover: "", gallery: [] },
+          design: data.design || existingBiz?.draftVersion?.design || { color: "#3b82f6", cardStyle: "default", pattern: "solid", font: "sans", hover: "lift" },
           listings: data.listings || existingBiz?.draftVersion?.listings || [],
           sections: data.sections || existingBiz?.draftVersion?.sections || { hero: true, about: true, listings: true, gallery: false, contact: true },
           cta: data.cta || existingBiz?.draftVersion?.cta || { primary: "WhatsApp Us" }
@@ -1267,12 +1268,13 @@ document.addEventListener('DOMContentLoaded', async () => {
              slug: businessData.slug,
              name: businessData.publishedVersion?.basic?.name || businessData.draftVersion?.basic?.name,
              category: businessData.publishedVersion?.basic?.category || businessData.draftVersion?.basic?.category,
-             province: businessData.publishedVersion?.basic?.province || businessData.draftVersion?.basic?.province,
+             province: businessData.publishedVersion?.contact?.province || businessData.draftVersion?.contact?.province,
              status: businessData.status,
              coverImage: businessData.publishedVersion?.branding?.cover || businessData.draftVersion?.branding?.cover || null,
              logo: businessData.publishedVersion?.branding?.logo || businessData.draftVersion?.branding?.logo || null,
              tagline: businessData.publishedVersion?.basic?.tagline || businessData.draftVersion?.basic?.tagline || "",
-             description: businessData.publishedVersion?.basic?.description || businessData.draftVersion?.basic?.description || ""
+             description: businessData.publishedVersion?.basic?.description || businessData.draftVersion?.basic?.description || "",
+             design: businessData.publishedVersion?.design || businessData.draftVersion?.design || null
            };
 
            const existingIdx = index.findIndex(b => b.id === businessId);
@@ -1322,12 +1324,13 @@ document.addEventListener('DOMContentLoaded', async () => {
              slug: existingBiz.slug,
              name: existingBiz.publishedVersion.basic.name,
              category: existingBiz.publishedVersion.basic.category,
-             province: existingBiz.publishedVersion.basic.province,
+             province: existingBiz.publishedVersion.contact.province,
              status: existingBiz.status,
              coverImage: existingBiz.publishedVersion.branding.cover || null,
              logo: existingBiz.publishedVersion.branding.logo || null,
              tagline: existingBiz.publishedVersion.basic.tagline || "",
-             description: existingBiz.publishedVersion.basic.description || ""
+             description: existingBiz.publishedVersion.basic.description || "",
+             design: existingBiz.publishedVersion.design || null
         };
 
         if (idx >= 0) index[idx] = entry;
@@ -1421,12 +1424,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 slug: existingBiz.slug,
                 name: existingBiz.publishedVersion?.basic?.name || existingBiz.draftVersion?.basic?.name,
                 category: existingBiz.publishedVersion?.basic?.category || existingBiz.draftVersion?.basic?.category,
-                province: existingBiz.publishedVersion?.basic?.province || existingBiz.draftVersion?.basic?.province,
+                province: existingBiz.publishedVersion?.contact?.province || existingBiz.draftVersion?.contact?.province,
                 status: existingBiz.status,
                 coverImage: existingBiz.publishedVersion?.branding?.cover || existingBiz.draftVersion?.branding?.cover || null,
                 logo: existingBiz.publishedVersion?.branding?.logo || existingBiz.draftVersion?.branding?.logo || null,
                 tagline: existingBiz.publishedVersion?.basic?.tagline || existingBiz.draftVersion?.basic?.tagline || "",
-                description: existingBiz.publishedVersion?.basic?.description || existingBiz.draftVersion?.basic?.description || ""
+                description: existingBiz.publishedVersion?.basic?.description || existingBiz.draftVersion?.basic?.description || "",
+                design: existingBiz.publishedVersion?.design || existingBiz.draftVersion?.design || null
             };
             if (idx >= 0) index[idx] = entry;
             else index.push(entry);

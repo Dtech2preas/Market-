@@ -1,20 +1,22 @@
 :root {
-  --primary: #0a192f; /* Deep Dark Blue for header/brand */
-  --primary-hover: #112240;
-  --secondary: #e9ecef; /* Slightly dim background */
-  --text: #1a1a1a;
-  --text-light: #495057;
-  --bg: #ffffff; /* Card backgrounds remain white for contrast */
-  --bg-offset: #dadddf; /* Dimmed body background */
-  --border: #ced4da;
-  --success: #198754;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --info: #0dcaf0;
+  --primary: #121c29; /* Darker blue/black base */
+  --primary-hover: #1c2b3d;
+  --secondary: #1f2b38; /* Darker secondary */
+  --text: #e2e8f0; /* Off-white text for dark theme */
+  --text-light: #94a3b8;
+  --bg: #0f1722; /* Very dark blue, almost black */
+  --bg-offset: #0a0f16; /* Deepest black/blue background */
+  --border: #2a3746; /* Subtle borders */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
 
-  /* Rigid structure - no rounded corners */
-  --radius: 8px; --radius-pill: 24px;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08); --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.15);
+  /* Form & card styling */
+  --radius: 12px;
+  --radius-pill: 24px;
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.5);
   --font: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -29,6 +31,10 @@ body {
   color: var(--text);
   background-color: var(--bg-offset);
   line-height: 1.5;
+  /* Very subtle animated mesh-like background */
+  background-image: radial-gradient(circle at 15% 50%, rgba(20, 40, 60, 0.3), transparent 25%),
+                    radial-gradient(circle at 85% 30%, rgba(10, 35, 55, 0.3), transparent 25%);
+  background-attachment: fixed;
 }
 
 a {
@@ -134,13 +140,14 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
   font-family: var(--font);
-  background-color: #ffffff;
+  background-color: var(--bg);
+  color: var(--text);
   transition: border-color 0.2s;
 }
 .form-control:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(10, 25, 47, 0.2);
+  border-color: var(--info);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 /* Cards */
@@ -305,11 +312,11 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   padding: 48px 16px;
   background-color: var(--primary);
-  color: white;
-  border-bottom: 2px solid var(--primary-hover);
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
 }
 .hero h1 {
-  color: white;
+  color: var(--text);
   margin-bottom: 16px;
 }
 
@@ -440,6 +447,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 .business-card.featured:hover {
   box-shadow: 0 8px 24px rgba(255, 215, 0, 0.25);
+}
+
+/* Custom Hover Effects */
+.business-card.hover-glow:hover {
+  box-shadow: 0 0 20px currentColor;
+  transform: translateY(-2px);
+}
+.business-card.hover-zoom .cover {
+  transition: background-size 0.5s ease;
+  background-size: 100%;
+}
+.business-card.hover-zoom:hover .cover {
+  background-size: 110%;
 }
 
 .business-card .cover {
@@ -819,8 +839,8 @@ h1, h2, h3, h4, h5, h6 {
 .hero {
   text-align: center;
   padding: 80px 16px;
-  background: linear-gradient(135deg, var(--primary) 0%, #1a365d 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--bg-offset) 0%, var(--primary) 100%);
+  color: var(--text);
   position: relative;
   overflow: hidden;
 }
@@ -828,7 +848,7 @@ h1, h2, h3, h4, h5, h6 {
   content: '';
   position: absolute;
   inset: 0;
-  background: url('data:image/svg+xml;utf8,<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.05)"/></svg>') repeat;
+  background: url('data:image/svg+xml;utf8,<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.02)"/></svg>') repeat;
 }
 .hero .container {
   position: relative;
@@ -836,7 +856,7 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 800px;
 }
 .hero h1 {
-  color: white;
+  color: var(--text);
   margin-bottom: 20px;
   font-size: 3rem;
   font-weight: 800;
@@ -844,7 +864,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .hero p {
   font-size: 1.25rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-light);
   margin-bottom: 32px;
 }
 .hero-actions {

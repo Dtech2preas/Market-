@@ -120,15 +120,45 @@ function generateCardHTML(b, isFeatured = false) {
   const shortDesc = b.description || b.tagline || '';
   const displayDesc = shortDesc.length > 80 ? shortDesc.substring(0, 77) + '...' : shortDesc;
 
+  const d = b.design || {};
+  const accent = d.color || 'var(--primary)';
+
+  let fontFam = 'var(--font)';
+  if (d.font === 'serif') fontFam = '"Merriweather", "Georgia", serif';
+  if (d.font === 'mono') fontFam = '"Fira Code", monospace';
+
+  let customStyles = ``;
+  if (d.cardStyle === 'minimal') {
+    customStyles += `border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.2);`;
+  } else if (d.cardStyle === 'bold') {
+    customStyles += `border: 2px solid ${accent};`;
+  } else if (d.cardStyle === 'glow') {
+    customStyles += `box-shadow: 0 0 15px ${accent}40; border-color: ${accent};`;
+  }
+
+  let hoverClass = '';
+  if (d.hover === 'glow') hoverClass = 'hover-glow';
+  else if (d.hover === 'zoom') hoverClass = 'hover-zoom';
+
+  let coverStyle = `background-image: url('${b.coverImage || 'https://placehold.co/400x200?text=Cover'}');`;
+
+  // Pattern fallback if no cover
+  if (!b.coverImage) {
+    if (d.pattern === 'dots') coverStyle = `background-image: radial-gradient(${accent} 2px, transparent 2px); background-size: 20px 20px; background-color: var(--secondary);`;
+    else if (d.pattern === 'waves') coverStyle = `background: repeating-radial-gradient(circle at 0 0, transparent 0, var(--secondary) 10px, transparent 10px, ${accent} 20px);`;
+    else if (d.pattern === 'grid') coverStyle = `background-image: linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px); background-size: 20px 20px; background-color: var(--secondary);`;
+    else coverStyle = `background-color: ${accent};`;
+  }
+
   return `
-    <div class="business-card ${isFeatured ? 'featured' : ''}" onclick="window.location.href='/business-profile.html?${b.slug}'">
-      <div class="cover" style="background-image: url('${b.coverImage || 'https://placehold.co/400x200?text=Cover'}')">
+    <div class="business-card ${isFeatured ? 'featured' : ''} ${hoverClass}" style="${customStyles}" onmouseover="this.style.borderColor='${accent}'" onmouseout="this.style.borderColor=''" onclick="window.location.href='/business-profile.html?${b.slug}'">
+      <div class="cover" style="${coverStyle}">
         <button class="card-save-btn" onclick="toggleSave(this, event)">🤍</button>
       </div>
       <div class="content">
         <div class="logo" style="background-image: url('${b.logo || 'https://placehold.co/100x100?text=Logo'}')"></div>
 
-        <h3 class="title">${b.name}</h3>
+        <h3 class="title" style="font-family: ${fontFam}; color: ${accent};">${b.name}</h3>
         <span class="category-tag">${b.category}</span>
 
         <p class="tagline" style="font-size: 0.9rem; color: var(--text-light); margin-top: 8px;">${displayDesc}</p>
