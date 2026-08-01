@@ -121,7 +121,7 @@ function generateCardHTML(b, isFeatured = false) {
   const displayDesc = shortDesc.length > 80 ? shortDesc.substring(0, 77) + '...' : shortDesc;
 
   const d = b.design || {};
-  const accent = d.color || 'var(--primary)';
+  const accent = d.color || 'var(--text)';
 
   let fontFam = 'var(--font)';
   if (d.font === 'serif') fontFam = '"Merriweather", "Georgia", serif';
