@@ -39,6 +39,20 @@ export default {
     }
 
     // --- Helper Functions ---
+    const escapeHTML = (str) => {
+      if (typeof str !== 'string') return '';
+      return str.replace(/[&<>"']/g, function(match) {
+        switch (match) {
+          case '&': return '&amp;';
+          case '<': return '&lt;';
+          case '>': return '&gt;';
+          case '"': return '&quot;';
+          case "'": return '&#39;';
+          default: return match;
+        }
+      });
+    };
+
     const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
       status,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -65,30 +79,94 @@ export default {
     };
 
     try {
-      // --- ROUTING LAYER (Subdomain Slug Routing) ---
+      // --- ROUTING LAYER (Slug Routing) ---
 
-      const hostname = url.hostname;
-      const subdomainMatch = hostname.match(/^([^.]+)\.business\.dtech-services\.co\.za$/i);
+      // 301 Redirect for old URLs
+      if (path === '/business-profile.html' || path === '/business-dynamic.html') {
+        let slug = url.searchParams.get('slug');
+        if (!slug) {
+          // Check if the whole query string is the slug (e.g. ?sammy)
+          const search = url.search.substring(1); // remove ?
+          if (search && !search.includes('=')) {
+            slug = search;
+          }
+        }
+        if (slug) {
+          return Response.redirect(`https://business.dtech-services.co.za/${slug}`, 301);
+        }
+      }
 
-      if (subdomainMatch && !path.startsWith('/api/')) {
-        const possibleSlug = subdomainMatch[1].toLowerCase();
+      // Clean Slug Routing
+      if (!path.startsWith('/api/') && !path.startsWith('/admin/') && !path.includes('.')) {
+        const possibleSlug = path.slice(1).split('/')[0].toLowerCase();
 
-        // Don't intercept known dashboard/admin subdomains if there are any
-        if (!['www', 'api', 'admin', 'dashboard', 'hub'].includes(possibleSlug)) {
+        if (possibleSlug && !['www', 'api', 'admin', 'dashboard', 'hub'].includes(possibleSlug)) {
            const businessId = await env.MARKET_KV.get(`slug:${possibleSlug}`);
 
            if (businessId) {
-              // It's a valid business slug! Return the dynamic HTML shell.
-              // The frontend JS inside business-dynamic.html will fetch the data via API.
-              // In a real setup, we'd read business-dynamic.html from KV or Pages.
+              const businessStr = await env.MARKET_KV.get(businessId);
+              if (businessStr) {
+                const businessData = JSON.parse(businessStr);
+                const pub = businessData.publishedVersion || businessData.draftVersion;
+                if (pub) {
+                  const bName = escapeHTML(pub.basic.name || '');
+                  const bDesc = escapeHTML(pub.basic.description || '');
+                  let bCat = escapeHTML(pub.basic.category || '');
+                  if (pub.basic.type) bCat += " - " + escapeHTML(pub.basic.type);
+                  const bCover = escapeHTML(pub.branding?.cover || '');
+                  const bLogo = escapeHTML(pub.branding?.logo || '');
 
-              const htmlContent = `
+                  // Generate CTA Button server-side
+                  let ctaBtn = '';
+                  const waNumber = (pub.contact && pub.contact.whatsapp) ? pub.contact.whatsapp.replace(/[^0-9]/g, '') : '';
+                  const ctaType = pub.cta ? escapeHTML(pub.cta.primary) : 'WhatsApp Us';
+
+                  if (waNumber) {
+                     const waMsg = encodeURIComponent(`Hi, I am interested in your business ${pub.basic.name} listed on DTECH Student Business Hub.`);
+                     const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
+                     ctaBtn = `<a href="${waLink}" class="btn btn-whatsapp" style="margin-top:20px;">${ctaType}</a>`;
+                  }
+
+                  let aboutHtml = `<p>${bDesc}</p>`;
+                  if (pub.basic.ownerName) aboutHtml += `<p><strong>Owner:</strong> ${escapeHTML(pub.basic.ownerName)}</p>`;
+                  if (pub.contact && pub.contact.address) aboutHtml += `<p><strong>Address:</strong> ${escapeHTML(pub.contact.address)}</p>`;
+
+                  const canonicalUrl = `https://business.dtech-services.co.za/${escapeHTML(possibleSlug)}`;
+
+                  const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dynamic Business - DTECH Hub</title>
+  <title>${bName} - DTECH Hub</title>
+  <meta name="description" content="${bDesc}">
+  <link rel="canonical" href="${canonicalUrl}">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="${bName} - DTECH Hub">
+  <meta property="og:description" content="${bDesc}">
+  <meta property="og:image" content="${bCover || bLogo}">
+  <meta property="og:url" content="${canonicalUrl}">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${bName} - DTECH Hub">
+  <meta name="twitter:description" content="${bDesc}">
+  <meta name="twitter:image" content="${bCover || bLogo}">
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "${bName}",
+    "image": "${bLogo || bCover}",
+    "description": "${bDesc}",
+    "url": "${canonicalUrl}"
+  }
+  <\/script>
   <style>
 :root {
   --primary: #0056b3;
@@ -744,289 +822,80 @@ footer {
     </div>
   </nav>
 
-  <header class="b-hero" id="hero-section">
+  <header class="b-hero" id="hero-section" style="${bCover ? 'background-image: url(' + bCover + ');' : ''}">
     <div class="container b-hero-content">
-      <div class="b-logo" id="logo-img"></div>
-      <h1 id="business-name">Loading...</h1>
-      <p style="font-size: 1.2rem; opacity: 0.9;" id="business-category"></p>
+      <div class="b-logo" id="logo-img" style="${bLogo ? 'background-image: url(' + bLogo + ');' : ''}"></div>
+      <h1 id="business-name">${bName}</h1>
+      <p style="font-size: 1.2rem; opacity: 0.9;" id="business-category">${bCat}</p>
+      ${ctaBtn}
     </div>
   </header>
 
   <main class="container">
     <section class="b-section">
        <h2>About</h2>
-       <p id="business-desc">Details loading...</p>
+       <div id="business-desc">${aboutHtml}</div>
     </section>
   </main>
 
   <script>
-     // Fetch actual data using the absolute Worker URL since this is cross-origin
-     const DTECH_WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
-     fetch(DTECH_WORKER_URL + '/api/business/' + '${possibleSlug}')
-       .then(r => r.json())
-       .then(data => {
-          if(data.error) { document.body.innerHTML = '<h1>Not Found</h1>'; return; }
-          const pub = data.publishedVersion || data.draftVersion;
+     document.addEventListener('DOMContentLoaded', () => {
+          const pub = ${JSON.stringify(pub).replace(/</g, '\\u003c')};
           if (!pub) return;
 
-          document.getElementById('business-name').innerText = pub.basic.name;
-          let catText = pub.basic.category;
-          if (pub.basic.type) catText += " - " + pub.basic.type;
-          document.getElementById('business-category').innerText = catText;
-
-          if (pub.branding && pub.branding.cover) {
-              document.getElementById('hero-section').style.backgroundImage = \`url('\${pub.branding.cover}')\`;
-          }
-          if (pub.branding && pub.branding.logo) {
-              document.getElementById('logo-img').style.backgroundImage = \`url('\${pub.branding.logo}')\`;
-          }
-
-          let aboutHtml = \`<p>\${pub.basic.description}</p>\`;
-          if (pub.basic.ownerName) aboutHtml += \`<p><strong>Owner:</strong> \${pub.basic.ownerName}</p>\`;
-          if (pub.contact && pub.contact.address) aboutHtml += \`<p><strong>Address:</strong> \${pub.contact.address}</p>\`;
-          document.getElementById('business-desc').innerHTML = aboutHtml;
-
-          // Generate CTA Button
-          let ctaBtn = '';
           const waNumber = (pub.contact && pub.contact.whatsapp) ? pub.contact.whatsapp.replace(/[^0-9]/g, '') : '';
-          const ctaType = pub.cta ? pub.cta.primary : 'WhatsApp Us';
-
-          if (waNumber) {
-             const waMsg = encodeURIComponent(\`Hi, I am interested in your business \${pub.basic.name} listed on DTECH Student Business Hub.\`);
-             const waLink = \`https://wa.me/\${waNumber}?text=\${waMsg}\`;
-             ctaBtn = \`<a href="\${waLink}" class="btn btn-whatsapp" style="margin-top:20px;">\${ctaType}</a>\`;
-             document.getElementById('hero-section').querySelector('.container').innerHTML += ctaBtn;
-          }
+          const ctaType = pub.cta && pub.cta.primary ? pub.cta.primary : 'WhatsApp Us';
 
           // Listings
           if (pub.listings && pub.listings.length > 0) {
-             let listingsHtml = \`<section class="b-section container" id="listings-section"><h2>Products & Services</h2><div class="grid">\`;
+             let listingsHtml = '\<section class="b-section container" id="listings-section"\>\<h2\>Products & Services\</h2\>\<div class="grid"\>';
              pub.listings.forEach(item => {
                 let priceDisplay = '';
                 if (item.priceType === 'Free Quote') priceDisplay = 'Free Quote';
-                else if (item.priceType === 'From') priceDisplay = \`From R\${item.price} - R\${item.priceMax}\`;
-                else if (item.priceType === 'Hourly') priceDisplay = \`R\${item.price} / hour\`;
-                else priceDisplay = \`R\${item.price}\`;
+                else if (item.priceType === 'From') priceDisplay = 'From R' + item.price + ' - R' + item.priceMax;
+                else if (item.priceType === 'Hourly') priceDisplay = 'R' + item.price + ' / hour';
+                else priceDisplay = 'R' + item.price;
 
-                let itemImg = item.image ? \`<div class="card-img-container"><img src="\${item.image}" class="card-img"></div>\` : '';
-                let itemCat = item.category ? \`<span class="badge">\${item.category}</span>\` : '';
+                let itemImg = item.image ? '\<div class="card-img-container"\>\<img src="' + item.image + '" class="card-img"\>\</div\>' : '';
+                let itemCat = item.category ? '\<span class="badge"\>' + item.category + '\</span\>' : '';
 
-                let itemWaMsg = encodeURIComponent(\`Hi, I am interested in \${item.name} (\${priceDisplay}) listed on your DTECH profile.\`);
-                let itemWaLink = waNumber ? \`https://wa.me/\${waNumber}?text=\${itemWaMsg}\` : '#';
+                let itemWaMsg = encodeURIComponent('Hi, I am interested in ' + item.name + ' (' + priceDisplay + ') listed on your DTECH profile.');
+                let itemWaLink = waNumber ? 'https://wa.me/' + waNumber + '?text=' + itemWaMsg : '#';
 
-                listingsHtml += \`
-                <div class="card">
-                   \${itemImg}
-                   <div class="card-content">
-                      \${itemCat}
-                      <h3 class="card-title" style="margin-top:8px;">\${item.name}</h3>
-                      <p class="card-desc">\${item.desc}</p>
-                      <p class="card-meta"><strong>\${priceDisplay}</strong></p>
-                      <a href="\${itemWaLink}" class="btn btn-outline" style="margin-top:10px; display:block; text-align:center;">\${ctaType}</a>
-                   </div>
-                </div>\`;
+                listingsHtml += '\<div class="card"\>' +
+                   itemImg +
+                   '\<div class="card-content"\>' +
+                      itemCat +
+                      '\<h3 class="card-title" style="margin-top:8px;"\>' + item.name + '\</h3\>' +
+                      '\<p class="card-desc"\>' + item.desc + '\</p\>' +
+                      '\<p class="card-meta"\>\<strong\>' + priceDisplay + '\</strong\>\</p\>' +
+                      '\<a href="' + itemWaLink + '" class="btn btn-outline" style="margin-top:10px; display:block; text-align:center;"\>' + ctaType + '\</a\>' +
+                   '\</div\>' +
+                '\</div\>';
              });
-             listingsHtml += \`</div></section>\`;
+             listingsHtml += '\</div\>\</section\>';
              document.querySelector('main').innerHTML += listingsHtml;
           }
 
           // Gallery
           if (pub.branding && pub.branding.gallery && pub.branding.gallery.length > 0) {
-             let galleryHtml = \`<section class="b-section container" id="gallery-section"><h2>Gallery</h2><div class="grid">\`;
+             let galleryHtml = '\<section class="b-section container" id="gallery-section"\>\<h2\>Gallery\</h2\>\<div class="grid"\>';
              pub.branding.gallery.filter(Boolean).forEach(img => {
-                 galleryHtml += \`<div class="card-img-container" style="border-radius:8px;"><img src="\${img}" class="card-img"></div>\`;
+                 galleryHtml += '\<div class="card-img-container" style="border-radius:8px;"\>\<img src="' + img + '" class="card-img"\>\</div\>';
              });
-             galleryHtml += \`</div></section>\`;
+             galleryHtml += '\</div\>\</section\>';
              document.querySelector('main').innerHTML += galleryHtml;
           }
        });
-  </script>
-<script>
-const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
-
-document.addEventListener('DOMContentLoaded', async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get('id');
-
-    const loading = document.getElementById('loading');
-    const profile = document.getElementById('business-profile');
-    const errorMsg = document.getElementById('error-message');
-
-    if (!id) {
-        loading.style.display = 'none';
-        errorMsg.textContent = 'No business ID provided.';
-        errorMsg.style.display = 'block';
-        return;
-    }
-
-    try {
-        const response = await fetch(\`\${WORKER_URL}/business/\${id}\`);
-
-        if (!response.ok) {
-            throw new Error('Business not found or not approved.');
-        }
-
-        const biz = await response.json();
-
-        // Populate DOM elements
-        document.title = \`\${biz.businessName} - DTECH Hub\`;
-
-        document.getElementById('biz-logo').src = biz.logoUrl || 'https://via.placeholder.com/150?text=No+Logo';
-        document.getElementById('biz-name').textContent = biz.businessName;
-        document.getElementById('biz-category').textContent = biz.category;
-        document.getElementById('biz-province').textContent = biz.province;
-        document.getElementById('biz-owner').textContent = biz.studentName;
-
-        document.getElementById('biz-about').textContent = biz.about || biz.description;
-
-        if (biz.school) {
-            document.getElementById('biz-school').textContent = biz.school;
-            document.getElementById('biz-school-container').style.display = 'block';
-        }
-
-        if (biz.listings && biz.listings.length > 0) {
-            document.getElementById('biz-listings-container').style.display = 'block';
-
-            // Set dynamic title based on category
-            let title = "Offerings";
-            switch(biz.category) {
-                case 'Service':
-                case 'Beauty':
-                case 'Creative':
-                    title = "Services & Pricing";
-                    break;
-                case 'Product':
-                    title = "Products";
-                    break;
-                case 'Food':
-                    title = "Menu";
-                    break;
-                case 'Tutoring':
-                    title = "Tutoring Subjects";
-                    break;
-            }
-            document.getElementById('biz-listings-title').textContent = title;
-
-            const listingsGrid = document.getElementById('biz-listings');
-            listingsGrid.innerHTML = '';
-
-            biz.listings.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'listing-card';
-
-                // Add image if available
-                if (item.imageUrl) {
-                    const img = document.createElement('img');
-                    img.src = item.imageUrl;
-                    img.alt = item.name;
-                    img.className = 'listing-image';
-                    card.appendChild(img);
-                }
-
-                const content = document.createElement('div');
-                content.className = 'listing-content';
-
-                const header = document.createElement('div');
-                header.className = 'listing-header';
-
-                const nameEl = document.createElement('h4');
-                nameEl.className = 'listing-name';
-                nameEl.textContent = item.name;
-
-                const priceEl = document.createElement('span');
-                priceEl.className = 'listing-price';
-                priceEl.textContent = item.price;
-
-                header.appendChild(nameEl);
-                header.appendChild(priceEl);
-                content.appendChild(header);
-
-                if (item.description) {
-                    const descEl = document.createElement('p');
-                    descEl.className = 'listing-desc';
-                    descEl.textContent = item.description;
-                    content.appendChild(descEl);
-                }
-
-                if (item.extra || item.extra2) {
-                    const meta = document.createElement('div');
-                    meta.className = 'listing-meta';
-
-                    if (item.extra) {
-                        const tag = document.createElement('span');
-                        tag.className = 'listing-tag';
-                        tag.textContent = item.extra;
-                        meta.appendChild(tag);
-                    }
-                    if (item.extra2) {
-                        const tag2 = document.createElement('span');
-                        tag2.className = 'listing-tag';
-                        tag2.textContent = item.extra2;
-                        meta.appendChild(tag2);
-                    }
-                    content.appendChild(meta);
-                }
-
-                card.appendChild(content);
-                listingsGrid.appendChild(card);
-            });
-        } else if (biz.services) {
-            // Fallback for legacy businesses
-            document.getElementById('biz-services').textContent = biz.services;
-            document.getElementById('biz-services-container').style.display = 'block';
-        }
-
-        if (biz.socialLinks) {
-            document.getElementById('biz-social').textContent = biz.socialLinks;
-            document.getElementById('biz-social-container').style.display = 'block';
-        }
-
-        if (biz.galleryUrls && biz.galleryUrls.length > 0) {
-            const galleryContainer = document.getElementById('biz-gallery-container');
-            const gallery = document.getElementById('biz-gallery');
-            gallery.innerHTML = '';
-            biz.galleryUrls.forEach(url => {
-                const img = document.createElement('img');
-                img.src = url;
-                img.alt = 'Gallery image';
-                img.style.maxWidth = '200px';
-                img.style.maxHeight = '200px';
-                img.style.objectFit = 'cover';
-                img.style.borderRadius = '8px';
-                gallery.appendChild(img);
-            });
-            galleryContainer.style.display = 'block';
-        }
-
-        // Format WhatsApp link
-        let waNumber = biz.whatsapp.replace(/[^0-9]/g, '');
-        // If it starts with 0 (South African format), replace with 27
-        if (waNumber.startsWith('0')) {
-            waNumber = '27' + waNumber.substring(1);
-        }
-        const waText = encodeURIComponent(\`Hi \${biz.studentName}, I found your business \${biz.businessName} on the DTECH Student Hub and I'm interested in your services.\`);
-        document.getElementById('biz-whatsapp').href = \`https://wa.me/\${waNumber}?text=\${waText}\`;
-
-        // Hide loading, show profile
-        loading.style.display = 'none';
-        profile.style.display = 'block';
-
-    } catch (error) {
-        console.error('Error fetching business:', error);
-        loading.style.display = 'none';
-        errorMsg.textContent = error.message;
-        errorMsg.style.display = 'block';
-    }
-});
-
-</script>
+  <\/script>
 </body>
 </html>`;
-              return new Response(htmlContent, { headers: { ...corsHeaders, "Content-Type": "text/html" } });
+                  return new Response(htmlContent, { headers: { ...corsHeaders, "Content-Type": "text/html", "Cache-Control": "public, max-age=3600" } });
+                }
+              }
            }
         }
       }
-
 
       // --- AUTHENTICATION API ---
 
@@ -1114,7 +983,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         published.forEach(b => {
             // Encode slug to ensure valid XML
             const safeSlug = encodeURIComponent(b.slug || '');
-            xml += `  <url>\n    <loc>https://business.dtech-services.co.za/business-profile.html?${safeSlug}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+            xml += `  <url>\n    <loc>https://business.dtech-services.co.za/${safeSlug}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
         });
 
         xml += `</urlset>`;
