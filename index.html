@@ -14,6 +14,9 @@
   </header>
 
   <main class="container" id="marketplace">
+    <div class="search-bar-container" style="margin-bottom: 20px; display: flex; gap: 10px;">
+      <input type="text" id="search-input" placeholder="Search businesses by name, category, or description..." style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem;">
+    </div>
     <div class="filter-bar">
       <div class="filter-pill active">All Businesses</div>
       <div class="filter-pill">Food & Drinks</div>
@@ -62,11 +65,13 @@
 document.addEventListener('DOMContentLoaded', () => {
   const filterPills = document.querySelectorAll('.filter-pill:not(select)');
   const provinceFilter = document.getElementById('province-filter');
+  const searchInput = document.getElementById('search-input');
 
   function applyFilters() {
     const activePill = document.querySelector('.filter-pill.active');
     const category = activePill ? activePill.textContent.trim() : 'All Businesses';
     const province = provinceFilter.value.trim();
+    const query = searchInput.value.toLowerCase().trim();
 
     let filtered = allBusinesses;
 
@@ -76,6 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (province !== '') {
       filtered = filtered.filter(b => b.province === province);
+    }
+
+    if (query !== '') {
+      filtered = filtered.filter(b => {
+        const name = (b.name || '').toLowerCase();
+        const cat = (b.category || '').toLowerCase();
+        const desc = (b.description || b.tagline || '').toLowerCase();
+        return name.includes(query) || cat.includes(query) || desc.includes(query);
+      });
     }
 
     renderMarketplace(filtered);
@@ -90,6 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   provinceFilter.addEventListener('change', () => {
+    applyFilters();
+  });
+
+  searchInput.addEventListener('input', () => {
     applyFilters();
   });
 
@@ -151,7 +169,7 @@ function generateCardHTML(b, isFeatured = false) {
   }
 
   return `
-    <div class="business-card ${isFeatured ? 'featured' : ''} ${hoverClass}" style="${customStyles}" onmouseover="this.style.borderColor='${accent}'" onmouseout="this.style.borderColor=''" onclick="window.location.href='/business-profile.html?${b.slug}'">
+    <div class="business-card fade-in ${isFeatured ? 'featured' : ''} ${hoverClass}" style="${customStyles}" onmouseover="this.style.borderColor='${accent}'" onmouseout="this.style.borderColor=''" onclick="window.location.href='/business-profile.html?${b.slug}'">
       <div class="cover" style="${coverStyle}">
         <button class="card-save-btn" onclick="toggleSave(this, event)">🤍</button>
       </div>
@@ -169,12 +187,37 @@ function generateCardHTML(b, isFeatured = false) {
 
 let allBusinesses = [];
 
+function generateSkeletonHTML() {
+  return `
+    <div class="business-card skeleton-card" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+      <div class="cover skeleton"></div>
+      <div class="content">
+        <div class="logo skeleton" style="border-radius: 50%;"></div>
+        <div class="skeleton-text skeleton" style="width: 70%; height: 24px; margin-bottom: 8px;"></div>
+        <div class="skeleton-text skeleton" style="width: 40%; height: 16px; margin-bottom: 16px;"></div>
+        <div class="skeleton-text skeleton" style="width: 100%; height: 14px; margin-bottom: 4px;"></div>
+        <div class="skeleton-text skeleton" style="width: 80%; height: 14px;"></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSkeletons() {
+  const container = document.getElementById('marketplace-container');
+  if (!container) return;
+  // Render 8 skeleton cards as placeholders
+  container.innerHTML = Array(8).fill(null).map(generateSkeletonHTML).join('');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('marketplace-container');
   const featuredSection = document.getElementById('featured-section');
   const featuredContainer = document.getElementById('featured-container');
 
   if (!container) return;
+
+  // Show skeleton loaders before fetch
+  renderSkeletons();
 
   try {
     const res = await fetch(`${WORKER_URL}/api/marketplace`);

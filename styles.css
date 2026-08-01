@@ -953,3 +953,59 @@ h1, h2, h3, h4, h5, h6 {
 #p-tagline {
   color: #64748b; /* Ensure text-light in white containers is a readable gray */
 }
+
+/* Skeleton Loader Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+.skeleton {
+  background: var(--surface-light, #1e293b);
+  background-image: linear-gradient(
+    to right,
+    var(--surface-light, #1e293b) 0%,
+    var(--border, #334155) 20%,
+    var(--surface-light, #1e293b) 40%,
+    var(--surface-light, #1e293b) 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 800px 100%;
+  animation: shimmer 1.5s linear infinite;
+}
+
+.skeleton-text {
+  border-radius: 4px;
+}
+
+
+/* Fluid Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+
+/* Search Bar styling */
+#search-input::placeholder {
+  color: var(--text-light, #94a3b8);
+}
+#search-input:focus {
+  outline: none;
+  border-color: var(--primary, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}

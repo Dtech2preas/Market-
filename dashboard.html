@@ -105,6 +105,22 @@
         </div>
       </div>
 
+      <!-- Profile Completeness Score (New) -->
+      <div class="banner" id="profile-completeness-card" style="margin-top: 24px; display: none; background: var(--surface); border: 1px solid var(--border);">
+        <div class="banner-header" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+          <div class="banner-title" style="color: var(--text);">📊 Profile Completeness: <span id="score-text">0%</span></div>
+          <div style="width: 100%; background: var(--bg); border-radius: 8px; overflow: hidden; height: 10px; margin-top: 5px;">
+            <div id="score-bar" style="height: 100%; background: var(--primary); width: 0%; transition: width 0.5s ease;"></div>
+          </div>
+        </div>
+        <div class="banner-body" style="margin-top: 15px;">
+          <p style="margin-bottom: 10px; font-weight: 500;">Tips to improve your profile:</p>
+          <ul id="completeness-tips" style="padding-left: 20px; color: var(--text-light); font-size: 0.95rem; line-height: 1.5;">
+            <!-- Tips injected via JS -->
+          </ul>
+        </div>
+      </div>
+
       <div class="banner info" id="additional-features" style="margin-top: 24px; display: none;">
         <div class="banner-header">
           <div class="banner-title">✨ Additional Features (Coming Soon)</div>
@@ -140,6 +156,7 @@
         document.getElementById('banner-approved').style.display = 'none';
         document.getElementById('stat-grid').style.display = 'none';
         document.getElementById('additional-features').style.display = 'none';
+        document.getElementById('profile-completeness-card').style.display = 'none';
 
         // Update welcome message if name is available in token (mocked for now)
         // document.getElementById('welcome-msg').innerText = `Welcome back`;
@@ -156,6 +173,32 @@
         } else if (bizData.status) {
             document.getElementById('stat-grid').style.display = 'grid';
             document.getElementById('additional-features').style.display = 'flex';
+
+            // Calculate Profile Completeness
+            let score = 0;
+            let tips = [];
+            const data = bizData.publishedVersion || bizData.draftVersion || bizData;
+            const basic = data.basic || data;
+
+            if (basic.name && basic.name.length > 0) { score += 10; } else { tips.push("Add a business name."); }
+            if (basic.category && basic.category.length > 0) { score += 10; } else { tips.push("Select a category for your business."); }
+            if (basic.description && basic.description.length > 50) { score += 20; } else { tips.push("Write a longer description (over 50 characters) to better explain your business."); }
+            if (data.contact && data.contact.whatsapp) { score += 15; } else { tips.push("Add a WhatsApp contact number for customers to reach you easily."); }
+            if (data.branding && data.branding.logo) { score += 15; } else { tips.push("Upload a business logo to look more professional."); }
+            if (data.branding && data.branding.cover) { score += 10; } else { tips.push("Upload a custom cover photo to stand out."); }
+            if (data.listings && data.listings.length > 0) { score += 20; } else { tips.push("Add at least one product or service to your catalog/listings."); }
+
+            document.getElementById('profile-completeness-card').style.display = 'flex';
+            document.getElementById('score-text').innerText = `${score}%`;
+            document.getElementById('score-bar').style.width = `${score}%`;
+
+            const tipsContainer = document.getElementById('completeness-tips');
+            if (tips.length === 0) {
+              tipsContainer.innerHTML = '<li>🎉 Fantastic! Your profile is fully optimized.</li>';
+              document.getElementById('score-bar').style.background = '#10b981'; // Green color for 100%
+            } else {
+              tipsContainer.innerHTML = tips.map(tip => `<li>${tip}</li>`).join('');
+            }
             if (editorLink) editorLink.style.display = 'block';
             document.querySelector('a[href="#analytics"]').style.display = 'block';
 
