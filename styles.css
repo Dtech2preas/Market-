@@ -132,7 +132,7 @@ h1, h2, h3, h4, h5, h6 {
   display: block;
   margin-bottom: 8px;
   font-weight: bold;
-  color: var(--primary);
+  color: var(--text);
 }
 .form-control {
   width: 100%;
@@ -370,7 +370,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 32px; }
 .stat-card { background: var(--bg); padding: 24px; border: 1px solid var(--border); border-radius: var(--radius-pill); box-shadow: var(--shadow); text-align: center; }
-.stat-card h3 { font-size: 32px; color: var(--primary); margin-bottom: 8px; }
+.stat-card h3 { font-size: 32px; color: var(--text); margin-bottom: 8px; }
 .stat-card p { color: var(--text-light); font-size: 14px; font-weight: bold; }
 
 @media (max-width: 768px) {
@@ -712,6 +712,7 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--bg);
   min-height: 100vh;
   padding-bottom: 60px;
+  color: #1e293b; /* Dark text for readable content in white profile contexts */
 }
 
 .mock-hero {
@@ -738,6 +739,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .mock-content {
   padding: 65px 20px 30px;
+  color: #1e293b; /* Dark text for generic elements in preview */
 }
 
 #p-name {
@@ -799,6 +801,7 @@ h1, h2, h3, h4, h5, h6 {
 .mock-content .card p {
   font-size: .9rem;
   margin-top: 8px;
+  color: #1e293b;
 }
 
 /* Trust Strip */
@@ -940,7 +943,7 @@ h1, h2, h3, h4, h5, h6 {
 .mock-content h4,
 .mock-content h5,
 .mock-content h6 {
-  color: var(--primary);
+  color: #121c29; /* Darker primary for headings specifically inside white contexts */
 }
 
 .fs-container .text-light,
