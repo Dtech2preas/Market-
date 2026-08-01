@@ -19,12 +19,11 @@ Available on:
   http://192.168.0.2:8080
 Hit CTRL-C to stop the server
 
-[2026-08-01T13:42:32.578Z]  "GET /styles.css" "curl/8.5.0"
-(node:39326) [DEP0066] DeprecationWarning: OutgoingMessage.prototype._headers is deprecated
+[2026-08-01T18:17:46.076Z]  "GET /onboarding-preview-mobile.html" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"
+(node:169946) [DEP0066] DeprecationWarning: OutgoingMessage.prototype._headers is deprecated
 (Use `node --trace-deprecation ...` to show where the warning was created)
-[2026-08-01T13:42:41.400Z]  "GET /styles.css" "curl/8.5.0"
-[2026-08-01T13:42:50.851Z]  "GET /styles.css" "curl/8.5.0"
-[2026-08-01T13:43:01.983Z]  "GET /styles.css" "curl/8.5.0"
-[2026-08-01T13:43:56.189Z]  "GET /onboarding-1-basic.html" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"
-[2026-08-01T13:43:56.286Z]  "GET /styles.css" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"
-[2026-08-01T13:43:57.063Z]  "GET /business-profile.html?dtech-services" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"
+[2026-08-01T18:17:46.185Z]  "GET /styles.css" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"
+[2026-08-01T18:17:48.037Z]  "GET /onboarding-preview-desktop.html" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"
+[2026-08-01T18:17:48.048Z]  "GET /styles.css" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"
+[2026-08-01T18:17:49.267Z]  "GET /business-dynamic.html" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"
+[2026-08-01T18:17:49.276Z]  "GET /styles.css" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"

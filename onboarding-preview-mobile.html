@@ -12,7 +12,7 @@
     /* Mock styles inside frame */
     .mock-hero { height: 200px; background: #ddd; background-size: cover; background-position: center; position: relative; }
     .mock-logo { width: 80px; height: 80px; background: white; border: 3px solid white; position: absolute; bottom: -40px; left: 20px; background-size: cover; }
-    .mock-content { padding: 60px 20px 20px; }
+    .mock-content { padding: 16px 20px 20px; }
   </style>
 </head>
 <body>
@@ -25,8 +25,10 @@
       <div class="mock-logo" id="p-logo"></div>
     </div>
     <div class="mock-content">
-      <h2 id="p-name">Business Name</h2>
-      <p style="color: var(--text-light); font-size: 1rem; margin-bottom: 24px;" id="p-tagline">Tagline goes here.</p>
+      <div style="padding-left: 90px; min-height: 40px; margin-bottom: 24px;">
+        <h2 id="p-name" style="margin-top: 0; margin-bottom: 4px;">Business Name</h2>
+        <p style="color: var(--text-light); font-size: 1rem; margin-bottom: 0;" id="p-tagline">Tagline goes here.</p>
+      </div>
 
       <div id="sec-about">
         <h4>About Us</h4>
