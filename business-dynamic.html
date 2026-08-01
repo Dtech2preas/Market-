@@ -42,11 +42,12 @@
         /* Hero Section */
         .hero { padding: 0; margin-bottom: 8px; position: relative; }
         .hero-cover { width: 100%; height: 300px; background: #ddd; background-size: cover; background-position: center; }
-        .hero-content { position: relative; padding: 0 20px 40px; text-align: center; background: white; border-bottom: 1px solid var(--border); }
-        .hero-logo { width: 120px; height: 120px; background: white; border: 4px solid white; border-radius: 50%; margin: -60px auto 20px; box-shadow: var(--shadow); object-fit: cover; }
-        .hero-title { font-size: 32px; margin-bottom: 8px; }
-        .hero-tagline { color: var(--text-light); font-size: 18px; margin-bottom: 24px; }
-        .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .hero-content { position: relative; padding: 20px 20px 40px; text-align: left; background: white; border-bottom: 1px solid var(--border); }
+        .hero-logo { width: 120px; height: 120px; background: white; border: 4px solid white; border-radius: 14px; position: absolute; top: -60px; left: 40px; box-shadow: var(--shadow); object-fit: cover; }
+        .hero-text-wrapper { padding-left: 140px; min-height: 60px; margin-bottom: 24px; }
+        .hero-title { font-size: 32px; margin-bottom: 4px; color: #1e293b; margin-top: 0; }
+        .hero-tagline { color: var(--text-light); font-size: 18px; margin-bottom: 0; }
+        .hero-actions { display: flex; gap: 12px; justify-content: flex-start; flex-wrap: wrap; padding-left: 140px; }
 
         /* About Section */
         .about-text { max-width: 800px; margin: 0 auto; text-align: center; font-size: 16px; }
@@ -85,10 +86,12 @@
         <div class="hero-cover" id="b-cover"></div>
         <div class="hero-content">
             <div class="hero-logo" id="b-logo"></div>
-            <h1 class="hero-title" id="h-title">DTECH Services</h1>
-            <p class="hero-tagline" id="h-tagline">Affordable websites for local businesses</p>
+            <div class="hero-text-wrapper">
+                <h1 class="hero-title" id="h-title">DTECH Services</h1>
+                <p class="hero-tagline" id="h-tagline">Affordable websites for local businesses</p>
+            </div>
             <div class="hero-actions">
-                <a href="#" class="btn btn-whatsapp" id="btn-wa">WhatsApp Us</a>
+                <a href="#" class="btn" id="btn-wa" style="background-color: #1e293b; color: white;">WhatsApp Us</a>
                 <a href="#" class="btn btn-outline">Call Now</a>
             </div>
         </div>

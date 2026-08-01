@@ -29,9 +29,11 @@
       <div class="mock-logo" id="p-logo"></div>
     </div>
 
-    <div class="mock-content" style="padding: 24px;">
-      <h2 id="p-name">Loading...</h2>
-      <p id="p-tagline"></p>
+    <div class="mock-content" style="padding: 20px 24px 24px;">
+      <div style="padding-left: 110px; min-height: 40px; margin-bottom: 24px;">
+        <h2 id="p-name" style="margin-top: 0; margin-bottom: 4px;">Loading...</h2>
+        <p id="p-tagline" style="margin-bottom: 0;"></p>
+      </div>
 
       <div id="p-actions" style="margin: 16px 0;"></div>
 
@@ -197,12 +199,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       .fs-container {
         font-family: ${fontFam};
       }
-      h1, h2, h3, h4, .listing-price {
+      h3, h4, .listing-price {
         color: ${accent} !important;
       }
-      .btn-primary {
-        background-color: ${accent} !important;
-        border-color: ${accent} !important;
+      #p-name {
+        color: #1e293b !important;
       }
       .listing-card {
         transition: transform 0.2s, box-shadow 0.2s;
@@ -266,7 +267,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const emailAddress = contact.email || '';
 
     let mainCtaLink = '';
-    let mainCtaColor = 'var(--primary)';
+    let mainCtaColor = '#1e293b';
 
     if (ctaType.toLowerCase().includes('whatsapp') && waNumber) {
       const waMsg = encodeURIComponent(`Hi, I am interested in your business ${basic.name || data.name} listed on DTECH Student Business Hub.`);
