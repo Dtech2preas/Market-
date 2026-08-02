@@ -6,116 +6,173 @@ The DTECH Student Business Hub is a web-based marketplace and directory platform
 **Target Audience:**
 - **Student Entrepreneurs:** To register, onboard their business details (basic info, contact, branding, listings), preview their dynamic site, and manage it via a dashboard.
 - **Customers / General Public:** To browse the marketplace, filter by categories, view dynamic business profiles, and contact businesses (primarily via WhatsApp).
-- **Administrators:** To review, approve, request changes, suspend, or manage business applications.
+- **Administrators:** To review, approve, request changes, suspend, or manage business applications, as well as handle SEO propagation.
 
 **Key Features:**
-- **Dynamic Subdomain Routing:** Businesses get their own virtual space (e.g., `https://[slug].business.dtech-services.co.za`).
-- **Step-by-step Onboarding & Editing:** A 7-step wizard (separated into individual HTML files) for creating and updating a business profile.
+- **Dynamic Subdomain/Slug Routing:** Businesses get their own virtual space with clean URLs based on their slugs.
+- **Step-by-step Onboarding & Editing:** A 7-step wizard (separated into individual HTML files) for creating and updating a business profile, avoiding complex Single Page Application patterns.
 - **Draft & Published State Management:** Edits are saved as drafts and only go live to the public when explicitly published.
-- **Admin Workflow:** Status tracking (Draft, Pending Review, Approved, Request Changes, Suspended).
-- **Marketplace Directory:** A central directory rotating daily to ensure fair exposure.
+- **Admin Workflow:** Status tracking (Draft, Pending Review, Approved, Request Changes, Declined, Verified Student, Featured, Suspended).
+- **Marketplace Directory:** A central directory with advanced client-side fuzzy search and filtering to minimize backend reads.
 
 ---
 
 ## 2. Architecture & Data Flow
-The platform is built using a modern, serverless architecture.
+The platform is built using a modern, serverless architecture optimized for high performance and low database read/write costs.
 
 ### Tech Stack:
-- **Frontend:** Pure HTML, CSS (global `styles.css`), and Vanilla JavaScript.
+- **Frontend:** Pure HTML, CSS (global `styles.css`), and Vanilla JavaScript. Safe DOM manipulation is strictly used over `innerHTML` to prevent XSS vulnerabilities.
 - **Backend:** Cloudflare Workers (`worker.js`) running in a serverless edge environment.
 - **Database / Storage:** Cloudflare KV (Key-Value store), utilizing the `MARKET_KV` namespace.
-- **Bundler:** ESBuild (`esbuild.mjs`) is used to bundle backend dependencies (`bcryptjs` for password hashing, `jose` for JWTs) into a single `worker.js` distribution.
-- **Image Hosting:** ImgBB API (external, proxied securely through the worker).
+- **Bundler:** ESBuild (`esbuild.mjs`) is used to bundle backend dependencies (`bcryptjs` for password hashing, `jose` for JWTs) into a single `dist/worker.js` distribution.
+- **Image Hosting:** ImgBB API (external, proxied securely through the worker via `/api/upload`).
+- **CI/CD Deployment:** GitHub Actions automatically deploys changes pushed to the main branch to Cloudflare.
 
 ### How It Works (The Data Flow):
 1. **Frontend to Backend Communication:** The frontend vanilla JS uses the `fetch()` API to send asynchronous requests to the Cloudflare Worker absolute URL (`https://late-frost-770c.nakiaklocko57.workers.dev`).
 2. **Authentication:** User registration hashes passwords using `bcryptjs`. Login generates a JWT using `jose`, which is stored in local storage and sent in the `Authorization: Bearer <token>` header for protected requests.
-3. **Drafting (Local vs Cloud):** While going through the onboarding or editing steps, data is temporarily stored in the browser's `localStorage` (prefixed with `onboarding_` or `editor_`). Once the user reaches the end and submits, it is pushed to the backend.
+3. **Drafting (Local vs Cloud):** While going through the onboarding or editing steps, data is temporarily stored in the browser's `localStorage` (prefixed with `onboarding_` or `editor_`). Once the user reaches the end and submits, it is pushed to the backend KV.
 4. **Cloudflare KV Storage Strategy:**
    - Users are stored under `user:<id>`. Emails mapped via `email:<email>`.
    - Businesses are stored under `business:<id>`.
    - Business lookups via slug map `slug:<slug>` to `<business_id>`.
    - User-to-Business mappings use `user_business:<user_id>` to `<business_id>`.
    - The marketplace directory uses a lightweight array under the key `marketplace:index` to avoid heavy database scanning.
-5. **Dynamic Rendering:** When a request hits a specific subdomain (`slug.business.dtech-services.co.za`), the Cloudflare Worker intercepts it. It looks up the slug in KV, retrieves the business data, and injects it into a pre-defined HTML template shell (`business-dynamic.html`) generated directly by the worker.
+5. **Dynamic Rendering:** When a request hits a clean route (`/<slug>`), the Cloudflare Worker intercepts it. It retrieves the business data and injects it into a pre-defined HTML template shell generated server-side.
 
 ---
 
-## 3. API Requests and Endpoints
+## 3. Data Schema & KV Structures
 
-All backend logic is handled inside `worker.js` via the `fetch` event listener.
+### User Schema (`user:<id>`)
+```json
+{
+  "id": "user:abc123xyz",
+  "email": "student@dtech.co.za",
+  "fullName": "John Doe",
+  "passwordHash": "$2a$08$...",
+  "role": "user",
+  "createdAt": 1690000000000
+}
+```
 
-### Subdomain Routing
+### Business Schema (`business:<id>`)
+The business record separates draft and published data to support offline edits.
+```json
+{
+  "id": "business:xyz987",
+  "userId": "user:abc123xyz",
+  "slug": "johns-tech-repair",
+  "status": "approved", // draft, pending_review, approved, request_changes, declined, verified, featured, suspended
+  "seoPropagated": true, // Flag indicating if static HTML file exists in /profile/
+  "draftVersion": {
+    "basic": { "businessName": "Johns Tech", "category": "Technology", "province": "Gauteng", "description": "...", "tagline": "..." },
+    "contact": { "email": "...", "phone": "...", "whatsapp": "...", "address": "...", "instagram": "..." },
+    "branding": { "logo": "https://imgbb.com/...", "cover": "https://imgbb.com/...", "gallery": ["url1", "url2"] },
+    "listings": [{ "id": "list_1", "title": "Screen Repair", "price": "R500", "description": "..." }],
+    "sections": { "hero": true, "about": true, "gallery": true, "listings": true },
+    "cta": { "type": "whatsapp", "text": "Message Us", "value": "27812345678" }
+  },
+  "publishedVersion": { ... identical structure to draftVersion when published ... },
+  "createdAt": 1690000000000,
+  "updatedAt": 1690000000000
+}
+```
+
+### Marketplace Index (`marketplace:index`)
+A lightweight array for rendering the homepage quickly.
+```json
+[
+  {
+    "id": "business:xyz987",
+    "slug": "johns-tech-repair",
+    "name": "Johns Tech",
+    "category": "Technology",
+    "province": "Gauteng",
+    "logo": "https://imgbb.com/...",
+    "cover": "https://imgbb.com/...",
+    "status": "approved",
+    "seoPropagated": true
+  }
+]
+```
+
+---
+
+## 4. API Requests and Endpoints
+
+All backend logic is handled inside `worker.js` via the `fetch` event listener. CORS headers are strictly applied to all responses to allow frontend cross-origin requests.
+
+### Subdomain/Slug Routing & Rendering (SSR)
 - **Method:** `GET`
-- **Path:** `https://[slug].business.dtech-services.co.za/`
-- **Explanation:** If the Worker detects a subdomain that isn't `api`, `www`, `admin`, etc., it treats it as a business slug. It looks up the `slug` in KV. If found, it returns an HTML shell string (containing inline CSS/JS). The JS inside this shell then makes a secondary `fetch` to `/api/business/[slug]` to load the actual JSON data and populate the DOM.
+- **Path:** `/<slug>`
+- **Explanation:** The worker treats non-standard paths as slugs. It looks up `slug:<slug>` in KV. It fetches the business JSON, escapes all user input to prevent Stored XSS, and dynamically interpolates it into a massive HTML shell generated server-side.
 
 ### Authentication API
-- **`POST /api/auth/register`**: Accepts `email`, `password`, `fullName`. Hashes the password using `bcryptjs` and stores the user in KV.
-- **`POST /api/auth/login`**: Accepts `email`, `password`. Verifies credentials and returns a signed JWT using `jose`.
-- **`GET /api/auth/me`**: Requires JWT. Returns the authenticated user's details.
+- **`POST /api/auth/register`**: Hashes passwords using `bcryptjs` and stores user mapping.
+- **`POST /api/auth/login`**: Verifies credentials and returns a signed JWT using `jose`.
+- **`GET /api/auth/me`**: Requires JWT. Returns authenticated user details.
 
 ### Marketplace API (Public)
 - **`GET /api/marketplace`**: Returns the `marketplace:index` from KV, filtering for businesses with `published`, `approved`, or `verified` statuses.
-- **`GET /api/business/[slug]`**: Looks up a business by slug and returns its full JSON representation (both draft and published versions).
+- **`GET /api/business/[slug]`**: Returns full JSON for a specific business (used when routing bypasses SSR).
+- **`GET /sitemap.xml`**: Dynamically generates an XML sitemap of all published businesses with clean URLs for search engine indexing.
 
 ### Dashboard & Business Management API (Protected)
 - **`GET /api/dashboard/my-business`**: Uses the JWT to find the user's ID, looks up `user_business:<userId>`, and returns their specific business data.
-- **`POST /api/dashboard/business`**: Accepts massive JSON payloads containing `basic`, `contact`, `branding`, `listings`, `sections`, and `cta` data.
-  - If it's a new business, creates it in KV as a draft.
-  - If updating, it updates the `draftVersion` object within the KV record.
-- **`POST /api/dashboard/publish`**: Takes a business ID. Checks if the status is `approved` or `verified`. If so, it copies the `draftVersion` over to the `publishedVersion` and updates the `marketplace:index` so changes are visible to the public.
-- **`POST /api/upload`**: Accepts `multipart/form-data` with an image. Proxies the image to the external ImgBB API using a hidden secret key, returning the secure URL string back to the frontend.
+- **`POST /api/dashboard/business`**: Accepts massive JSON payloads containing `basic`, `contact`, `branding`, `listings`, `sections`, and `cta` data. Saves to `draftVersion`.
+- **`POST /api/dashboard/publish`**: Copies the `draftVersion` over to the `publishedVersion` and updates `marketplace:index`.
+- **`POST /api/upload`**: Accepts `multipart/form-data` with an image. Proxies the image securely to ImgBB to protect the API key from the frontend.
 
 ### Admin API (Protected)
-- **`GET /admin/businesses`**: Scans the KV namespace for all keys starting with `business:` to return a comprehensive list of all businesses on the platform for admin review.
-- **`POST /admin/action`**: Accepts an ID and an action (`approve`, `request_changes`, `decline`, `disable`). Modifies the business status. If `approve` is sent for the first time, it auto-publishes the draft data to live.
-- **`POST /admin/edit`**: Allows an admin to directly modify specific fields of a business (like its name).
+- **`GET /admin/businesses`**: Scans KV for all `business:` keys for admin review.
+- **`POST /admin/action`**: Modifies business status (`approve`, `decline`, etc.). Auto-publishes on first approval.
+- **`POST /admin/seo-mark-propagated`**: Updates the `seoPropagated` flag to `true` for a given business once an admin has manually generated and uploaded the static HTML file for OpenGraph preview support.
 
 ---
 
-## 4. Detailed File Breakdown
+## 5. Detailed File Breakdown
 
-### Root Configuration Files
-- **`package.json` / `package-lock.json`**: NPM configuration files containing dependencies (`bcryptjs`, `jose`) and scripts.
-- **`esbuild.mjs`**: The build script that uses ESBuild to bundle the Node.js modules into a format compatible with Cloudflare Workers.
-- **`wrangler.toml`**: The Cloudflare configuration file detailing the worker name, main entry point (`dist/worker.js`), and the KV namespace binding (`MARKET_KV`).
-- **`worker.js`**: The core backend file containing all the routing, API endpoint logic, KV interactions, and dynamic HTML generation.
+### Root Configuration & Deployment Files
+- **`package.json` / `package-lock.json`**: NPM configurations for `bcryptjs` and `jose`.
+- **`esbuild.mjs`**: Custom build script to bundle backend files into `dist/worker.js`.
+- **`wrangler.toml`**: Cloudflare configuration (entry point, KV bindings).
+- **`.github/workflows/deploy.yml`**: Automates deployment using `cloudflare/wrangler-action@v3`. Crucially passes environment variables like `IMGBB_API_KEY` into the runner so they aren't lost.
 
-### Global Assets
-- **`styles.css`**: The single, centralized CSS file powering the entire platform. Uses CSS variables for consistent theming (dark blue aesthetic), responsive grid layouts, pill-style buttons, and modern shadow styling.
-- **`index.html`**: The main public landing page. Displays the marketplace directory, allowing users to filter and browse published businesses.
-- **`login.html` & `register.html`**: The authentication screens for students to create accounts and log in to the dashboard.
+### Core Backend logic
+- **`worker.js`**: Contains ALL backend routing, JSON parsing, API endpoints, ImgBB proxying, authentication, and SSR Server-Side HTML generation. Includes HTML escaping utilities.
 
-### Dashboard & Business Management
-- **`dashboard.html`**: The central hub for a logged-in student. Shows the current status of their business (Draft, Pending, Approved), analytics, and provides links to start or edit their profile.
+### Global Assets & Frontend
+- **`styles.css`**: Centralized CSS. Defines the dark blue aesthetic, variables (`--primary`, `--bg`), pill-style buttons, and responsive grid layouts.
+- **`index.html`**: The main public landing page. Features a client-side search and filtering system using an in-memory `allBusinesses` array to drastically reduce backend database queries.
+- **`login.html` & `register.html`**: Authentication screens. Account creation is kept strictly separate from business onboarding.
+- **`dashboard.html`**: Central hub for logged-in students. Features a client-side "Profile Completeness Score" calculation that dynamically inspects business data properties and outputs actionable UI tips without storing the score in the database.
 
-### The Onboarding Flow (Creation)
-These files represent the 7-step wizard a new user takes to create their business. Data is saved in `localStorage` under `onboarding_` keys.
-- **`onboarding-1-basic.html`**: Collects Business Name, Category, Province, Tagline, and Description.
-- **`onboarding-2-contact.html`**: Collects Email, Phone, WhatsApp number, Address, and Social Links.
-- **`onboarding-3-branding.html`**: Handles uploading the Logo, Cover Image, and Gallery images (interfaces with `/api/upload`).
-- **`onboarding-4-listings.html`**: Allows users to add multiple products or services, defining prices, categories, and descriptions.
-- **`onboarding-5-sections.html`**: A toggle interface to enable/disable specific sections (Hero, About, Gallery, Listings) on their dynamic site.
-- **`onboarding-6-cta.html`**: Configures the main Call-To-Action button (e.g., "WhatsApp Us" vs "Get a Quote").
-- **`onboarding-7-preview.html`**: The final step. Compiles all `localStorage` data, shows a preview, and submits the massive JSON payload to `/api/dashboard/business`.
-- **`onboarding-preview-desktop.html` & `onboarding-preview-mobile.html`**: IFrames used within step 7 to show responsive mockups of what the site will look like.
+### The Onboarding & Editor Flows
+Separated strictly into distinct HTML files, avoiding SPA anti-patterns.
+- **`onboarding-1-basic.html` to `onboarding-7-preview.html`**: Creation wizard using `localStorage` (`onboarding_` prefix).
+- **`editor-1-basic.html` to `editor-7-preview.html`**: Editing wizard using `localStorage` (`editor_` prefix), loading from `draftVersion`.
+- **`onboarding-preview-desktop.html` / `mobile.html`**: Synchronized preview IFrames.
 
-### The Editor Flow (Post-Approval Updates)
-These files mirror the onboarding flow exactly but are used *after* a business has been created. They use `editor_` prefixes in `localStorage` and load existing `draftVersion` data from the server.
-- **`editor-1-basic.html`** through **`editor-6-cta.html`**: Same UI as onboarding, but purposed for editing existing data.
-- **`editor-7-preview.html`**: Allows users to preview their draft edits and explicitly "Publish" them using `/api/dashboard/publish`.
+### Dynamic Rendering & Routing Fallbacks
+- **`business-dynamic.html`**: Fallback structure reference.
+- **`business-profile.html`**: A secondary standalone viewing page accessed via `?slug=...` instead of a route. Used specifically when `seoPropagated` is `false`.
 
 ### The Admin System
-- **`admin.html`**: The main admin overview/dashboard showing high-level stats.
-- **`admin-sidebar.html`**: A shared UI component for the admin navigation.
-- **`admin-pending.html`**: Lists businesses that are in the "Draft" or "Pending Review" status, allowing admins to Approve, Decline, or Request Changes.
-- **`admin-review.html`**: A detailed view for an admin to scrutinize a specific application before approving.
-- **`admin-approved.html`**: Lists currently active/approved businesses, allowing admins to Suspend them or make direct edits.
+- **`admin.html`**, **`admin-pending.html`**, **`admin-review.html`**, **`admin-approved.html`**: Status management dashboards.
+- **`admin-sidebar.html`**: Navigation (manually synchronized across admin pages).
+- **`admin-seo.html`**: Critical utility page. Generates static HTML blocks injected with OpenGraph tags (for WhatsApp link previews) which admins then download, commit to the `/profile/<slug>.html` directory, and mark as propagated in KV.
 
-### Dynamic Business Rendering
-- **`business-dynamic.html`**: The shell template used to render the final product for a business. Note: Much of the actual logic for this is now dynamically injected directly from the `worker.js` file when a subdomain is accessed, but this file serves as the standalone structural reference.
-- **`business-profile.html`**: An alternative viewing page accessed via `?slug=...` instead of a subdomain, used for previewing or when subdomain routing is bypassed.
+---
 
-### Image Assets
-- **`*.png` (e.g., `admin-review.png`, `dashboard.png`, `editor.png`, `onboarding.png`)**: Likely design wireframes, mockups, or screenshots kept in the repository for reference during development.
+## 6. What's New (Added Aug 2, 2026)
+*This section highlights architecture details, custom logic, and features that were completely missing from earlier documentation iterations.*
+
+- **Client-Side Profile Completeness Score (`dashboard.html`):** The dashboard now dynamically calculates a completeness percentage (0-100%) purely on the frontend by analyzing the fetched business JSON payload. It displays missing fields (e.g., "Upload a logo") without needing backend storage for the score.
+- **SEO Propagation & OpenGraph Workflow (`admin-seo.html`):** Because Cloudflare Workers on GitHub Pages cannot intercept custom domain previews perfectly on all platforms, a manual admin workflow was added. Admins generate static HTML files containing meta tags for a business, upload them to a `/profile/` folder, and flip a `seoPropagated` boolean flag in the KV database.
+- **Dynamic Routing Fallback (`index.html` & `dashboard.html`):** The frontend strictly checks the `seoPropagated` flag. If true, it routes clicks to `/profile/<slug>.html`. If false, it falls back to the query parameter route (`/business-profile.html?<slug>`).
+- **Secure Image Upload Proxy (`/api/upload` in `worker.js`):** The ImgBB API key is no longer dangerously exposed in the frontend HTML. The worker now features a secure multipart proxy endpoint that handles the upload server-side and returns the secure URL string.
+- **Client-Side Marketplace Search Filtering (`index.html`):** The marketplace now fetches the `marketplace:index` array once into memory (`allBusinesses`). All category and text-based fuzzy searching is performed using JavaScript array filtering on the client, minimizing KV reads and improving UI responsiveness.
+- **XML Sitemap Generation (`/sitemap.xml` in `worker.js`):** The worker dynamically generates a search-engine compliant `sitemap.xml` mapping clean URLs for all published businesses.
+- **Automated Deployment & Secrets (`.github/`):** The repository utilizes GitHub Actions for continuous deployment. Specific fixes like `ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION` and explicit secrets passing (`IMGBB_API_KEY`) were implemented to resolve Wrangler v3 edge cases.
+- **Strict Server-Side HTML Escaping:** Template literal escaping is heavily enforced inside `worker.js` via an `escapeHTML()` helper to protect against Stored Cross-Site Scripting (XSS) when rendering user-submitted business profiles.
