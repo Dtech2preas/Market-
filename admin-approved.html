@@ -66,7 +66,8 @@
               <small style="color: var(--text-light);">Owner: ${biz.studentName || 'Unknown'} | Approved: ${date}</small>
             </div>
             <div style="display: flex; gap: 8px;">
-              <button onclick="openEditModal('${biz.id}', '${escapeHTML(biz.businessName)}', '${escapeHTML(biz.studentName)}', '${escapeHTML(biz.description)}')" class="btn btn-outline-dark" style="margin-right: 8px;">Edit</button><a href="https://${biz.slug || ''}.business.dtech-services.co.za" target="_blank" class="btn btn-outline-dark">View Site</a>
+              <button onclick="openSeoModal(this.getAttribute('data-biz'))" data-biz='${escapeHTML(JSON.stringify(biz))}' class="btn btn-outline-dark" style="margin-right: 8px;">${biz.seoPropagated ? 'Update SEO' : 'Generate SEO'}</button>
+              <button onclick="openEditModal('${biz.id}', '${escapeHTML(biz.businessName)}', '${escapeHTML(biz.studentName)}', '${escapeHTML(biz.description)}')" class="btn btn-outline-dark" style="margin-right: 8px;">Edit</button><a href="https://business.dtech-services.co.za/profile/${biz.slug}.html" target="_blank" class="btn btn-outline-dark" style="margin-right: 8px;">View SEO</a><a href="https://business.dtech-services.co.za/${biz.slug}" target="_blank" class="btn btn-outline-dark">View Site</a>
               <button onclick="updateStatus('${biz.id}', 'disable')" class="btn" style="background: var(--danger); color: white;">Suspend</button>
             </div>
           `;
@@ -91,6 +92,33 @@
       }
     }
   </script>
+
+  <div id="seo-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="background: white; max-width: 600px; margin: 50px auto; padding: 20px; border-radius: 8px;">
+      <h3>Generate SEO Profile</h3>
+      <p>Follow these steps to manually propagate SEO:</p>
+      <ol>
+        <li>Copy the generated HTML below or download the file.</li>
+        <li>Upload it to the GitHub repository in the <strong>/profile</strong> folder.</li>
+        <li>Name the file <strong><span id="seo-slug-display">slug</span>.html</strong></li>
+        <li>Click "Mark SEO as Propagated" to notify the user.</li>
+      </ol>
+      <textarea id="seo-code-output" rows="10" style="width: 100%; font-family: monospace; font-size: 12px; margin-bottom: 16px;" readonly></textarea>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button id="btn-copy-seo" class="btn btn-outline" type="button">Copy HTML Code</button>
+        <button id="btn-download-seo" class="btn btn-outline" type="button">Download .html File</button>
+      </div>
+
+      <hr style="margin: 16px 0;">
+
+      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button class="btn btn-outline" onclick="document.getElementById('seo-modal').style.display='none'">Cancel</button>
+        <button id="btn-mark-propagated" class="btn btn-primary">Mark SEO as Propagated</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
 
@@ -157,7 +185,106 @@
         document.getElementById('edit-description').value = description;
         document.getElementById('edit-modal').style.display = 'block';
     }
-  </script>
+
+let currentSeoBiz = null;
+let currentSeoCode = '';
+
+function openSeoModal(bStr) {
+    const b = typeof bStr === 'string' ? JSON.parse(bStr) : bStr;
+    currentSeoBiz = b;
+    const slug = b.slug || b.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    document.getElementById('seo-slug-display').innerText = slug;
+
+    const bName = escapeHTML(b.businessName || '');
+    const bDesc = escapeHTML(b.description || '');
+    const bCover = b.branding?.cover || '';
+    const bLogo = b.branding?.logo || '';
+    const bImg = escapeHTML(bCover || bLogo || 'https://placehold.co/600x400?text=No+Image');
+
+    const canonicalUrl = `https://business.dtech-services.co.za/profile/${slug}.html`;
+    const targetUrl = `https://business.dtech-services.co.za/business-profile.html?${slug}`;
+
+    currentSeoCode = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${bName} - DTECH Hub</title>
+  <meta name="description" content="${bDesc} | Listed on DTECH Student Business Hub">
+  <link rel="canonical" href="${canonicalUrl}">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="${bName} - DTECH Hub">
+  <meta property="og:description" content="${bDesc} | Listed on DTECH Student Business Hub">
+  <meta property="og:image" content="${bImg}">
+  <meta property="og:url" content="${canonicalUrl}">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${bName} - DTECH Hub">
+  <meta name="twitter:description" content="${bDesc} | Listed on DTECH Student Business Hub">
+  <meta name="twitter:image" content="${bImg}">
+
+  <meta http-equiv="refresh" content="0; url=${targetUrl}">
+</head>
+<body>
+  <p>Redirecting to <a href="${targetUrl}">${bName} Profile</a>...</p>
+  <script>window.location.href="${targetUrl}";</script>
+</body>
+</html>`;
+
+    document.getElementById('seo-code-output').value = currentSeoCode;
+    document.getElementById('seo-modal').style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const copyBtn = document.getElementById('btn-copy-seo');
+    if (copyBtn) {
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(currentSeoCode);
+            alert('HTML Code Copied! Now create a file named ' + document.getElementById('seo-slug-display').innerText + '.html and paste it in.');
+        };
+    }
+
+    const downloadBtn = document.getElementById('btn-download-seo');
+    if (downloadBtn) {
+        downloadBtn.onclick = () => {
+            const blob = new Blob([currentSeoCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = document.getElementById('seo-slug-display').innerText + '.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+    }
+
+    const markBtn = document.getElementById('btn-mark-propagated');
+    if (markBtn) {
+        markBtn.onclick = async () => {
+            if (!currentSeoBiz) return;
+            try {
+                markBtn.innerText = 'Saving...';
+                const res = await fetch(`${WORKER_URL}/admin/action`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: currentSeoBiz.id, action: 'propagate_seo' })
+                });
+                if (!res.ok) throw new Error('Failed to propagate SEO');
+                alert('SEO Marked as Propagated successfully.');
+                document.getElementById('seo-modal').style.display = 'none';
+                fetchApproved(); // Refresh list
+            } catch (e) {
+                alert('Error: ' + e.message);
+            } finally {
+                markBtn.innerText = 'Mark SEO as Propagated';
+            }
+        };
+    }
+});
+
+</script>
 <script>
 function escapeHTML(str) {
     if (!str) return '';

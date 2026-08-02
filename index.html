@@ -169,7 +169,7 @@ function generateCardHTML(b, isFeatured = false) {
   }
 
   return `
-    <div class="business-card fade-in ${isFeatured ? 'featured' : ''} ${hoverClass}" style="${customStyles}" onmouseover="this.style.borderColor='${accent}'" onmouseout="this.style.borderColor=''" onclick="window.location.href='/business-profile.html?${b.slug}'">
+    <div class="business-card fade-in ${isFeatured ? 'featured' : ''} ${hoverClass}" style="${customStyles}" onmouseover="this.style.borderColor='${accent}'" onmouseout="this.style.borderColor=''" onclick="window.location.href='${b.seoPropagated ? '/profile/' + b.slug + '.html' : '/business-profile.html?' + b.slug}'">
       <div class="cover" style="${coverStyle}">
         <button class="card-save-btn" onclick="toggleSave(this, event)">🤍</button>
       </div>

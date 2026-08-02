@@ -1231,7 +1231,9 @@ footer {
                 contact: b.draftVersion?.contact || {},
                 branding: b.draftVersion?.branding || {},
                 listings: b.draftVersion?.listings || [],
-                sections: b.draftVersion?.sections || {}
+                sections: b.draftVersion?.sections || {},
+                seoPropagated: b.seoPropagated || false,
+                slug: b.slug
               });
             }
           }
@@ -1278,9 +1280,14 @@ footer {
           existingBiz.adminReason = data.reason || "";
         } else if (action === "disable") {
           existingBiz.status = "suspended";
+        } else if (action === "propagate_seo") {
+          existingBiz.seoPropagated = true;
         }
 
         await env.MARKET_KV.put(id, JSON.stringify(existingBiz));
+
+        // Also update index just in case
+
 
         // Update marketplace index
         let indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
