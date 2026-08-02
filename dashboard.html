@@ -73,7 +73,7 @@
         </div>
       </div>
 
-      <!-- Banner: Approved / Active -->
+            <!-- Banner: Approved / Active -->
       <div class="banner success" id="banner-approved" style="display: none;">
         <div class="banner-header">
           <div class="banner-title">✅ Business Approved</div>
@@ -87,6 +87,7 @@
           <div style="margin-top: 8px; font-size: 0.9em; background: rgba(255,255,255,0.5); padding: 4px 8px; border-radius: 4px; display: inline-block;">
              <strong>Your URL:</strong> <span id="approved-url-display"></span>
           </div>
+          <div id="seo-status-msg" style="margin-top: 8px; font-size: 0.9em; padding: 4px 8px; border-radius: 4px; display: block; font-weight: bold;"></div>
         </div>
       </div>
 
@@ -215,17 +216,32 @@
             } else if (bizData.status === 'approved' || bizData.status === 'verified') {
                 const banner = document.getElementById('banner-approved');
                 banner.style.display = 'flex';
+
+                let shareUrl = `https://business.dtech-services.co.za/business-profile.html?${bizData.slug}`;
+                const seoMsgDiv = document.getElementById('seo-status-msg');
+
+                if (bizData.seoPropagated) {
+                    seoMsgDiv.style.color = '#155724';
+                    seoMsgDiv.style.background = '#d4edda';
+                    seoMsgDiv.innerHTML = '✨ Your advanced SEO is ready! Sharing your URL will now show a beautiful preview.';
+                    shareUrl = `https://business.dtech-services.co.za/profile/${bizData.slug}.html`;
+                } else {
+                    seoMsgDiv.style.color = '#856404';
+                    seoMsgDiv.style.background = '#fff3cd';
+                    seoMsgDiv.innerHTML = '⏳ Waiting for advanced SEO information to propagate. (Previews might not show image yet)';
+                }
+
                 const liveUrl = `https://business.dtech-services.co.za/business-profile.html?${bizData.slug}`;
 
                 const link = banner.querySelector('a');
                 link.href = liveUrl;
                 link.target = '_blank';
 
-                document.getElementById('approved-url-display').innerText = liveUrl;
+                document.getElementById('approved-url-display').innerText = shareUrl;
 
                 const copyBtn = document.getElementById('copy-link-btn');
                 copyBtn.onclick = () => {
-                    navigator.clipboard.writeText(liveUrl).then(() => {
+                    navigator.clipboard.writeText(shareUrl).then(() => {
                         const origText = copyBtn.innerText;
                         copyBtn.innerText = 'Copied!';
                         setTimeout(() => copyBtn.innerText = origText, 2000);
