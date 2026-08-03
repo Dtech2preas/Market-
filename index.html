@@ -42,6 +42,14 @@
         <option value="North West">North West</option>
         <option value="Western Cape">Western Cape</option>
       </select>
+      <div class="view-toggles mobile-only" style="display: none; gap: 8px; align-items: center; margin-left: 10px;">
+        <button id="view-2-col" class="view-toggle-btn active" title="Grid View" style="background: none; border: none; cursor: pointer; color: var(--text-light); padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        </button>
+        <button id="view-1-col" class="view-toggle-btn" title="List View" style="background: none; border: none; cursor: pointer; color: var(--text-light); padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        </button>
+      </div>
     </div>
 
     <div class="featured-section" id="featured-section" style="display: none;">
@@ -66,6 +74,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterPills = document.querySelectorAll('.filter-pill:not(select)');
   const provinceFilter = document.getElementById('province-filter');
   const searchInput = document.getElementById('search-input');
+
+  // View Toggle Logic
+  const view2ColBtn = document.getElementById('view-2-col');
+  const view1ColBtn = document.getElementById('view-1-col');
+  const marketplaceContainer = document.getElementById('marketplace-container');
+  const featuredContainer = document.getElementById('featured-container');
+
+  if (view2ColBtn && view1ColBtn) {
+    view2ColBtn.addEventListener('click', () => {
+      view2ColBtn.classList.add('active');
+      view1ColBtn.classList.remove('active');
+      if (marketplaceContainer) marketplaceContainer.classList.remove('mobile-1-col');
+      if (featuredContainer) featuredContainer.classList.remove('mobile-1-col');
+    });
+
+    view1ColBtn.addEventListener('click', () => {
+      view1ColBtn.classList.add('active');
+      view2ColBtn.classList.remove('active');
+      if (marketplaceContainer) marketplaceContainer.classList.add('mobile-1-col');
+      if (featuredContainer) featuredContainer.classList.add('mobile-1-col');
+    });
+  }
 
   function applyFilters() {
     const activePill = document.querySelector('.filter-pill.active');

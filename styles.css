@@ -924,11 +924,60 @@ h1, h2, h3, h4, h5, h6 {
   grid-template-columns: repeat(4, 1fr);
 }
 
-/* 2 columns on mobile */
+.mobile-only {
+  display: none !important;
+}
+
+/* mobile styling */
 @media (max-width: 768px) {
+  .mobile-only {
+    display: flex !important;
+  }
+
+  .view-toggle-btn.active {
+    color: var(--primary) !important;
+    background: var(--secondary) !important;
+  }
+
   .marketplace-grid {
-    grid-template-columns: repeat(1, 1fr); /* 1 column on mobile for better detail view */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .marketplace-grid.mobile-1-col {
+    grid-template-columns: 1fr;
     gap: 16px;
+  }
+
+  /* Compact styling for 2-column view */
+  .marketplace-grid:not(.mobile-1-col) .business-card .cover {
+    height: 80px;
+  }
+  .marketplace-grid:not(.mobile-1-col) .business-card .logo {
+    width: 40px;
+    height: 40px;
+    top: -20px;
+    left: 12px;
+  }
+  .marketplace-grid:not(.mobile-1-col) .business-card .content {
+    padding: 12px;
+    padding-top: 24px;
+  }
+  .marketplace-grid:not(.mobile-1-col) .business-card h3 {
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+  .marketplace-grid:not(.mobile-1-col) .business-card p {
+    font-size: 0.75rem;
+    margin-bottom: 8px;
+    -webkit-line-clamp: 2; /* Truncate description more aggressively */
+  }
+  .marketplace-grid:not(.mobile-1-col) .tags {
+    gap: 4px;
+  }
+  .marketplace-grid:not(.mobile-1-col) .tag {
+    font-size: 0.65rem;
+    padding: 2px 6px;
   }
 }
 
