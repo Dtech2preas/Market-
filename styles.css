@@ -166,21 +166,13 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Marketplace Grid */
+/* Force 2 cards side-by-side on ALL screens */
+.marketplace-grid,
 .old-marketplace-grid {
-  display: grid;
-  gap: 20px;
-  padding: 32px 0;
-  /* 4 columns on desktop */
-  grid-template-columns: repeat(4, 1fr);
-}
-
-/* 2 columns on mobile */
-@media (max-width: 768px) {
-  .old-marketplace-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 16px !important;
+  padding: 24px 0 48px;
 }
 
 /* Business Card Specific */
