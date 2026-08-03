@@ -21,114 +21,60 @@
       <nav class="sidebar-nav">
         <a href="#overview" class="sidebar-link active">Overview</a>
         <a href="editor-1-basic.html" class="sidebar-link" id="editor-link">Website Editor</a>
-        <a href="#analytics" class="sidebar-link">Analytics</a>
-        <a href="#settings" class="sidebar-link">Settings</a>
       </nav>
     </aside>
 
     <main class="dashboard-content">
-      <h2 style="margin-bottom: 24px;" id="welcome-msg">Welcome back</h2>
-
-      <!-- Banner: Create Business -->
-      <div class="banner info" id="banner-create" style="display: none;">
-        <div class="banner-header">
-          <div class="banner-title">🚀 Welcome to DTECH Hub!</div>
-          <a href="onboarding-1-basic.html" class="btn btn-primary">Create a Business Website</a>
-        </div>
-        <div class="banner-body">
-          It looks like you haven't set up a business profile yet. Get started by creating your website.
-        </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 id="welcome-msg">Welcome back</h2>
       </div>
 
-      <!-- Banner: Request Changes -->
-      <div class="banner warning" id="banner-changes" style="display: none;">
-        <div class="banner-header">
-          <div class="banner-title">⚠️ Changes Requested</div>
-          <a href="onboarding-1-basic.html" class="btn" style="background: white; border: 1px solid #856404; color: #856404;">Continue Editing</a>
-        </div>
-        <div class="banner-body">
-          Your business application requires some updates before it can be approved.
-          <div class="banner-reason">"Please upload a clear logo and add at least one product to your listings."</div>
-        </div>
-      </div>
+      <!-- Unified Header Section -->
+      <div class="unified-header" style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-pill); box-shadow: var(--shadow); padding: 24px; display: flex; flex-direction: column; gap: 20px;">
 
-      <!-- Banner: Declined -->
-      <div class="banner danger" id="banner-declined" style="display: none;">
-        <div class="banner-header">
-          <div class="banner-title">⛔ Application Declined</div>
-        </div>
-        <div class="banner-body">
-          Unfortunately, your business application has been declined.
-          <div class="banner-reason">"This appears to be a duplicate business submission."</div>
-        </div>
-      </div>
+        <!-- Status Area -->
+        <div id="unified-status-area" style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; border-bottom: 1px solid var(--border);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div id="status-icon" style="font-size: 28px;">🚀</div>
+              <div>
+                <h3 id="status-title" style="color: var(--text); margin: 0; font-size: 1.25rem;">Welcome to DTECH Hub!</h3>
+                <p id="status-desc" style="color: var(--text-light); margin: 4px 0 0 0; font-size: 0.95rem;">Loading your business profile status...</p>
+              </div>
+            </div>
+            <div id="status-actions">
+              <!-- Action buttons will be injected here -->
+            </div>
+          </div>
 
-      <!-- Banner: Pending -->
-      <div class="banner info" id="banner-pending" style="display: none;">
-        <div class="banner-header">
-          <div class="banner-title">⏳ Pending Review</div>
-        </div>
-        <div class="banner-body">
-          Your application is currently being reviewed by an administrator. We will notify you once a decision is made.
-        </div>
-      </div>
+          <div id="status-reason" style="display: none; background: rgba(239, 68, 68, 0.1); border-left: 4px solid var(--danger); padding: 12px; margin-top: 8px; border-radius: 4px; color: var(--text); font-style: italic; font-size: 0.9rem;">
+          </div>
 
-            <!-- Banner: Approved / Active -->
-      <div class="banner success" id="banner-approved" style="display: none;">
-        <div class="banner-header">
-          <div class="banner-title">✅ Business Approved</div>
-          <div>
-            <button id="copy-link-btn" class="btn" style="background: white; border: 1px solid #155724; color: #155724; margin-right: 8px;">Copy Link</button>
-            <a href="#" class="btn" style="background: white; border: 1px solid #155724; color: #155724;">View Live Site</a>
+          <div id="status-url-area" style="display: none; flex-direction: column; gap: 8px; margin-top: 8px;">
+            <div style="font-size: 0.9em; background: var(--bg-offset); padding: 8px 12px; border-radius: 8px; display: inline-block; border: 1px solid var(--border);">
+              <strong style="color: var(--text);">Your URL:</strong> <span id="approved-url-display" style="color: var(--info);"></span>
+            </div>
+            <div id="seo-status-msg" style="font-size: 0.85rem; padding: 6px 12px; border-radius: 6px; font-weight: 500;"></div>
           </div>
         </div>
-        <div class="banner-body">
-          Your business is live on the directory! You can manage your content in the Website Editor.
-          <div style="margin-top: 8px; font-size: 0.9em; background: rgba(255,255,255,0.5); padding: 4px 8px; border-radius: 4px; display: inline-block;">
-             <strong>Your URL:</strong> <span id="approved-url-display"></span>
+
+        <!-- Profile Completeness Area -->
+        <div id="unified-completeness-area" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="color: var(--text); font-weight: 600;">Profile Completeness</div>
+            <div id="score-text" style="color: var(--info); font-weight: bold;">0%</div>
           </div>
-          <div id="seo-status-msg" style="margin-top: 8px; font-size: 0.9em; padding: 4px 8px; border-radius: 4px; display: block; font-weight: bold;"></div>
-        </div>
-      </div>
-
-      <div class="stat-grid" id="stat-grid">
-        <div class="stat-card">
-          <h3>142</h3>
-          <p>Profile Views (This Week)</p>
-        </div>
-        <div class="stat-card">
-          <h3>28</h3>
-          <p>Contact Clicks</p>
-        </div>
-        <div class="stat-card">
-          <h3>12</h3>
-          <p>Active Listings</p>
-        </div>
-      </div>
-
-      <!-- Profile Completeness Score (New) -->
-      <div class="banner" id="profile-completeness-card" style="margin-top: 24px; display: none; background: var(--surface); border: 1px solid var(--border);">
-        <div class="banner-header" style="flex-direction: column; align-items: flex-start; gap: 10px;">
-          <div class="banner-title" style="color: var(--text);">📊 Profile Completeness: <span id="score-text">0%</span></div>
-          <div style="width: 100%; background: var(--bg); border-radius: 8px; overflow: hidden; height: 10px; margin-top: 5px;">
-            <div id="score-bar" style="height: 100%; background: var(--primary); width: 0%; transition: width 0.5s ease;"></div>
+          <div style="width: 100%; background: var(--bg-offset); border-radius: 8px; overflow: hidden; height: 8px; margin-bottom: 16px; border: 1px solid var(--border);">
+            <div id="score-bar" style="height: 100%; background: var(--info); width: 0%; transition: width 0.5s ease;"></div>
+          </div>
+          <div id="completeness-tips-container" style="background: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 12px;">
+            <p style="margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; color: var(--text);">Tips to improve your profile:</p>
+            <ul id="completeness-tips" style="padding-left: 20px; color: var(--text-light); font-size: 0.85rem; line-height: 1.6; margin: 0;">
+              <!-- Tips injected via JS -->
+            </ul>
           </div>
         </div>
-        <div class="banner-body" style="margin-top: 15px;">
-          <p style="margin-bottom: 10px; font-weight: 500;">Tips to improve your profile:</p>
-          <ul id="completeness-tips" style="padding-left: 20px; color: var(--text-light); font-size: 0.95rem; line-height: 1.5;">
-            <!-- Tips injected via JS -->
-          </ul>
-        </div>
-      </div>
 
-      <div class="banner info" id="additional-features" style="margin-top: 24px; display: none;">
-        <div class="banner-header">
-          <div class="banner-title">✨ Additional Features (Coming Soon)</div>
-        </div>
-        <div class="banner-body">
-          We are working on bringing more tools and features to help you grow your business. Stay tuned!
-        </div>
       </div>
     </main>
   </div>
@@ -149,31 +95,33 @@
         });
         const bizData = await res.json();
 
-        // Hide all banners first
-        document.getElementById('banner-create').style.display = 'none';
-        document.getElementById('banner-changes').style.display = 'none';
-        document.getElementById('banner-declined').style.display = 'none';
-        document.getElementById('banner-pending').style.display = 'none';
-        document.getElementById('banner-approved').style.display = 'none';
-        document.getElementById('stat-grid').style.display = 'none';
-        document.getElementById('additional-features').style.display = 'none';
-        document.getElementById('profile-completeness-card').style.display = 'none';
+        // DOM Elements for unified header
+        const statusIcon = document.getElementById('status-icon');
+        const statusTitle = document.getElementById('status-title');
+        const statusDesc = document.getElementById('status-desc');
+        const statusActions = document.getElementById('status-actions');
+        const statusReason = document.getElementById('status-reason');
+        const statusUrlArea = document.getElementById('status-url-area');
 
-        // Update welcome message if name is available in token (mocked for now)
-        // document.getElementById('welcome-msg').innerText = `Welcome back`;
+        const completenessArea = document.getElementById('unified-completeness-area');
+        const scoreText = document.getElementById('score-text');
+        const scoreBar = document.getElementById('score-bar');
+        const tipsContainer = document.getElementById('completeness-tips');
 
         // Hide sidebar links if no business
         const sidebarNav = document.querySelector('.sidebar-nav');
         const editorLink = document.getElementById('editor-link');
 
         if (bizData.error || !bizData.id) {
-            // No business found, show creation banner
-            document.getElementById('banner-create').style.display = 'flex';
+            // No business found
             if (editorLink) editorLink.style.display = 'none';
-            document.querySelector('a[href="#analytics"]').style.display = 'none';
+            statusIcon.innerText = '🚀';
+            statusTitle.innerText = 'Welcome to DTECH Hub!';
+            statusDesc.innerText = "It looks like you haven't set up a business profile yet. Get started by creating your website.";
+            statusActions.innerHTML = '<a href="onboarding-1-basic.html" class="btn btn-primary">Create a Business Website</a>';
         } else if (bizData.status) {
-            document.getElementById('stat-grid').style.display = 'grid';
-            document.getElementById('additional-features').style.display = 'flex';
+            if (editorLink) editorLink.style.display = 'block';
+            completenessArea.style.display = 'block';
 
             // Calculate Profile Completeness
             let score = 0;
@@ -189,62 +137,79 @@
             if (data.branding && data.branding.cover) { score += 10; } else { tips.push("Upload a custom cover photo to stand out."); }
             if (data.listings && data.listings.length > 0) { score += 20; } else { tips.push("Add at least one product or service to your catalog/listings."); }
 
-            document.getElementById('profile-completeness-card').style.display = 'flex';
-            document.getElementById('score-text').innerText = `${score}%`;
-            document.getElementById('score-bar').style.width = `${score}%`;
+            scoreText.innerText = `${score}%`;
+            scoreBar.style.width = `${score}%`;
 
-            const tipsContainer = document.getElementById('completeness-tips');
             if (tips.length === 0) {
               tipsContainer.innerHTML = '<li>🎉 Fantastic! Your profile is fully optimized.</li>';
-              document.getElementById('score-bar').style.background = '#10b981'; // Green color for 100%
+              scoreBar.style.background = 'var(--success)';
+              scoreText.style.color = 'var(--success)';
             } else {
               tipsContainer.innerHTML = tips.map(tip => `<li>${tip}</li>`).join('');
             }
-            if (editorLink) editorLink.style.display = 'block';
-            document.querySelector('a[href="#analytics"]').style.display = 'block';
 
             if (bizData.status === 'request_changes') {
-                const banner = document.getElementById('banner-changes');
-                banner.style.display = 'flex';
-                if(bizData.adminReason) banner.querySelector('.banner-reason').innerText = `"${bizData.adminReason}"`;
+                statusIcon.innerText = '⚠️';
+                statusTitle.innerText = 'Changes Requested';
+                statusTitle.style.color = 'var(--warning)';
+                statusDesc.innerText = 'Your business application requires some updates before it can be approved.';
+                statusActions.innerHTML = '<a href="onboarding-1-basic.html" class="btn btn-outline" style="border-color: var(--warning); color: var(--warning);">Continue Editing</a>';
+                if(bizData.adminReason) {
+                    statusReason.style.display = 'block';
+                    statusReason.style.borderColor = 'var(--warning)';
+                    statusReason.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
+                    statusReason.innerText = `"${bizData.adminReason}"`;
+                }
             } else if (bizData.status === 'declined' || bizData.status === 'reject') {
-                const banner = document.getElementById('banner-declined');
-                banner.style.display = 'flex';
-                if(bizData.adminReason) banner.querySelector('.banner-reason').innerText = `"${bizData.adminReason}"`;
+                statusIcon.innerText = '⛔';
+                statusTitle.innerText = 'Application Declined';
+                statusTitle.style.color = 'var(--danger)';
+                statusDesc.innerText = 'Unfortunately, your business application has been declined.';
+                if(bizData.adminReason) {
+                    statusReason.style.display = 'block';
+                    statusReason.style.borderColor = 'var(--danger)';
+                    statusReason.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                    statusReason.innerText = `"${bizData.adminReason}"`;
+                }
             } else if (bizData.status === 'pending') {
-                document.getElementById('banner-pending').style.display = 'flex';
+                statusIcon.innerText = '⏳';
+                statusTitle.innerText = 'Pending Review';
+                statusTitle.style.color = 'var(--info)';
+                statusDesc.innerText = 'Your application is currently being reviewed by an administrator. We will notify you once a decision is made.';
             } else if (bizData.status === 'approved' || bizData.status === 'verified') {
-                const banner = document.getElementById('banner-approved');
-                banner.style.display = 'flex';
+                statusIcon.innerText = '✅';
+                statusTitle.innerText = 'Business Approved';
+                statusTitle.style.color = 'var(--success)';
+                statusDesc.innerText = 'Your business is live on the directory! You can manage your content in the Website Editor.';
 
+                statusUrlArea.style.display = 'flex';
                 let shareUrl = `https://business.dtech-services.co.za/business-profile.html?${bizData.slug}`;
+                const liveUrl = shareUrl;
                 const seoMsgDiv = document.getElementById('seo-status-msg');
 
                 if (bizData.seoPropagated) {
-                    seoMsgDiv.style.color = '#155724';
-                    seoMsgDiv.style.background = '#d4edda';
+                    seoMsgDiv.style.color = 'var(--success)';
+                    seoMsgDiv.style.background = 'rgba(16, 185, 129, 0.1)';
                     seoMsgDiv.innerHTML = '✨ Your advanced SEO is ready! Sharing your URL will now show a beautiful preview.';
                     shareUrl = `https://business.dtech-services.co.za/profile/${bizData.slug}.html`;
                 } else {
-                    seoMsgDiv.style.color = '#856404';
-                    seoMsgDiv.style.background = '#fff3cd';
+                    seoMsgDiv.style.color = 'var(--warning)';
+                    seoMsgDiv.style.background = 'rgba(245, 158, 11, 0.1)';
                     seoMsgDiv.innerHTML = '⏳ Waiting for advanced SEO information to propagate. (Previews might not show image yet)';
                 }
 
-                const liveUrl = `https://business.dtech-services.co.za/business-profile.html?${bizData.slug}`;
-
-                const link = banner.querySelector('a');
-                link.href = liveUrl;
-                link.target = '_blank';
-
                 document.getElementById('approved-url-display').innerText = shareUrl;
 
-                const copyBtn = document.getElementById('copy-link-btn');
-                copyBtn.onclick = () => {
+                statusActions.innerHTML = `
+                  <button id="copy-link-btn" class="btn btn-outline" style="border-color: var(--success); color: var(--success); margin-right: 8px;">Copy Link</button>
+                  <a href="${liveUrl}" target="_blank" class="btn btn-outline" style="border-color: var(--success); color: var(--success);">View Live Site</a>
+                `;
+
+                document.getElementById('copy-link-btn').onclick = function() {
                     navigator.clipboard.writeText(shareUrl).then(() => {
-                        const origText = copyBtn.innerText;
-                        copyBtn.innerText = 'Copied!';
-                        setTimeout(() => copyBtn.innerText = origText, 2000);
+                        const origText = this.innerText;
+                        this.innerText = 'Copied!';
+                        setTimeout(() => this.innerText = origText, 2000);
                     });
                 };
             }
