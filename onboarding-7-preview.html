@@ -74,6 +74,11 @@
         });
         const data = await res.json();
 
+        if (!res.ok || data.error) {
+            alert(`Failed to submit application: ${data.error || 'Unknown error'}`);
+            return;
+        }
+
         // Clear storage
         ['onboarding_basic', 'onboarding_contact', 'onboarding_listings', 'onboarding_sections', 'onboarding_logo', 'onboarding_cover', 'onboarding_cta', 'onboarding_gallery', 'onboarding_design'].forEach(k => localStorage.removeItem(k));
 
