@@ -3141,6 +3141,21 @@ var worker_default = {
         return null;
       }
     };
+    const getAdminUser = async (req) => {
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+      const token = authHeader.split(" ")[1];
+      try {
+        const secret = new TextEncoder().encode(env.JWT_SECRET || "fallback-secret-for-dev-only");
+        const { payload } = await jwtVerify(token, secret);
+        if (payload.type === "admin" && payload.role === "super_admin") {
+          return payload;
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    };
     const getBody = async (req) => {
       try {
         return await req.json();
@@ -4204,7 +4219,52 @@ footer {
         await env.MARKET_KV.put("marketplace:index", JSON.stringify(index));
         return jsonResponse({ success: true });
       }
+      if (request.method === "GET" && path === "/api/admin/check-setup") {
+        const adminExists = await env.MARKET_KV.get("admin:exists");
+        return jsonResponse({ setupRequired: !adminExists });
+      }
+      if (request.method === "POST" && path === "/api/admin/setup") {
+        const adminExists = await env.MARKET_KV.get("admin:exists");
+        if (adminExists) {
+          return errorResponse("Admin setup already complete.", 403);
+        }
+        const { email, password } = await getBody(request);
+        if (!email || !password) return errorResponse("Missing email or password");
+        const passwordHash = await hashPassword(password);
+        const adminId = `admin:${Date.now().toString(36)}`;
+        const adminData = {
+          id: adminId,
+          email,
+          passwordHash,
+          role: "super_admin",
+          createdAt: Date.now()
+        };
+        await env.MARKET_KV.put(adminId, JSON.stringify(adminData));
+        await env.MARKET_KV.put(`admin_email:${email}`, adminId);
+        await env.MARKET_KV.put("admin:exists", "true");
+        return jsonResponse({ success: true, message: "Admin setup complete" });
+      }
+      if (request.method === "POST" && path === "/api/admin/login") {
+        const { email, password } = await getBody(request);
+        if (!email || !password) return errorResponse("Missing email or password");
+        const adminExists = await env.MARKET_KV.get("admin:exists");
+        if (!adminExists) return errorResponse("Admin setup not complete", 403);
+        const adminId = await env.MARKET_KV.get(`admin_email:${email}`);
+        if (!adminId) return errorResponse("Invalid credentials", 401);
+        const adminStr = await env.MARKET_KV.get(adminId);
+        if (!adminStr) return errorResponse("Admin not found", 404);
+        const admin = JSON.parse(adminStr);
+        const isValid = await comparePassword(password, admin.passwordHash);
+        if (!isValid) {
+          return errorResponse("Invalid credentials", 401);
+        }
+        const secret = new TextEncoder().encode(env.JWT_SECRET || "fallback-secret-for-dev-only");
+        const token = await new SignJWT({ adminId: admin.id, type: "admin", role: admin.role }).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime("24h").sign(secret);
+        return jsonResponse({ token, admin: { email: admin.email, role: admin.role } });
+      }
       if (request.method === "GET" && path === "/admin/businesses") {
+        const adminPayload = await getAdminUser(request);
+        if (!adminPayload) return errorResponse("Unauthorized", 401);
         try {
           const listRes = await env.MARKET_KV.list({ prefix: "business:" });
           const businesses = [];
@@ -4235,6 +4295,8 @@ footer {
         }
       }
       if (request.method === "POST" && path === "/admin/edit") {
+        const adminPayload = await getAdminUser(request);
+        if (!adminPayload) return errorResponse("Unauthorized", 401);
         const data = await getBody(request);
         const { id, updates } = data;
         if (!id || !updates) return errorResponse("Missing fields");
@@ -4246,6 +4308,8 @@ footer {
         return jsonResponse({ success: true });
       }
       if (request.method === "POST" && path === "/admin/action") {
+        const adminPayload = await getAdminUser(request);
+        if (!adminPayload) return errorResponse("Unauthorized", 401);
         const data = await getBody(request);
         const { id, action } = data;
         if (!id || !action) return errorResponse("Missing fields");

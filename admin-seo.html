@@ -1,6 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <style>body { display: none; }</style>
+  <script>
+    (function() {
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        window.location.href = 'admin-login.html';
+      } else {
+        try {
+          const payload = JSON.parse(atob(adminToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+          if (payload.exp * 1000 < Date.now() || payload.type !== 'admin') {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'admin-login.html';
+          } else {
+            // Restore visibility once validated
+            document.documentElement.style.display = 'initial';
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.style.display = 'block';
+            });
+          }
+        } catch (e) {
+          localStorage.removeItem('adminToken');
+          window.location.href = 'admin-login.html';
+        }
+      }
+    })();
+  </script>
   <meta charset="UTF-8">
   <title>SEO Management - Admin</title>
   <link rel="stylesheet" href="/styles.css">
@@ -76,7 +102,7 @@
 
     async function fetchApprovedForSeo() {
       try {
-        const response = await fetch(`${WORKER_URL}/admin/businesses`);
+        const response = await fetch(`${WORKER_URL}/admin/businesses`, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') } });
         const businesses = await response.json();
         const active = businesses.filter(b => b.status === 'approved' || b.status === 'verified');
 
@@ -192,11 +218,7 @@
       try {
           const originalText = btn.innerText;
           btn.innerText = 'Saving...';
-          const res = await fetch(`${WORKER_URL}/admin/action`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ id, action: 'propagate_seo' })
-          });
+          const res = await fetch(`${WORKER_URL}/admin/action`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') }, body: JSON.stringify({ id, action: 'propagate_seo' }) });
           if (!res.ok) throw new Error('Failed to propagate SEO');
           btn.innerText = 'Saved!';
           setTimeout(() => fetchApprovedForSeo(), 1500); // refresh list

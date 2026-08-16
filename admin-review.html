@@ -1,6 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <style>body { display: none; }</style>
+  <script>
+    (function() {
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        window.location.href = 'admin-login.html';
+      } else {
+        try {
+          const payload = JSON.parse(atob(adminToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+          if (payload.exp * 1000 < Date.now() || payload.type !== 'admin') {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'admin-login.html';
+          } else {
+            // Restore visibility once validated
+            document.documentElement.style.display = 'initial';
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.style.display = 'block';
+            });
+          }
+        } catch (e) {
+          localStorage.removeItem('adminToken');
+          window.location.href = 'admin-login.html';
+        }
+      }
+    })();
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Review - DTECH Hub</title>
@@ -189,7 +215,7 @@
       try {
         // Fetch specific business from admin scope. Note: The mock worker /admin/businesses returns a list.
         // We'll fetch the list and find our ID since /admin/business/:id isn't implemented.
-        const res = await fetch(`${WORKER_URL}/admin/businesses`);
+        const res = await fetch(`${WORKER_URL}/admin/businesses`, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') } });
         const businesses = await res.json();
         const biz = businesses.find(b => b.id === currentBusinessId);
 
@@ -253,7 +279,7 @@
       try {
           const res = await fetch(`${WORKER_URL}/admin/action`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') },
               body: JSON.stringify({ id: currentBusinessId, action: action, reason: reason })
           });
           const data = await res.json();
