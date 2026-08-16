@@ -94,6 +94,23 @@
         data = await res.json();
 
         if(!data.error) {
+            // Send email notification via FormSubmit
+            const websiteUrl = `https://business.dtech-services.co.za/${basic.slug || ''}`;
+            try {
+                await fetch('https://formsubmit.co/ajax/dtech2services@gmail.com', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `There's a website update on ${websiteUrl}`
+                    })
+                });
+            } catch (err) {
+                console.error("FormSubmit error", err);
+            }
+
             // Clear storage
             ['editor_basic', 'editor_contact', 'editor_listings', 'editor_sections', 'editor_logo', 'editor_cover', 'editor_bizId', 'editor_cta', 'editor_gallery', 'editor_design'].forEach(k => localStorage.removeItem(k));
             alert("Changes successfully published to live site!");
