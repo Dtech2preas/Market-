@@ -185,13 +185,13 @@ export default {
   <\/script>
   <style>
 :root {
-  --primary: #0056b3;
-  --secondary: #f8f9fa;
-  --text: #333;
-  --text-light: #6c757d;
+  --primary: #121c29;
+  --secondary: #f1f5f9;
+  --text: #0f172a;
+  --text-light: #475569;
   --bg: #ffffff;
-  --bg-offset: #f4f6f8;
-  --border: #e9ecef;
+  --bg-offset: #f8fafc;
+  --border: #e2e8f0;
   --success: #28a745;
   --warning: #ffc107;
   --danger: #dc3545;
@@ -453,11 +453,11 @@ h1, h2, h3, h4 {
   }
 }
 :root {
-    --primary-color: #0056b3;
-    --secondary-color: #f8f9fa;
-    --text-color: #333;
-    --light-text: #666;
-    --border-color: #ddd;
+    --primary-color: #121c29;
+    --secondary-color: #f1f5f9;
+    --text-color: #0f172a;
+    --light-text: #475569;
+    --border-color: #e2e8f0;
     --success-color: #28a745;
     --danger-color: #dc3545;
     --whatsapp-color: #25d366;
