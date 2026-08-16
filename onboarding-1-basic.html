@@ -31,6 +31,8 @@
       <div class="form-group">
         <label class="form-label">Profile Link (Slug)</label>
         <input type="text" id="b-slug" class="form-control" placeholder="e.g. dtech-services">
+        <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 4px;">This will be your business URL. Use only letters, numbers, hyphens (-), and underscores (_). No spaces allowed.</p>
+        <p id="slug-error" style="color: var(--danger); font-size: 0.85rem; margin-top: 4px; display: none;"></p>
       </div>
       <div class="form-group">
         <label class="form-label">Category</label>
@@ -81,10 +83,36 @@
   <script>
     const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
 
-    function saveAndNext() {
+    async function saveAndNext() {
+      const slugInput = document.getElementById('b-slug').value;
+      const slugError = document.getElementById('slug-error');
+
+      if (/[^a-zA-Z0-9-_]/.test(slugInput)) {
+        slugError.innerText = 'Invalid characters in slug. Please remove spaces and use only letters, numbers, hyphens, or underscores.';
+        slugError.style.display = 'block';
+        return;
+      }
+
+      // Check slug availability
+      const token = localStorage.getItem('dtech_token');
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      try {
+          const res = await fetch(`${WORKER_URL}/api/business/check-slug?slug=${encodeURIComponent(slugInput)}`, { headers });
+          const data = await res.json();
+          if (data.available === false) {
+             slugError.innerText = 'This slug is already taken. Please choose another one.';
+             slugError.style.display = 'block';
+             return;
+          }
+      } catch (e) {
+          console.error(e);
+      }
+
+      slugError.style.display = 'none';
+
       const data = {
         name: document.getElementById('b-name').value,
-        slug: document.getElementById('b-slug').value,
+        slug: slugInput,
         category: document.getElementById('b-category').value,
         tagline: document.getElementById('b-tagline').value,
         type: document.getElementById('b-type').value,

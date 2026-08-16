@@ -148,8 +148,8 @@
             <div class="seo-code-container">${escapeHTML(seoCode)}</div>
 
             <div class="seo-actions">
-              <button onclick="copyCode(this, '${escapeHTML(seoCode).replace(/'/g, "\\'")}')" class="btn btn-outline-dark">Copy HTML</button>
-              <button onclick="downloadCode('${slug}.html', '${escapeHTML(seoCode).replace(/'/g, "\\'")}')" class="btn btn-outline-dark">Download .html</button>
+              <button data-code="${escapeHTML(seoCode)}" onclick="copyCode(this)" class="btn btn-outline-dark">Copy HTML</button>
+              <button data-code="${escapeHTML(seoCode)}" data-filename="${slug}.html" onclick="downloadCode(this)" class="btn btn-outline-dark">Download .html</button>
               <button onclick="markPropagated('${biz.id}', this)" class="btn ${biz.seoPropagated ? 'btn-outline' : 'btn-primary'}">
                 ${biz.seoPropagated ? 'Mark as Propagated Again' : 'Mark as Propagated'}
               </button>
@@ -162,7 +162,8 @@
       }
     }
 
-    function copyCode(btn, code) {
+    function copyCode(btn) {
+      const code = btn.getAttribute('data-code');
       // Decode HTML entities before copying
       const textarea = document.createElement('textarea');
       textarea.innerHTML = code;
@@ -173,7 +174,9 @@
       setTimeout(() => btn.innerText = originalText, 2000);
     }
 
-    function downloadCode(filename, code) {
+    function downloadCode(btn) {
+      const filename = btn.getAttribute('data-filename');
+      const code = btn.getAttribute('data-code');
       const textarea = document.createElement('textarea');
       textarea.innerHTML = code;
       const blob = new Blob([textarea.value], { type: 'text/html' });
