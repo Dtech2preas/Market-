@@ -1,12 +1,12 @@
 :root {
   --primary: #121c29; /* Darker blue/black base */
   --primary-hover: #1c2b3d;
-  --secondary: #1f2b38; /* Darker secondary */
-  --text: #e2e8f0; /* Off-white text for dark theme */
-  --text-light: #94a3b8;
-  --bg: #0f1722; /* Very dark blue, almost black */
-  --bg-offset: #0a0f16; /* Deepest black/blue background */
-  --border: #2a3746; /* Subtle borders */
+  --secondary: #f1f5f9; /* Darker secondary */
+  --text: #0f172a; /* Off-white text for dark theme */
+  --text-light: #475569;
+  --bg: #ffffff; /* Very dark blue, almost black */
+  --bg-offset: #f8fafc; /* Deepest black/blue background */
+  --border: #e2e8f0; /* Subtle borders */
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
@@ -32,8 +32,8 @@ body {
   background-color: var(--bg-offset);
   line-height: 1.5;
   /* Very subtle animated mesh-like background */
-  background-image: radial-gradient(circle at 15% 50%, rgba(20, 40, 60, 0.3), transparent 25%),
-                    radial-gradient(circle at 85% 30%, rgba(10, 35, 55, 0.3), transparent 25%);
+  background-image: radial-gradient(circle at 15% 50%, rgba(20, 40, 60, 0.05), transparent 25%),
+                    radial-gradient(circle at 85% 30%, rgba(10, 35, 55, 0.05), transparent 25%);
   background-attachment: fixed;
 }
 
@@ -69,12 +69,16 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
   align-items: center;
 }
+.navbar a { color: #ffffff; }
+.navbar a:hover { color: #e2e8f0; }
+
 .navbar-brand {
-  font-size: 1.5rem;
+font-size: 1.5rem;
   font-weight: bold;
   color: #ffffff;
 
   letter-spacing: 1px;
+
 }
 .nav-links {
   display: flex;
