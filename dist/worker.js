@@ -4024,6 +4024,23 @@ footer {
           headers: { ...corsHeaders, "Content-Type": "application/xml" }
         });
       }
+      if (request.method === "GET" && path === "/api/business/check-slug") {
+        const rawSlug = url.searchParams.get("slug");
+        if (!rawSlug) return errorResponse("Slug required", 400);
+        const slug = rawSlug.toLowerCase().trim().replace(/[^a-z0-9-_]/g, "-");
+        const businessId = await env.MARKET_KV.get(`slug:${slug}`);
+        if (businessId) {
+          const authPayload = await getAuthUser(request);
+          if (authPayload) {
+            const userBizId = await env.MARKET_KV.get(`user_business:${authPayload.userId}`);
+            if (userBizId === businessId) {
+              return jsonResponse({ available: true, message: "Slug is yours" });
+            }
+          }
+          return jsonResponse({ available: false, error: "Slug already taken" });
+        }
+        return jsonResponse({ available: true });
+      }
       if (request.method === "GET" && path === "/api/marketplace") {
         const indexStr = await env.MARKET_KV.get("marketplace:index") || "[]";
         let index = JSON.parse(indexStr);
@@ -4082,7 +4099,7 @@ footer {
         const data = await getBody(request);
         const name = data.basic?.name || data.name;
         const rawSlug = data.basic?.slug || data.slug;
-        const slug = rawSlug ? rawSlug.toLowerCase().trim().replace(/[^a-z0-9-]/g, "-") : null;
+        const slug = rawSlug ? rawSlug.toLowerCase().trim().replace(/[^a-z0-9-_]/g, "-") : null;
         const category = data.basic?.category || data.category;
         const province = data.contact?.province || data.province;
         if (!name || !slug) return errorResponse("Name and slug required");

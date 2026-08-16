@@ -192,9 +192,32 @@
        }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       const isEditor = window.location.pathname.includes('editor');
       if (isEditor) {
+         // Fetch branding data from the server if we don't have local drafts
+         const token = localStorage.getItem('dtech_token');
+         if (token) {
+           try {
+             const res = await fetch(`${WORKER_URL}/api/dashboard/my-business`, {
+               headers: { 'Authorization': `Bearer ${token}` }
+             });
+             const bizData = await res.json();
+             if (!bizData.error && bizData.draftVersion && bizData.draftVersion.branding) {
+                const b = bizData.draftVersion.branding;
+                if (!localStorage.getItem('editor_logo') && b.logo) localStorage.setItem('editor_logo', b.logo);
+                if (!localStorage.getItem('editor_cover') && b.cover) localStorage.setItem('editor_cover', b.cover);
+                if (!localStorage.getItem('editor_gallery') && b.gallery) localStorage.setItem('editor_gallery', JSON.stringify(b.gallery));
+             }
+             if (!bizData.error && bizData.draftVersion && bizData.draftVersion.design) {
+                const d = bizData.draftVersion.design;
+                if (!localStorage.getItem('editor_design') && d) localStorage.setItem('editor_design', JSON.stringify(d));
+             }
+           } catch(e) {
+             console.error('Error fetching biz data', e);
+           }
+         }
+
          // Re-map storage keys for editor
          ['logo', 'cover', 'gallery', 'design'].forEach(k => {
              const val = localStorage.getItem(`editor_${k}`);
