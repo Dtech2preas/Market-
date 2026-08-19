@@ -4195,6 +4195,14 @@ footer {
         if (!["approved", "verified"].includes(existingBiz.status)) {
           return errorResponse("Business must be approved before publishing changes", 400);
         }
+        if (existingBiz.seoPropagated && existingBiz.publishedVersion) {
+          const oldV = existingBiz.publishedVersion;
+          const newV = existingBiz.draftVersion;
+          const isSeoChanged = oldV.basic?.name !== newV.basic?.name || oldV.basic?.slug !== newV.basic?.slug || oldV.basic?.tagline !== newV.basic?.tagline || oldV.basic?.description !== newV.basic?.description || oldV.branding?.cover !== newV.branding?.cover;
+          if (isSeoChanged) {
+            existingBiz.seoPropagated = false;
+          }
+        }
         existingBiz.publishedVersion = JSON.parse(JSON.stringify(existingBiz.draftVersion));
         existingBiz.updatedAt = Date.now();
         await env.MARKET_KV.put(id, JSON.stringify(existingBiz));
@@ -4318,6 +4326,14 @@ footer {
         const existingBiz = JSON.parse(existingBizStr);
         if (action === "approve") {
           existingBiz.status = "approved";
+          if (existingBiz.seoPropagated && existingBiz.publishedVersion) {
+            const oldV = existingBiz.publishedVersion;
+            const newV = existingBiz.draftVersion;
+            const isSeoChanged = oldV.basic?.name !== newV.basic?.name || oldV.basic?.slug !== newV.basic?.slug || oldV.basic?.tagline !== newV.basic?.tagline || oldV.basic?.description !== newV.basic?.description || oldV.branding?.cover !== newV.branding?.cover;
+            if (isSeoChanged) {
+              existingBiz.seoPropagated = false;
+            }
+          }
           existingBiz.publishedVersion = JSON.parse(JSON.stringify(existingBiz.draftVersion));
         } else if (action === "request_changes") {
           existingBiz.status = "request_changes";

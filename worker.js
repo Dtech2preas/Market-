@@ -1214,6 +1214,22 @@ footer {
             return errorResponse("Business must be approved before publishing changes", 400);
         }
 
+        // Check if SEO propagation needs to be invalidated
+        if (existingBiz.seoPropagated && existingBiz.publishedVersion) {
+            const oldV = existingBiz.publishedVersion;
+            const newV = existingBiz.draftVersion;
+            const isSeoChanged =
+                oldV.basic?.name !== newV.basic?.name ||
+                oldV.basic?.slug !== newV.basic?.slug ||
+                oldV.basic?.tagline !== newV.basic?.tagline ||
+                oldV.basic?.description !== newV.basic?.description ||
+                oldV.branding?.cover !== newV.branding?.cover;
+
+            if (isSeoChanged) {
+                existingBiz.seoPropagated = false;
+            }
+        }
+
         existingBiz.publishedVersion = JSON.parse(JSON.stringify(existingBiz.draftVersion));
         existingBiz.updatedAt = Date.now();
 
@@ -1378,6 +1394,23 @@ footer {
 
         if (action === "approve") {
           existingBiz.status = "approved";
+
+          // Check if SEO propagation needs to be invalidated
+          if (existingBiz.seoPropagated && existingBiz.publishedVersion) {
+              const oldV = existingBiz.publishedVersion;
+              const newV = existingBiz.draftVersion;
+              const isSeoChanged =
+                  oldV.basic?.name !== newV.basic?.name ||
+                  oldV.basic?.slug !== newV.basic?.slug ||
+                  oldV.basic?.tagline !== newV.basic?.tagline ||
+                  oldV.basic?.description !== newV.basic?.description ||
+                  oldV.branding?.cover !== newV.branding?.cover;
+
+              if (isSeoChanged) {
+                  existingBiz.seoPropagated = false;
+              }
+          }
+
           existingBiz.publishedVersion = JSON.parse(JSON.stringify(existingBiz.draftVersion)); // Auto-publish on first approval
         } else if (action === "request_changes") {
           existingBiz.status = "request_changes";
