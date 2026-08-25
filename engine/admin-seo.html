@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<style>body { display: none; }</style>
+<script>
+    (function() {
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        window.location.href = 'admin-login.html';
+      } else {
+        try {
+          const payload = JSON.parse(atob(adminToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+          if (payload.exp * 1000 < Date.now() || payload.type !== 'admin') {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'admin-login.html';
+          } else {
+            // Restore visibility once validated
+            document.documentElement.style.display = 'initial';
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.style.display = 'block';
+            });
+          }
+        } catch (e) {
+          localStorage.removeItem('adminToken');
+          window.location.href = 'admin-login.html';
+        }
+      }
+    })();
+  </script>
+<meta charset="utf-8"/>
+<title>SEO Management - Admin</title>
+<link href="/styles.css" rel="stylesheet"/>
+<style>
+    .admin-item { background: #fff; padding: 16px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .admin-item-header { display: flex; justify-content: space-between; align-items: center; }
+    .seo-code-container { background: var(--bg); padding: 16px; border-radius: 8px; font-family: monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; border: 1px solid var(--border); }
+    .seo-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge-propagated { background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
+    .badge-pending { background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+<div class="container">
+<a class="navbar-brand" href="/">DTECH Admin</a>
+<div class="nav-links">
+<a class="btn btn-outline" href="#">Logout</a>
+</div>
+</div>
+</nav>
+<div class="container dashboard-layout">
+<aside class="sidebar">
+<nav class="sidebar-nav">
+<a class="sidebar-link" href="admin.html">Overview</a>
+<a class="sidebar-link" href="admin-pending.html">Pending Applications</a>
+<a class="sidebar-link" href="admin-approved.html">Active Businesses</a>
+<a class="sidebar-link active" href="admin-seo.html">SEO Management</a>
+</nav>
+</aside>
+<main class="dashboard-content">
+<h2>SEO Management</h2>
+<p>Manage OpenGraph previews and static SEO files for active businesses.</p>
+<div class="card">
+<h3>How to update SEO</h3>
+<p>
+          To allow WhatsApp and social media to see rich link previews (images and titles), you must manually propagate the SEO.
+        </p>
+<ol>
+<li>Click "Copy HTML" or "Download" for a business below.</li>
+<li>Upload it to the GitHub repository in the <strong>/profile</strong> folder.</li>
+<li>Name the file exactly as the shown filename (e.g., <strong>slug.html</strong>).</li>
+<li>Click "Mark as Propagated" so the user is notified on their dashboard.</li>
+</ol>
+</div>
+<div id="seo-list">
+<p>Loading...</p>
+</div>
+</main>
+</div>
+<script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    document.addEventListener('DOMContentLoaded', fetchApprovedForSeo);
+
+    function escapeHTML(str) {
+        if (!str) return '';
+        return str.toString().replace(/[&<>'"]/g,
+            tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag] || tag)
+        );
+    }
+
+    async function fetchApprovedForSeo() {
+      try {
+        const response = await fetch(`${WORKER_URL}/admin/businesses`, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') } });
+        const businesses = await response.json();
+        const active = businesses.filter(b => b.status === 'approved' || b.status === 'verified');
+
+        const list = document.getElementById('seo-list');
+        list.innerHTML = '';
+
+        if(active.length === 0) {
+          list.innerHTML = '<p>No active businesses found.</p>';
+          return;
+        }
+
+        active.forEach(biz => {
+          const item = document.createElement('div');
+          item.className = 'admin-item';
+
+          const slug = biz.slug || (biz.businessName ? biz.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'unknown');
+          const bName = escapeHTML(biz.businessName || '');
+          const bDesc = escapeHTML(biz.description || '');
+          const bCover = biz.branding?.cover || '';
+          const bLogo = biz.branding?.logo || '';
+          const bImg = escapeHTML(bCover || bLogo || 'https://placehold.co/600x400?text=No+Image');
+
+          const canonicalUrl = `https://business.dtech-services.co.za/profile/${slug}.html`;
+          const targetUrl = `https://business.dtech-services.co.za/business-profile.html?${slug}`;
+
+          const seoCode = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${bName} - DTECH Hub</title>
+  <meta name="description" content="${bDesc} | Listed on DTECH Student Business Hub">
+  <link rel="canonical" href="${canonicalUrl}">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="${bName} - DTECH Hub">
+  <meta property="og:description" content="${bDesc} | Listed on DTECH Student Business Hub">
+  <meta property="og:image" content="${bImg}">
+  <meta property="og:url" content="${canonicalUrl}">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${bName} - DTECH Hub">
+  <meta name="twitter:description" content="${bDesc} | Listed on DTECH Student Business Hub">
+  <meta name="twitter:image" content="${bImg}">
+
+  <meta http-equiv="refresh" content="0; url=${targetUrl}">
+</head>
+<body>
+  <p>Redirecting to <a href="${targetUrl}">${bName} Profile</a>...</p>
+  <script>window.location.href="${targetUrl}";<\\/script>
+</body>
+</html>`;
+
+          item.innerHTML = `
+            <div class="admin-item-header">
+              <div>
+                <strong style="font-size: 1.1rem; color: var(--primary);">${biz.businessName || 'Unnamed'}</strong>
+                <span class="${biz.seoPropagated ? 'badge-propagated' : 'badge-pending'}" style="margin-left: 8px;">
+                  ${biz.seoPropagated ? 'SEO Propagated' : 'SEO Pending'}
+                </span>
+                <div style="color: var(--text-light); margin-top: 4px; font-size: 0.9rem;">
+                  Filename: <strong>${slug}.html</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="seo-code-container">${escapeHTML(seoCode)}</div>
+
+            <div class="seo-actions">
+              <button data-code="${escapeHTML(seoCode)}" onclick="copyCode(this)" class="btn btn-outline-dark">Copy HTML</button>
+              <button data-code="${escapeHTML(seoCode)}" data-filename="${slug}.html" onclick="downloadCode(this)" class="btn btn-outline-dark">Download .html</button>
+              <button onclick="markPropagated('${biz.id}', this)" class="btn ${biz.seoPropagated ? 'btn-outline' : 'btn-primary'}">
+                ${biz.seoPropagated ? 'Mark as Propagated Again' : 'Mark as Propagated'}
+              </button>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      } catch (error) {
+        document.getElementById('seo-list').innerHTML = '<p style="color: red;">Error loading businesses.</p>';
+      }
+    }
+
+    function copyCode(btn) {
+      const code = btn.getAttribute('data-code');
+      // Decode HTML entities before copying
+      const textarea = document.createElement('textarea');
+      textarea.innerHTML = code;
+      navigator.clipboard.writeText(textarea.value);
+
+      const originalText = btn.innerText;
+      btn.innerText = 'Copied!';
+      setTimeout(() => btn.innerText = originalText, 2000);
+    }
+
+    function downloadCode(btn) {
+      const filename = btn.getAttribute('data-filename');
+      const code = btn.getAttribute('data-code');
+      const textarea = document.createElement('textarea');
+      textarea.innerHTML = code;
+      const blob = new Blob([textarea.value], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function markPropagated(id, btn) {
+      try {
+          const originalText = btn.innerText;
+          btn.innerText = 'Saving...';
+          const res = await fetch(`${WORKER_URL}/admin/action`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') }, body: JSON.stringify({ id, action: 'propagate_seo' }) });
+          if (!res.ok) throw new Error('Failed to propagate SEO');
+          btn.innerText = 'Saved!';
+          setTimeout(() => fetchApprovedForSeo(), 1500); // refresh list
+      } catch (e) {
+          alert('Error: ' + e.message);
+          btn.innerText = 'Error';
+      }
+    }
+  </script>
+</body>
+</html>

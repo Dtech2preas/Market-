@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Business Profile - DTECH Hub</title>
+<link href="/styles.css" rel="stylesheet"/>
+<style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #f8f9fa;
+            --text: #0f172a;
+            --text-light: #6c757d;
+            --bg: #ffffff;
+            --bg-offset: #f4f6f8;
+            --border: #e9ecef;
+            --success: #28a745;
+            --whatsapp: #25d366;
+            --radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --font: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font); color: var(--text); background-color: var(--bg-offset); line-height: 1.6; }
+        a { text-decoration: none; color: var(--primary); }
+        h1, h2, h3, h4 { font-weight: 600; color: #111; }
+
+        .container { width: 100%; max-width: 1000px; margin: 0 auto; padding: 0 16px; }
+
+        .btn { display: inline-block; padding: 10px 20px; border-radius: 24px; font-weight: 600; text-align: center; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-whatsapp { background-color: var(--whatsapp); color: white; }
+        .btn-outline { border-color: var(--border); color: var(--text); background: white; }
+
+        /* Dynamic Sections */
+        section { padding: 60px 0; background: var(--bg); margin-bottom: 8px; }
+        section:nth-child(even) { background: var(--bg-offset); }
+
+        .section-title { text-align: center; margin-bottom: 40px; font-size: 28px; }
+
+        /* Hero Section */
+        .hero { padding: 0; margin-bottom: 8px; position: relative; }
+        .hero-cover { width: 100%; height: 300px; background: #ddd; background-size: cover; background-position: center; }
+        .hero-content { position: relative; padding: 20px 20px 40px; text-align: left; background: white; border-bottom: 1px solid var(--border); }
+        .hero-logo { width: 120px; height: 120px; background: white; border: 4px solid white; border-radius: 14px; position: absolute; top: -60px; left: 40px; box-shadow: var(--shadow); object-fit: cover; }
+        .hero-text-wrapper { padding-left: 140px; min-height: 60px; margin-bottom: 24px; }
+        .hero-title { font-size: 32px; margin-bottom: 4px; color: var(--text); margin-top: 0; }
+        .hero-tagline { color: var(--text-light); font-size: 18px; margin-bottom: 0; }
+        .hero-actions { display: flex; gap: 12px; justify-content: flex-start; flex-wrap: wrap; padding-left: 140px; }
+
+        /* About Section */
+        .about-text { max-width: 800px; margin: 0 auto; text-align: center; font-size: 16px; }
+
+        /* Listings Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+        .listing-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform 0.2s; }
+        .listing-card:hover { transform: translateY(-4px); }
+        .listing-img { width: 100%; height: 200px; background: #eee; object-fit: cover; }
+        .listing-content { padding: 20px; }
+        .listing-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .listing-title { font-size: 18px; margin: 0; }
+        .listing-price { font-weight: bold; color: var(--primary); font-size: 18px; }
+        .listing-desc { color: var(--text-light); font-size: 14px; margin-bottom: 16px; }
+
+        /* Gallery Grid */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+        .gallery-img { width: 100%; height: 200px; background: #eee; border-radius: var(--radius); object-fit: cover; cursor: pointer; transition: opacity 0.2s; }
+        .gallery-img:hover { opacity: 0.9; }
+
+        /* Contact Section */
+        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 800px; margin: 0 auto; }
+        @media (max-width: 768px) { .contact-grid { grid-template-columns: 1fr; } }
+        .contact-item { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+        .contact-icon { width: 48px; height: 48px; border-radius: 50%; background: var(--bg-offset); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .social-links { display: flex; gap: 12px; justify-content: center; margin-top: 32px; }
+        .social-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        footer { text-align: center; padding: 40px; color: var(--text-light); font-size: 14px; background: white; border-top: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+<!-- Hero Section (Dynamic) -->
+<div class="hero" id="section-hero">
+<div class="hero-cover" id="b-cover"></div>
+<div class="hero-content">
+<div class="hero-logo" id="b-logo"></div>
+<div class="hero-text-wrapper">
+<h1 class="hero-title" id="h-title">DTECH Services</h1>
+<p class="hero-tagline" id="h-tagline">Affordable websites for local businesses</p>
+</div>
+<div class="hero-actions">
+<a class="btn" href="#" id="btn-wa">WhatsApp Us</a>
+<a class="btn btn-outline" href="#">Call Now</a>
+</div>
+</div>
+</div>
+<!-- About Section (Dynamic) -->
+<section id="section-about">
+<div class="container">
+<h2 class="section-title">About Us</h2>
+<p class="about-text" id="a-desc">
+                We are a dedicated team of student developers providing affordable, high-quality web design and digital marketing services to local businesses in the Limpopo area. Our goal is to help you establish a professional online presence that drives growth and attracts more customers.
+            </p>
+</div>
+</section>
+<!-- Services/Products Section (Dynamic) -->
+<section id="section-listings">
+<div class="container">
+<h2 class="section-title">Our Services</h2>
+<div class="grid" id="listings-grid">
+<div class="listing-card">
+<div class="listing-img"></div>
+<div class="listing-content">
+<div class="listing-header">
+<h3 class="listing-title">Starter Website</h3>
+<span class="listing-price">R500</span>
+</div>
+<p class="listing-desc">A professional 3-page website perfect for small businesses looking to get online quickly.</p>
+<a class="btn btn-outline" href="#">Enquire</a>
+</div>
+</div>
+<div class="listing-card">
+<div class="listing-img"></div>
+<div class="listing-content">
+<div class="listing-header">
+<h3 class="listing-title">E-Commerce Setup</h3>
+<span class="listing-price">R1200</span>
+</div>
+<p class="listing-desc">Full online store setup allowing you to sell products directly to customers securely.</p>
+<a class="btn btn-outline" href="#">Enquire</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Gallery Section (Dynamic) -->
+<section id="section-gallery">
+<div class="container">
+<h2 class="section-title">Gallery</h2>
+<div class="gallery-grid" id="gallery-grid">
+<div class="gallery-img"></div>
+<div class="gallery-img"></div>
+<div class="gallery-img"></div>
+<div class="gallery-img"></div>
+</div>
+</div>
+</section>
+<!-- Contact Section (Dynamic) -->
+<section id="section-contact">
+<div class="container">
+<h2 class="section-title">Get in Touch</h2>
+<div class="contact-grid">
+<div>
+<div class="contact-item">
+<div class="contact-icon">📞</div>
+<div>
+<strong>Phone</strong><br/>
+<span id="c-phone"></span>
+</div>
+</div>
+<div class="contact-item">
+<div class="contact-icon">📱</div>
+<div>
+<strong>WhatsApp</strong><br/>
+<span id="c-whatsapp"></span>
+</div>
+</div>
+</div>
+<div>
+<div class="contact-item">
+<div class="contact-icon">✉️</div>
+<div>
+<strong>Email</strong><br/>
+<span id="c-email"></span>
+</div>
+</div>
+<div class="contact-item">
+<div class="contact-icon">📍</div>
+<div>
+<strong>Location</strong><br/>
+<span id="c-location"></span>
+</div>
+</div>
+</div>
+</div>
+<div class="social-links">
+<a class="social-icon" href="#">F</a>
+<a class="social-icon" href="#">I</a>
+<a class="social-icon" href="#">T</a>
+</div>
+</div>
+</section>
+<footer>
+<p>Powered by DTECH Hub</p>
+</footer>
+<script>
+        const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            let slug = window.location.pathname.replace('/', '').replace('.html', '');
+            if (!slug || slug === 'business-dynamic') {
+                slug = new URLSearchParams(window.location.search).get('slug') || 'dtech-services';
+            }
+
+            try {
+                const res = await fetch(`${WORKER_URL}/api/business/${slug}`);
+                const data = await res.json();
+
+                if (data && !data.error && data.publishedVersion) {
+                    const pub = data.publishedVersion;
+
+                    // Basic
+                    if(pub.basic) {
+                        document.getElementById('h-title').innerText = pub.basic.name || '';
+                        document.getElementById('h-tagline').innerText = pub.basic.tagline || '';
+                        document.getElementById('a-desc').innerText = pub.basic.description || '';
+                    }
+
+                    // Contact
+                    if(pub.contact) {
+                        document.getElementById('c-phone').innerText = pub.contact.phone || '';
+                        document.getElementById('c-whatsapp').innerText = pub.contact.whatsapp || '';
+                        document.getElementById('c-email').innerText = pub.contact.email || '';
+                        document.getElementById('c-location').innerText = pub.basic?.city || '';
+
+                        let waNumber = (pub.contact.whatsapp || '').replace(/[^0-9]/g, '');
+                        if (waNumber.startsWith('0')) waNumber = '27' + waNumber.substring(1);
+                        document.getElementById('btn-wa').href = `https://wa.me/${waNumber}`;
+                    }
+
+                    // Branding
+                    if(pub.branding) {
+                        if(pub.branding.logo) document.getElementById('b-logo').style.backgroundImage = `url(${pub.branding.logo})`;
+                        if(pub.branding.cover) document.getElementById('b-cover').style.backgroundImage = `url(${pub.branding.cover})`;
+
+                        if(pub.branding.gallery && pub.branding.gallery.length > 0) {
+                            const galGrid = document.getElementById('gallery-grid');
+                            galGrid.innerHTML = '';
+                            pub.branding.gallery.forEach(url => {
+                                const div = document.createElement('div');
+                                div.className = 'gallery-img';
+                                div.style.backgroundImage = `url(${url})`;
+                                galGrid.appendChild(div);
+                            });
+                        }
+                    }
+
+                    // Listings
+                    if(pub.listings && pub.listings.length > 0) {
+                        const lGrid = document.getElementById('listings-grid');
+                        lGrid.innerHTML = '';
+                        pub.listings.forEach(item => {
+                            const card = document.createElement('div');
+                            card.className = 'listing-card';
+                            card.innerHTML = `
+                                <div class="listing-content">
+                                    <div class="listing-header">
+                                        <h3 class="listing-title">${item.name || ''}</h3>
+                                        <span class="listing-price">R${item.price || ''}</span>
+                                    </div>
+                                    <p class="listing-desc">${item.description || ''}</p>
+                                    <a href="javascript:document.getElementById('btn-wa').click()" class="btn btn-outline" style="width: 100%;">Enquire</a>
+                                </div>
+                            `;
+                            lGrid.appendChild(card);
+                        });
+                    }
+
+                    // Toggles
+                    if (pub.sections) {
+                        if (!pub.sections.hero) document.getElementById('section-hero').style.display = 'none';
+                        if (!pub.sections.about) document.getElementById('section-about').style.display = 'none';
+                        if (!pub.sections.listings) document.getElementById('section-listings').style.display = 'none';
+                        if (!pub.sections.gallery) document.getElementById('section-gallery').style.display = 'none';
+                        if (!pub.sections.contact) document.getElementById('section-contact').style.display = 'none';
+                    }
+                }
+            } catch (e) {
+                console.error("Error fetching dynamic data:", e);
+            }
+        });
+    </script>
+</body>
+</html>

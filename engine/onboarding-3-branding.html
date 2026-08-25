@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Branding - DTECH Hub</title>
+<link href="/styles.css" rel="stylesheet"/>
+<style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .step-indicator { font-weight: bold; color: var(--text-light); margin-bottom: 8px; }
+    .page-title { margin-bottom: 24px; }
+    .btn-group { display: flex; justify-content: space-between; margin-top: 32px; }
+
+    .upload-box { border: 2px dashed var(--border); padding: 32px; text-align: center; cursor: pointer; transition: 0.2s; background: #fafafa; }
+    .upload-box:hover { border-color: var(--primary); background: #f0f0f0; }
+    .preview-img { max-width: 100%; max-height: 150px; margin-top: 16px; display: none; }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+<div class="container">
+<a class="navbar-brand" href="/">DTECH Hub Setup</a>
+</div>
+</nav>
+<div class="container">
+<div class="onboarding-container">
+<div class="step-indicator">STEP 3 OF 6</div>
+<h2 class="page-title">Branding &amp; Media</h2>
+<div class="form-group">
+<label class="form-label">Business Logo</label>
+<div class="upload-box" onclick="document.getElementById('logo-upload').click()">
+<p>Click to upload logo (Square)</p>
+<img class="preview-img" id="logo-preview"/>
+</div>
+<input accept="image/*" id="logo-upload" type="file"/>
+</div>
+<div class="form-group">
+<label class="form-label">Cover Image</label>
+<div class="upload-box" onclick="document.getElementById('cover-upload').click()">
+<p>Click to upload cover banner (Rectangle)</p>
+<img class="preview-img" id="cover-preview"/>
+</div>
+<input accept="image/*" id="cover-upload" type="file"/>
+</div>
+<div class="form-group">
+<label class="form-label">Gallery Images (Max 6)</label>
+<div id="gallery-container">
+<!-- Gallery inputs will be injected here -->
+</div>
+</div>
+<div>
+<h3 class="page-title">Design Customizations</h3>
+<div class="form-group">
+<label class="form-label">Brand Accent Color</label>
+<input class="form-control" id="d-color" type="color" value="#3b82f6"/>
+</div>
+<div class="form-group">
+<label class="form-label">Card Style</label>
+<select class="form-control" id="d-cardStyle">
+<option value="minimal">Minimal (No borders)</option>
+<option selected="" value="default">Default (Standard)</option>
+<option value="bold">Bold (High contrast)</option>
+<option value="glow">Neon Glow</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Background Pattern (Fallback if no cover)</label>
+<select class="form-control" id="d-pattern">
+<option selected="" value="solid">Solid Color</option>
+<option value="dots">Dots</option>
+<option value="waves">Waves</option>
+<option value="grid">Grid Lines</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Typography Style</label>
+<select class="form-control" id="d-font">
+<option selected="" value="sans">Modern Sans-Serif</option>
+<option value="serif">Elegant Serif</option>
+<option value="mono">Tech Mono</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Card Hover Effect</label>
+<select class="form-control" id="d-hover">
+<option selected="" value="lift">Lift Up</option>
+<option value="glow">Glow Effect</option>
+<option value="zoom">Zoom Image</option>
+</select>
+</div>
+</div>
+<div class="btn-group">
+<a class="btn btn-outline-dark" href="onboarding-2-contact.html">← Back</a>
+<button class="btn btn-primary" onclick="saveAndNext()">Next: Services / Products →</button>
+</div>
+</div>
+</div>
+<script>
+
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    async function uploadImage(file) {
+      const formData = new FormData();
+      formData.append('image', file);
+      const token = localStorage.getItem('dtech_token');
+      const res = await fetch(`${WORKER_URL}/api/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) return data.url;
+      throw new Error(data.error || 'Upload failed');
+    }
+
+    function handleUpload(inputId, previewId, storageKey) {
+      document.getElementById(inputId).addEventListener('change', async function(e) {
+        if(e.target.files.length > 0) {
+          const file = e.target.files[0];
+          try {
+             // Show loading state
+             const box = this.parentElement;
+             const origText = box.querySelector('p').innerText;
+             box.querySelector('p').innerText = 'Uploading...';
+
+             const url = await uploadImage(file);
+
+             box.querySelector('p').innerText = origText;
+             const img = document.getElementById(previewId);
+             img.src = url;
+             img.style.display = 'block';
+             localStorage.setItem(storageKey, url);
+          } catch(err) {
+             alert('Error uploading image');
+          }
+        }
+      });
+    }
+
+    handleUpload('logo-upload', 'logo-preview', 'onboarding_logo');
+    handleUpload('cover-upload', 'cover-preview', 'onboarding_cover');
+
+    function renderGallery() {
+       const container = document.getElementById('gallery-container');
+       container.innerHTML = '';
+       let gallery = JSON.parse(localStorage.getItem('onboarding_gallery') || '[]');
+
+       for(let i=0; i<6; i++) {
+          const url = gallery[i] || '';
+          const displayStyle = url ? 'block' : 'none';
+          const html = `
+            <div class="upload-box" onclick="document.getElementById('gallery-upload-${i}').click()" style="padding: 16px;">
+              <p style="font-size: 0.8rem; margin-bottom: 8px;">${url ? 'Change Image' : '+ Add Image'}</p>
+              <img id="gallery-preview-${i}" class="preview-img" src="${url}" style="display: ${displayStyle}; margin: 0 auto; max-height: 100px;">
+            </div>
+            <input type="file" id="gallery-upload-${i}" style="display:none" accept="image/*">
+          `;
+          container.insertAdjacentHTML('beforeend', html);
+       }
+
+       for(let i=0; i<6; i++) {
+          document.getElementById(`gallery-upload-${i}`).addEventListener('change', async function(e) {
+             if(e.target.files.length > 0) {
+                const file = e.target.files[0];
+                try {
+                   const box = this.previousElementSibling;
+                   box.querySelector('p').innerText = 'Uploading...';
+                   const newUrl = await uploadImage(file);
+                   let currentGallery = JSON.parse(localStorage.getItem('onboarding_gallery') || '[]');
+                   currentGallery[i] = newUrl;
+                   localStorage.setItem('onboarding_gallery', JSON.stringify(currentGallery));
+                   renderGallery();
+                } catch(err) {
+                   alert('Error uploading gallery image');
+                   renderGallery();
+                }
+             }
+          });
+       }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const isEditor = window.location.pathname.includes('editor');
+      if (isEditor) {
+         // Re-map storage keys for editor
+         ['logo', 'cover', 'gallery', 'design'].forEach(k => {
+             const val = localStorage.getItem(`editor_${k}`);
+             if (val) localStorage.setItem(`onboarding_${k}`, val);
+         });
+      }
+
+      const savedLogo = localStorage.getItem('onboarding_logo');
+      const savedCover = localStorage.getItem('onboarding_cover');
+      const savedDesign = JSON.parse(localStorage.getItem('onboarding_design') || '{}');
+
+      if(savedLogo) {
+        const img = document.getElementById('logo-preview');
+        img.src = savedLogo;
+        img.style.display = 'block';
+      }
+      if(savedCover) {
+        const img = document.getElementById('cover-preview');
+        img.src = savedCover;
+        img.style.display = 'block';
+      }
+
+      if(savedDesign.color) document.getElementById('d-color').value = savedDesign.color;
+      if(savedDesign.cardStyle) document.getElementById('d-cardStyle').value = savedDesign.cardStyle;
+      if(savedDesign.pattern) document.getElementById('d-pattern').value = savedDesign.pattern;
+      if(savedDesign.font) document.getElementById('d-font').value = savedDesign.font;
+      if(savedDesign.hover) document.getElementById('d-hover').value = savedDesign.hover;
+
+      renderGallery();
+    });
+
+    function saveAndNext() {
+      const designData = {
+         color: document.getElementById('d-color').value,
+         cardStyle: document.getElementById('d-cardStyle').value,
+         pattern: document.getElementById('d-pattern').value,
+         font: document.getElementById('d-font').value,
+         hover: document.getElementById('d-hover').value
+      };
+      localStorage.setItem('onboarding_design', JSON.stringify(designData));
+
+      const isEditor = window.location.pathname.includes('editor');
+      if (isEditor) {
+         ['logo', 'cover', 'gallery', 'design'].forEach(k => {
+             const val = localStorage.getItem(`onboarding_${k}`);
+             if (val) localStorage.setItem(`editor_${k}`, val);
+         });
+         window.location.href = 'editor-4-listings.html';
+      } else {
+         window.location.href = 'onboarding-4-listings.html';
+      }
+    }
+
+  </script>
+</body>
+</html>

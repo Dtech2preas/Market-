@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<style>body { display: none; }</style>
+<script>
+    (function() {
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        window.location.href = 'admin-login.html';
+      } else {
+        try {
+          const payload = JSON.parse(atob(adminToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+          if (payload.exp * 1000 < Date.now() || payload.type !== 'admin') {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'admin-login.html';
+          } else {
+            // Restore visibility once validated
+            document.documentElement.style.display = 'initial';
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.style.display = 'block';
+            });
+          }
+        } catch (e) {
+          localStorage.removeItem('adminToken');
+          window.location.href = 'admin-login.html';
+        }
+      }
+    })();
+  </script>
+<meta charset="utf-8"/>
+<title>Active Businesses - Admin</title>
+<link href="/styles.css" rel="stylesheet"/>
+<style>
+    .admin-item { background: #fff; padding: 16px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .admin-item-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+<div class="container">
+<a class="navbar-brand" href="/">DTECH Admin</a>
+<div class="nav-links">
+<a class="btn btn-outline" href="#">Logout</a>
+</div>
+</div>
+</nav>
+<div class="container dashboard-layout">
+<aside class="sidebar">
+<nav class="sidebar-nav">
+<a class="sidebar-link" href="admin.html">Overview</a>
+<a class="sidebar-link" href="admin-pending.html">Pending Applications</a>
+<a class="sidebar-link active" href="admin-approved.html">Active Businesses</a>
+<a class="sidebar-link" href="admin-seo.html">SEO Management</a>
+</nav>
+</aside>
+<main class="dashboard-content">
+<h2>Active &amp; Verified Businesses</h2>
+<p>Manage businesses currently visible on the directory.</p>
+<div id="approved-list">
+<p>Loading...</p>
+</div>
+</main>
+</div>
+<script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    document.addEventListener('DOMContentLoaded', fetchApproved);
+
+    async function fetchApproved() {
+      try {
+        const response = await fetch(`${WORKER_URL}/admin/businesses`, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') } });
+        const businesses = await response.json();
+        const active = businesses.filter(b => b.status === 'approved' || b.status === 'verified');
+
+        const list = document.getElementById('approved-list');
+        list.innerHTML = '';
+
+        if(active.length === 0) {
+          list.innerHTML = '<p>No active businesses found.</p>';
+          return;
+        }
+
+        active.forEach(biz => {
+          const item = document.createElement('div');
+          item.className = 'admin-item';
+          const date = new Date(biz.timestamp || Date.now()).toLocaleDateString();
+          item.innerHTML = `
+            <div>
+              <strong style="font-size: 1.1rem; color: var(--primary);">${biz.businessName || 'Unnamed'}</strong> <span class="badge badge-verified" style="margin-left: 8px;">Active</span><br>
+              <small style="color: var(--text-light);">Owner: ${biz.studentName || 'Unknown'} | Approved: ${date}</small>
+            </div>
+            <div class="admin-item-actions">
+              <a href="admin-seo.html" class="btn btn-outline-dark" style="margin-right: 8px;">Manage SEO</a>
+              <button onclick="openEditModal(this.getAttribute('data-biz'))" data-biz='${escapeHTML(JSON.stringify(biz))}' class="btn btn-outline-dark" style="margin-right: 8px;">Edit</button><a href="https://business.dtech-services.co.za/profile/${biz.slug}.html" target="_blank" class="btn btn-outline-dark" style="margin-right: 8px;">View SEO</a><a href="https://business.dtech-services.co.za/${biz.slug}" target="_blank" class="btn btn-outline-dark">View Site</a>
+              <button onclick="updateStatus('${biz.id}', 'disable')" class="btn" style="background: var(--danger); color: white;">Suspend</button>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      } catch (error) {
+        document.getElementById('approved-list').innerHTML = '<p style="color: red;">Error loading active businesses.</p>';
+      }
+    }
+
+    async function updateStatus(id, action) {
+      if (!confirm(`Are you sure you want to ${action} this business?`)) return;
+      try {
+          const res = await fetch(`${WORKER_URL}/admin/action`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') },
+              body: JSON.stringify({ id, action })
+          });
+          if(res.ok) fetchApproved();
+      } catch (error) {
+          alert('Error updating status');
+      }
+    }
+  </script>
+</body>
+</html>
+<!-- Edit Modal (Restored) -->
+<div id="edit-modal">
+<div>
+<h3>Edit Business</h3>
+<form id="edit-form">
+<input id="edit-id" type="hidden"/>
+<div class="form-group">
+<label>Business Name</label>
+<input class="form-control" id="edit-business-name" required="" type="text"/>
+</div>
+<div class="form-group">
+<label>Student Name</label>
+<input class="form-control" id="edit-student-name" required="" type="text"/>
+</div>
+<div class="form-group">
+<label>Description</label>
+<textarea class="form-control" id="edit-description" rows="3"></textarea>
+</div>
+<div>
+<button class="btn btn-outline-dark" onclick="document.getElementById('edit-modal').style.display='none'" type="button">Cancel</button>
+<button class="btn btn-primary" type="submit">Save Changes</button>
+</div>
+</form>
+</div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const editForm = document.getElementById('edit-form');
+        if(editForm) {
+            editForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('edit-id').value;
+                const updates = {
+                    businessName: document.getElementById('edit-business-name').value,
+                    studentName: document.getElementById('edit-student-name').value,
+                    description: document.getElementById('edit-description').value
+                };
+
+                try {
+                    const response = await fetch(`${WORKER_URL}/admin/edit`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') },
+                        body: JSON.stringify({ id, updates })
+                    });
+                    if (!response.ok) throw new Error('Failed to update');
+
+                    document.getElementById('edit-modal').style.display = 'none';
+                    fetchApproved();
+                } catch (error) {
+                    alert('Error updating business: ' + error.message);
+                }
+            });
+        }
+    });
+
+    function openEditModal(bStr) {
+        const b = typeof bStr === 'string' ? JSON.parse(bStr) : bStr;
+        document.getElementById('edit-id').value = b.id;
+        document.getElementById('edit-business-name').value = b.businessName || '';
+        document.getElementById('edit-student-name').value = b.studentName || '';
+        document.getElementById('edit-description').value = b.description || '';
+        document.getElementById('edit-modal').style.display = 'block';
+    }
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.toString().replace(/[&<>'"]/g,
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag)
+    );
+}
+</script>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Contact Info - DTECH Hub</title>
+<link href="/styles.css" rel="stylesheet"/>
+<style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .step-indicator { font-weight: bold; color: var(--text-light); margin-bottom: 8px; }
+    .page-title { margin-bottom: 24px; }
+    .btn-group { display: flex; justify-content: space-between; margin-top: 32px; }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+<div class="container">
+<a class="navbar-brand" href="/">DTECH Hub Setup</a>
+</div>
+</nav>
+<div class="container">
+<div class="onboarding-container">
+<div class="step-indicator">STEP 2 OF 6</div>
+<h2 class="page-title">Contact &amp; Location</h2>
+<div class="form-group">
+<label class="form-label">Phone Number</label>
+<input class="form-control" id="c-phone" placeholder="e.g. 082 123 4567" type="text"/>
+</div>
+<div class="form-group">
+<label class="form-label">WhatsApp Number</label>
+<input class="form-control" id="c-whatsapp" placeholder="e.g. +27 82 123 4567" type="text"/>
+</div>
+<div class="form-group">
+<label class="form-label">Public Email</label>
+<input class="form-control" id="c-email" placeholder="hello@example.com" type="email"/>
+</div>
+<div class="form-group">
+<label class="form-label">Province</label>
+<select class="form-control" id="c-province">
+<option>Eastern Cape</option>
+<option>Free State</option>
+<option>Gauteng</option>
+<option>KwaZulu-Natal</option>
+<option>Limpopo</option>
+<option>Mpumalanga</option>
+<option>Northern Cape</option>
+<option>North West</option>
+<option>Western Cape</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Business Address (Optional)</label>
+<textarea class="form-control" id="c-address" placeholder="Enter your full business address" rows="3"></textarea>
+</div>
+<div class="btn-group">
+<a class="btn btn-outline-dark" href="onboarding-1-basic.html">← Back</a>
+<button class="btn btn-primary" onclick="saveAndNext()">Next: Branding →</button>
+</div>
+</div>
+</div>
+<script>
+    function saveAndNext() {
+      const data = {
+        phone: document.getElementById('c-phone').value,
+        whatsapp: document.getElementById('c-whatsapp').value,
+        email: document.getElementById('c-email').value,
+        address: document.getElementById('c-address').value,
+        province: document.getElementById('c-province').value
+      };
+      localStorage.setItem('onboarding_contact', JSON.stringify(data));
+      window.location.href = 'onboarding-3-branding.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = JSON.parse(localStorage.getItem('onboarding_contact') || '{}');
+      if (saved.phone) document.getElementById('c-phone').value = saved.phone;
+      if (saved.whatsapp) document.getElementById('c-whatsapp').value = saved.whatsapp;
+      if (saved.email) document.getElementById('c-email').value = saved.email;
+      if (saved.address) document.getElementById('c-address').value = saved.address;
+      if (saved.province) document.getElementById('c-province').value = saved.province;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Call to Action - DTECH Hub</title>
+<link href="/styles.css" rel="stylesheet"/>
+<style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .step-indicator { font-weight: bold; color: var(--text-light); margin-bottom: 8px; }
+    .page-title { margin-bottom: 24px; }
+    .btn-group { display: flex; justify-content: space-between; margin-top: 32px; }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+<div class="container">
+<a class="navbar-brand" href="/">DTECH Hub Setup</a>
+</div>
+</nav>
+<div class="container">
+<div class="onboarding-container">
+<div class="step-indicator">STEP 6 OF 6</div>
+<h2 class="page-title">Call to Action Button</h2>
+<p>Choose the primary action you want customers to take when they visit your page.</p>
+<div class="form-group">
+<label class="form-label">Primary Button Text</label>
+<select class="form-control" id="cta-primary">
+<option>WhatsApp Us</option>
+<option>Call Now</option>
+<option>Book Now</option>
+<option>Order Now</option>
+<option>Get Quote</option>
+<option>Message Us</option>
+</select>
+<small>This button will use the WhatsApp number provided in Step 2 to open a pre-filled chat.</small>
+</div>
+<div class="btn-group">
+<a class="btn btn-outline-dark" href="onboarding-5-sections.html">← Back</a>
+<button class="btn btn-primary" onclick="saveAndNext()">Review &amp; Submit →</button>
+</div>
+</div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = JSON.parse(localStorage.getItem('onboarding_cta') || 'null');
+      if(saved && saved.primary) {
+        document.getElementById('cta-primary').value = saved.primary;
+      }
+    });
+
+    function saveAndNext() {
+      const data = {
+        primary: document.getElementById('cta-primary').value
+      };
+      localStorage.setItem('onboarding_cta', JSON.stringify(data));
+      window.location.href = 'onboarding-7-preview.html';
+    }
+  </script>
+</body>
+</html>
