@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edit Basic Info - DTECH Hub</title>
+<link href="/styles.css" rel="stylesheet"/>
+<style>
+    .onboarding-container { max-width: 600px; margin: 40px auto; background: var(--bg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .step-indicator { font-weight: bold; color: var(--text-light); margin-bottom: 8px; }
+    .page-title { margin-bottom: 24px; }
+    .btn-group { display: flex; justify-content: space-between; margin-top: 32px; }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+<div class="container">
+<a class="navbar-brand" href="dashboard.html">DTECH Hub Editor</a>
+</div>
+</nav>
+<div class="container">
+<div class="onboarding-container">
+<div class="step-indicator">EDITOR</div>
+<h2 class="page-title">Edit Basic Information</h2>
+<div class="form-group">
+<label class="form-label">Business Name</label>
+<input class="form-control" id="b-name" placeholder="e.g. DTECH Services" type="text"/>
+</div>
+<div class="form-group">
+<label class="form-label">Profile Link (Slug)</label>
+<input class="form-control" id="b-slug" placeholder="e.g. dtech-services" type="text"/>
+<p>This will be your business URL. Use only letters, numbers, hyphens (-), and underscores (_). No spaces allowed.</p>
+<p id="slug-error"></p>
+</div>
+<div class="form-group">
+<label class="form-label">Category</label>
+<select class="form-control" id="b-category">
+<option>Food &amp; Drinks</option>
+<option>Creative Services</option>
+<option>Technology</option>
+<option>Education</option>
+<option>Fashion &amp; Beauty</option>
+<option>Home &amp; Lifestyle</option>
+<option>Transport</option>
+<option>Digital Services</option>
+<option>Professional Services</option>
+<option>Events</option>
+<option>Other</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Business Type</label>
+<select class="form-control" id="b-type">
+<option>Individual</option>
+<option>Team</option>
+<option>Student Organization</option>
+<option>Registered Business</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Owner Name (Optional)</label>
+<input class="form-control" id="b-ownerName" placeholder="e.g. John Doe" type="text"/>
+</div>
+<div class="form-group">
+<label class="form-label">Short Tagline</label>
+<input class="form-control" id="b-tagline" placeholder="What do you do in one sentence?" type="text"/>
+</div>
+<div class="form-group">
+<label class="form-label">Full Description</label>
+<textarea class="form-control" id="b-desc" placeholder="Tell us about your business..." rows="4"></textarea>
+</div>
+<div class="btn-group">
+<a class="btn btn-outline-dark" href="dashboard.html">Cancel</a>
+<button class="btn btn-primary" onclick="saveAndNext()">Save &amp; Next: Contact Info →</button>
+</div>
+</div>
+</div>
+<script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    async function saveAndNext() {
+      const slugInput = document.getElementById('b-slug').value;
+      const slugError = document.getElementById('slug-error');
+
+      if (/[^a-zA-Z0-9-_]/.test(slugInput)) {
+        slugError.innerText = 'Invalid characters in slug. Please remove spaces and use only letters, numbers, hyphens, or underscores.';
+        slugError.style.display = 'block';
+        return;
+      }
+
+      // Check slug availability
+      const token = localStorage.getItem('dtech_token');
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      try {
+          const res = await fetch(`${WORKER_URL}/api/business/check-slug?slug=${encodeURIComponent(slugInput)}`, { headers });
+          const data = await res.json();
+          if (data.available === false) {
+             slugError.innerText = 'This slug is already taken. Please choose another one.';
+             slugError.style.display = 'block';
+             return;
+          }
+      } catch (e) {
+          console.error(e);
+      }
+
+      slugError.style.display = 'none';
+
+      const data = {
+        name: document.getElementById('b-name').value,
+        slug: slugInput,
+        category: document.getElementById('b-category').value,
+        tagline: document.getElementById('b-tagline').value,
+        type: document.getElementById('b-type').value,
+        ownerName: document.getElementById('b-ownerName').value,
+        description: document.getElementById('b-desc').value
+      };
+      localStorage.setItem('editor_basic', JSON.stringify(data));
+      window.location.href = 'editor-2-contact.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('dtech_token');
+      if (!token) {
+          window.location.href = '/login.html';
+          return;
+      }
+
+      try {
+        const res = await fetch(`${WORKER_URL}/api/dashboard/my-business`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const bizData = await res.json();
+        if (!bizData.error && bizData.draftVersion) {
+           localStorage.setItem('editor_bizId', bizData.id);
+
+           // Prefill form from draftVersion if no unsaved local changes exist
+           const saved = JSON.parse(localStorage.getItem('editor_basic')) || bizData.draftVersion.basic || {};
+
+           if (saved.name) document.getElementById('b-name').value = saved.name;
+           if (saved.slug) document.getElementById('b-slug').value = saved.slug;
+           if (saved.category) document.getElementById('b-category').value = saved.category;
+           if (saved.tagline) document.getElementById('b-tagline').value = saved.tagline;
+      if (saved.type) document.getElementById('b-type').value = saved.type;
+      if (saved.ownerName) document.getElementById('b-ownerName').value = saved.ownerName;
+           if (saved.description) document.getElementById('b-desc').value = saved.description;
+        }
+      } catch(e) {
+          console.error(e);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+
+/* Functional Skeleton CSS */
+.hidden { display: none !important; }
+.mobile-only { display: none !important; }
+.section-body { display: none; }
+.section-body.active { display: block; }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; }
+.modal-overlay.active { display: flex; }
+.toast-container { position: fixed; }
+.lightbox-overlay { display: none; }
+.lightbox-overlay.active { display: flex; }
+.fs-overlay { display: none; }
+.fs-overlay.active { display: block; }

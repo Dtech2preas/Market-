@@ -1,0 +1,13 @@
+{
+  "name": "dtech-hub",
+  "version": "1.0.0",
+  "description": "DTECH Student Business Hub",
+  "main": "worker.js",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.10.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
+  }
+}

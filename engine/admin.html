@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<style>body { display: none; }</style>
+<script>
+    (function() {
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        window.location.href = 'admin-login.html';
+      } else {
+        try {
+          const payload = JSON.parse(atob(adminToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+          if (payload.exp * 1000 < Date.now() || payload.type !== 'admin') {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'admin-login.html';
+          } else {
+            // Restore visibility once validated
+            document.documentElement.style.display = 'initial';
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.style.display = 'block';
+            });
+          }
+        } catch (e) {
+          localStorage.removeItem('adminToken');
+          window.location.href = 'admin-login.html';
+        }
+      }
+    })();
+  </script>
+<meta charset="utf-8"/>
+<title>Admin Dashboard - DTECH Hub</title>
+<link href="/styles.css" rel="stylesheet"/>
+</head>
+<body>
+<nav class="navbar">
+<div class="container">
+<a class="navbar-brand" href="/">DTECH Admin</a>
+<div class="nav-links">
+<a class="btn btn-outline" href="#">Logout</a>
+</div>
+</div>
+</nav>
+<div class="container dashboard-layout">
+<aside class="sidebar">
+<nav class="sidebar-nav">
+<a class="sidebar-link active" href="admin.html">Overview</a>
+<a class="sidebar-link" href="admin-pending.html">Pending Applications</a>
+<a class="sidebar-link" href="admin-approved.html">Active Businesses</a>
+<a class="sidebar-link" href="admin-seo.html">SEO Management</a>
+</nav>
+</aside>
+<main class="dashboard-content">
+<h2>Platform Overview</h2>
+<p>High level metrics and status of the DTECH Business Hub.</p>
+<div>
+<div class="card">
+<h3 id="total-businesses">0</h3>
+<p>Total Submissions</p>
+</div>
+<div class="card">
+<h3 id="pending-count">0</h3>
+<p>Awaiting Review</p>
+<a class="btn btn-outline-dark" href="admin-pending.html">View Pending</a>
+</div>
+<div class="card">
+<h3 id="approved-count">0</h3>
+<p>Active Businesses</p>
+<a class="btn btn-outline-dark" href="admin-approved.html">Manage Active</a>
+</div>
+</div>
+</main>
+</div>
+<script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const response = await fetch(`${WORKER_URL}/admin/businesses`, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') } });
+        if (!response.ok) throw new Error('Failed to fetch');
+        const businesses = await response.json();
+
+        document.getElementById('total-businesses').textContent = businesses.length;
+        document.getElementById('pending-count').textContent = businesses.filter(b => b.status === 'pending').length;
+        document.getElementById('approved-count').textContent = businesses.filter(b => b.status === 'approved' || b.status === 'verified').length;
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    });
+  </script>
+</body>
+</html>

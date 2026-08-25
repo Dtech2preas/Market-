@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login - DTECH Hub</title>
+<link href="/styles.css" rel="stylesheet"/>
+</head>
+<body>
+<nav class="navbar">
+<div class="container">
+<a class="navbar-brand" href="/">DTECH Hub</a>
+</div>
+</nav>
+<div class="container">
+<div class="auth-container">
+<h2>Welcome Back</h2>
+<form id="loginForm">
+<div class="form-group">
+<label class="form-label">Email</label>
+<input class="form-control" required="" type="email"/>
+</div>
+<div class="form-group">
+<label class="form-label">Password</label>
+<input class="form-control" required="" type="password"/>
+</div>
+<button class="btn btn-primary" type="submit">Log In</button>
+</form>
+<p>
+        Don't have an account? <a href="/register.html">Sign up</a>
+</p>
+</div>
+</div>
+<script>
+// --- js/auth.js ---
+const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = loginForm.querySelector('input[type="email"]').value;
+      const password = loginForm.querySelector('input[type="password"]').value;
+
+      try {
+        const res = await fetch(`${WORKER_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.token) {
+          localStorage.setItem('dtech_token', data.token);
+          window.location.href = '/dashboard.html';
+        } else {
+          alert(data.error || 'Login failed');
+        }
+      } catch (err) {
+        alert('Network error. Please try again.');
+      }
+    });
+  }
+});
+</script>
+</body>
+</html>

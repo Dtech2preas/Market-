@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<style>body { display: none; }</style>
+<script>
+    (function() {
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        window.location.href = 'admin-login.html';
+      } else {
+        try {
+          const payload = JSON.parse(atob(adminToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+          if (payload.exp * 1000 < Date.now() || payload.type !== 'admin') {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'admin-login.html';
+          } else {
+            // Restore visibility once validated
+            document.documentElement.style.display = 'initial';
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.style.display = 'block';
+            });
+          }
+        } catch (e) {
+          localStorage.removeItem('adminToken');
+          window.location.href = 'admin-login.html';
+        }
+      }
+    })();
+  </script>
+<meta charset="utf-8"/>
+<title>Pending Applications - Admin</title>
+<link href="/styles.css" rel="stylesheet"/>
+<style>
+    .admin-item { background: #fff; padding: 16px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .admin-item-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+<div class="container">
+<a class="navbar-brand" href="/">DTECH Admin</a>
+<div class="nav-links">
+<a class="btn btn-outline" href="#">Logout</a>
+</div>
+</div>
+</nav>
+<div class="container dashboard-layout">
+<aside class="sidebar">
+<nav class="sidebar-nav">
+<a class="sidebar-link" href="admin.html">Overview</a>
+<a class="sidebar-link active" href="admin-pending.html">Pending Applications</a>
+<a class="sidebar-link" href="admin-approved.html">Active Businesses</a>
+<a class="sidebar-link" href="admin-seo.html">SEO Management</a>
+</nav>
+</aside>
+<main class="dashboard-content">
+<h2>Pending Applications</h2>
+<p>Review applications waiting for approval.</p>
+<div id="pending-list">
+<p>Loading...</p>
+</div>
+</main>
+</div>
+<script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const response = await fetch(`${WORKER_URL}/admin/businesses`, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('adminToken') } });
+        const businesses = await response.json();
+        const pending = businesses.filter(b => b.status === 'pending');
+
+        const list = document.getElementById('pending-list');
+        list.innerHTML = '';
+
+        if(pending.length === 0) {
+          list.innerHTML = '<p>No pending applications at this time.</p>';
+          return;
+        }
+
+        pending.forEach(biz => {
+          const item = document.createElement('div');
+          item.className = 'admin-item';
+          const date = new Date(biz.timestamp || Date.now()).toLocaleDateString();
+          item.innerHTML = `
+            <div>
+              <strong style="font-size: 1.1rem; color: var(--primary);">${biz.businessName || 'Unnamed'}</strong> (${biz.category || 'N/A'})<br>
+              <small style="color: var(--text-light);">Owner: ${biz.studentName || 'Unknown'} | Submitted: ${date}</small>
+            </div>
+            <div>
+              <a href="admin-review.html?id=${encodeURIComponent(biz.id)}" class="btn btn-primary">Review Application</a>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      } catch (error) {
+        document.getElementById('pending-list').innerHTML = '<p style="color: red;">Error loading applications.</p>';
+      }
+    });
+  </script>
+</body>
+</html>

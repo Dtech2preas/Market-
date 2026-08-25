@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DTECH Student Business Hub</title>
+<link href="/styles.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+<h1>D-TECH STUDENT BUSINESSES</h1>
+<a class="btn btn-primary" href="/login.html">List Your Business</a>
+</header>
+<main class="container" id="marketplace">
+<div class="search-bar-container">
+<input id="search-input" placeholder="Search businesses by name, category, or description..." type="text"/>
+</div>
+<div class="filter-bar">
+<div class="filter-pill active">All Businesses</div>
+<div class="filter-pill">Food &amp; Drinks</div>
+<div class="filter-pill">Creative Services</div>
+<div class="filter-pill">Technology</div>
+<div class="filter-pill">Education</div>
+<div class="filter-pill">Fashion &amp; Beauty</div>
+<div class="filter-pill">Home &amp; Lifestyle</div>
+<div class="filter-pill">Transport</div>
+<div class="filter-pill">Digital Services</div>
+<div class="filter-pill">Professional Services</div>
+<div class="filter-pill">Events</div>
+<div class="filter-pill">Other</div>
+<select class="filter-pill" id="province-filter">
+<option value="">All Provinces</option>
+<option value="Eastern Cape">Eastern Cape</option>
+<option value="Free State">Free State</option>
+<option value="Gauteng">Gauteng</option>
+<option value="KwaZulu-Natal">KwaZulu-Natal</option>
+<option value="Limpopo">Limpopo</option>
+<option value="Mpumalanga">Mpumalanga</option>
+<option value="Northern Cape">Northern Cape</option>
+<option value="North West">North West</option>
+<option value="Western Cape">Western Cape</option>
+</select>
+<div class="view-toggles mobile-only">
+<button class="view-toggle-btn active" id="view-2-col" title="Grid View">
+<svg fill="none" height="24" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="24"><rect height="7" width="7" x="3" y="3"></rect><rect height="7" width="7" x="14" y="3"></rect><rect height="7" width="7" x="14" y="14"></rect><rect height="7" width="7" x="3" y="14"></rect></svg>
+</button>
+<button class="view-toggle-btn" id="view-1-col" title="List View">
+<svg fill="none" height="24" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="24"><line x1="8" x2="21" y1="6" y2="6"></line><line x1="8" x2="21" y1="12" y2="12"></line><line x1="8" x2="21" y1="18" y2="18"></line><line x1="3" x2="3.01" y1="6" y2="6"></line><line x1="3" x2="3.01" y1="12" y2="12"></line><line x1="3" x2="3.01" y1="18" y2="18"></line></svg>
+</button>
+</div>
+</div>
+<div class="featured-section" id="featured-section">
+<div class="featured-header">
+<h2>Featured Businesses</h2>
+<span class="featured-badge">Top Picks</span>
+</div>
+<div class="marketplace-grid" id="featured-container">
+<!-- Featured cards injected here -->
+</div>
+</div>
+<div class="marketplace-grid" id="marketplace-container">
+<!-- Cards injected via JS -->
+</div>
+</main>
+<script>
+// --- js/main.js ---
+// Basic logic for the marketplace UI
+document.addEventListener('DOMContentLoaded', () => {
+  const filterPills = document.querySelectorAll('.filter-pill:not(select)');
+  const provinceFilter = document.getElementById('province-filter');
+  const searchInput = document.getElementById('search-input');
+
+  // View Toggle Logic
+  const view2ColBtn = document.getElementById('view-2-col');
+  const view1ColBtn = document.getElementById('view-1-col');
+  const marketplaceContainer = document.getElementById('marketplace-container');
+  const featuredContainer = document.getElementById('featured-container');
+
+  if (view2ColBtn && view1ColBtn) {
+    view2ColBtn.addEventListener('click', () => {
+      view2ColBtn.classList.add('active');
+      view1ColBtn.classList.remove('active');
+      if (marketplaceContainer) marketplaceContainer.classList.remove('mobile-1-col');
+      if (featuredContainer) featuredContainer.classList.remove('mobile-1-col');
+    });
+
+    view1ColBtn.addEventListener('click', () => {
+      view1ColBtn.classList.add('active');
+      view2ColBtn.classList.remove('active');
+      if (marketplaceContainer) marketplaceContainer.classList.add('mobile-1-col');
+      if (featuredContainer) featuredContainer.classList.add('mobile-1-col');
+    });
+  }
+
+  function applyFilters() {
+    const activePill = document.querySelector('.filter-pill.active');
+    const category = activePill ? activePill.textContent.trim() : 'All Businesses';
+    const province = provinceFilter.value.trim();
+    const query = searchInput.value.toLowerCase().trim();
+
+    let filtered = allBusinesses;
+
+    if (category !== 'All Businesses') {
+      filtered = filtered.filter(b => b.category === category);
+    }
+
+    if (province !== '') {
+      filtered = filtered.filter(b => b.province === province);
+    }
+
+    if (query !== '') {
+      filtered = filtered.filter(b => {
+        const name = (b.name || '').toLowerCase();
+        const cat = (b.category || '').toLowerCase();
+        const desc = (b.description || b.tagline || '').toLowerCase();
+        return name.includes(query) || cat.includes(query) || desc.includes(query);
+      });
+    }
+
+    renderMarketplace(filtered);
+  }
+
+  filterPills.forEach(pill => {
+    pill.addEventListener('click', (e) => {
+      filterPills.forEach(p => p.classList.remove('active'));
+      e.target.classList.add('active');
+      applyFilters();
+    });
+  });
+
+  provinceFilter.addEventListener('change', () => {
+    applyFilters();
+  });
+
+  searchInput.addEventListener('input', () => {
+    applyFilters();
+  });
+
+  console.log("DTECH Main JS Loaded");
+});
+
+// Bookmark Toggle
+function toggleSave(btn, event) {
+  event.stopPropagation(); // Prevent opening modal
+  btn.classList.toggle('saved');
+  if(btn.classList.contains('saved')) {
+    btn.innerHTML = '❤️';
+  } else {
+    btn.innerHTML = '🤍';
+  }
+}
+
+// Open External Tab
+function openExternal(slug, event) {
+  event.stopPropagation(); // Prevent opening modal
+  window.open(`https://${slug}.business.dtech-services.co.za`, '_blank');
+}
+
+// --- js/marketplace.js ---
+const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+function generateCardHTML(b, isFeatured = false) {
+  const shortDesc = b.description || b.tagline || '';
+  const displayDesc = shortDesc.length > 80 ? shortDesc.substring(0, 77) + '...' : shortDesc;
+
+  const d = b.design || {};
+  const accent = d.color || 'var(--text)';
+
+  let fontFam = 'var(--font)';
+  if (d.font === 'serif') fontFam = '"Merriweather", "Georgia", serif';
+  if (d.font === 'mono') fontFam = '"Fira Code", monospace';
+
+  let customStyles = ``;
+  if (d.cardStyle === 'minimal') {
+    customStyles += `border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.2);`;
+  } else if (d.cardStyle === 'bold') {
+    customStyles += `border: 2px solid ${accent};`;
+  } else if (d.cardStyle === 'glow') {
+    customStyles += `box-shadow: 0 0 15px ${accent}40; border-color: ${accent};`;
+  }
+
+  let hoverClass = '';
+  if (d.hover === 'glow') hoverClass = 'hover-glow';
+  else if (d.hover === 'zoom') hoverClass = 'hover-zoom';
+
+  let coverStyle = `background-image: url('${b.coverImage || 'https://placehold.co/400x200?text=Cover'}');`;
+
+  // Pattern fallback if no cover
+  if (!b.coverImage) {
+    if (d.pattern === 'dots') coverStyle = `background-image: radial-gradient(${accent} 2px, transparent 2px); background-size: 20px 20px; background-color: var(--secondary);`;
+    else if (d.pattern === 'waves') coverStyle = `background: repeating-radial-gradient(circle at 0 0, transparent 0, var(--secondary) 10px, transparent 10px, ${accent} 20px);`;
+    else if (d.pattern === 'grid') coverStyle = `background-image: linear-gradient(${accent} 1px, transparent 1px), linear-gradient(90deg, ${accent} 1px, transparent 1px); background-size: 20px 20px; background-color: var(--secondary);`;
+    else coverStyle = `background-color: ${accent};`;
+  }
+
+  return `
+    <div class="business-card fade-in ${isFeatured ? 'featured' : ''} ${hoverClass}" style="${customStyles}" onmouseover="this.style.borderColor='${accent}'" onmouseout="this.style.borderColor=''" onclick="window.location.href='${b.seoPropagated ? '/profile/' + b.slug + '.html' : '/business-profile.html?' + b.slug}'">
+      <div class="cover" style="${coverStyle}">
+        <button class="card-save-btn" onclick="toggleSave(this, event)">🤍</button>
+      </div>
+      <div class="content">
+        <div class="logo" style="background-image: url('${b.logo || 'https://placehold.co/100x100?text=Logo'}')"></div>
+
+        <h3 class="title" style="font-family: ${fontFam}; color: ${accent};">${b.name}</h3>
+        <span class="category-tag">${b.category}</span>
+
+        <p class="tagline" style="font-size: 0.9rem; color: var(--text-light); margin-top: 8px;">${displayDesc}</p>
+      </div>
+    </div>
+  `;
+}
+
+let allBusinesses = [];
+
+function generateSkeletonHTML() {
+  return `
+    <div class="business-card skeleton-card" style="border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+      <div class="cover skeleton"></div>
+      <div class="content">
+        <div class="logo skeleton" style="border-radius: 50%;"></div>
+        <div class="skeleton-text skeleton" style="width: 70%; height: 24px; margin-bottom: 8px;"></div>
+        <div class="skeleton-text skeleton" style="width: 40%; height: 16px; margin-bottom: 16px;"></div>
+        <div class="skeleton-text skeleton" style="width: 100%; height: 14px; margin-bottom: 4px;"></div>
+        <div class="skeleton-text skeleton" style="width: 80%; height: 14px;"></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSkeletons() {
+  const container = document.getElementById('marketplace-container');
+  if (!container) return;
+  // Render 8 skeleton cards as placeholders
+  container.innerHTML = Array(8).fill(null).map(generateSkeletonHTML).join('');
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const container = document.getElementById('marketplace-container');
+  const featuredSection = document.getElementById('featured-section');
+  const featuredContainer = document.getElementById('featured-container');
+
+  if (!container) return;
+
+  // Show skeleton loaders before fetch
+  renderSkeletons();
+
+  try {
+    const res = await fetch(`${WORKER_URL}/api/marketplace`);
+    allBusinesses = await res.json();
+
+    renderMarketplace(allBusinesses);
+
+  } catch (e) {
+    container.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">Error loading marketplace.</p>';
+  }
+});
+
+function renderMarketplace(businesses) {
+  const container = document.getElementById('marketplace-container');
+  const featuredSection = document.getElementById('featured-section');
+  const featuredContainer = document.getElementById('featured-container');
+
+  if (!businesses || businesses.length === 0) {
+    featuredSection.style.display = 'none';
+    container.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">No businesses found for this filter.</p>';
+    return;
+  }
+
+  // Simulate Featured Businesses (take first 3 if available)
+  if (businesses.length > 2) {
+    featuredSection.style.display = 'block';
+    const featured = businesses.slice(0, 3);
+    featuredContainer.innerHTML = featured.map(b => generateCardHTML(b, true)).join('');
+    // Show rest in main grid
+    const rest = businesses.slice(3);
+    container.innerHTML = rest.map(b => generateCardHTML(b)).join('');
+  } else {
+    // Not enough for a separate featured section
+    featuredSection.style.display = 'none';
+    container.innerHTML = businesses.map(b => generateCardHTML(b)).join('');
+  }
+}
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard - DTECH Hub</title>
+<link href="/styles.css" rel="stylesheet"/>
+</head>
+<body>
+<nav class="navbar">
+<div class="container">
+<a class="navbar-brand" href="/">DTECH Hub</a>
+<div class="nav-links">
+<a class="btn btn-outline" href="#">Logout</a>
+</div>
+</div>
+</nav>
+<div class="container dashboard-layout">
+<aside class="sidebar">
+<nav class="sidebar-nav">
+<a class="sidebar-link active" href="#overview">Overview</a>
+<a class="sidebar-link" href="editor-1-basic.html" id="editor-link">Website Editor</a>
+</nav>
+</aside>
+<main class="dashboard-content">
+<div>
+<h2 id="welcome-msg">Welcome back</h2>
+</div>
+<!-- Unified Header Section -->
+<div class="unified-header">
+<!-- Status Area -->
+<div id="unified-status-area">
+<div>
+<div>
+<div id="status-icon">🚀</div>
+<div>
+<h3 id="status-title">Welcome to DTECH Hub!</h3>
+<p id="status-desc">Loading your business profile status...</p>
+</div>
+</div>
+<div id="status-actions">
+<!-- Action buttons will be injected here -->
+</div>
+</div>
+<div id="status-reason">
+</div>
+<div id="status-url-area">
+<div>
+<strong>Your URL:</strong> <span id="approved-url-display"></span>
+</div>
+<div id="seo-status-msg"></div>
+</div>
+</div>
+<!-- Profile Completeness Area -->
+<div id="unified-completeness-area">
+<div>
+<div>Profile Completeness</div>
+<div id="score-text">0%</div>
+</div>
+<div>
+<div id="score-bar"></div>
+</div>
+<div id="completeness-tips-container">
+<p>Tips to improve your profile:</p>
+<ul id="completeness-tips">
+<!-- Tips injected via JS -->
+</ul>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    const WORKER_URL = 'https://late-frost-770c.nakiaklocko57.workers.dev';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = localStorage.getItem('dtech_token');
+      if (!token) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${WORKER_URL}/api/dashboard/my-business`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const bizData = await res.json();
+
+        // DOM Elements for unified header
+        const statusIcon = document.getElementById('status-icon');
+        const statusTitle = document.getElementById('status-title');
+        const statusDesc = document.getElementById('status-desc');
+        const statusActions = document.getElementById('status-actions');
+        const statusReason = document.getElementById('status-reason');
+        const statusUrlArea = document.getElementById('status-url-area');
+
+        const completenessArea = document.getElementById('unified-completeness-area');
+        const scoreText = document.getElementById('score-text');
+        const scoreBar = document.getElementById('score-bar');
+        const tipsContainer = document.getElementById('completeness-tips');
+
+        // Hide sidebar links if no business
+        const sidebarNav = document.querySelector('.sidebar-nav');
+        const editorLink = document.getElementById('editor-link');
+
+        if (bizData.error || !bizData.id) {
+            // No business found
+            if (editorLink) editorLink.style.display = 'none';
+            statusIcon.innerText = '🚀';
+            statusTitle.innerText = 'Welcome to DTECH Hub!';
+            statusDesc.innerText = "It looks like you haven't set up a business profile yet. Get started by creating your website.";
+            statusActions.innerHTML = '<a href="onboarding-1-basic.html" class="btn btn-primary">Create a Business Website</a>';
+        } else if (bizData.status) {
+            if (editorLink) editorLink.style.display = 'block';
+            completenessArea.style.display = 'block';
+
+            // Calculate Profile Completeness
+            let score = 0;
+            let tips = [];
+            const data = bizData.publishedVersion || bizData.draftVersion || bizData;
+            const basic = data.basic || data;
+
+            if (basic.name && basic.name.length > 0) { score += 10; } else { tips.push("Add a business name."); }
+            if (basic.category && basic.category.length > 0) { score += 10; } else { tips.push("Select a category for your business."); }
+            if (basic.description && basic.description.length > 50) { score += 20; } else { tips.push("Write a longer description (over 50 characters) to better explain your business."); }
+            if (data.contact && data.contact.whatsapp) { score += 15; } else { tips.push("Add a WhatsApp contact number for customers to reach you easily."); }
+            if (data.branding && data.branding.logo) { score += 15; } else { tips.push("Upload a business logo to look more professional."); }
+            if (data.branding && data.branding.cover) { score += 10; } else { tips.push("Upload a custom cover photo to stand out."); }
+            if (data.listings && data.listings.length > 0) { score += 20; } else { tips.push("Add at least one product or service to your catalog/listings."); }
+
+            scoreText.innerText = `${score}%`;
+            scoreBar.style.width = `${score}%`;
+
+            if (tips.length === 0) {
+              tipsContainer.innerHTML = '<li>🎉 Fantastic! Your profile is fully optimized.</li>';
+              scoreBar.style.background = 'var(--success)';
+              scoreText.style.color = 'var(--success)';
+            } else {
+              tipsContainer.innerHTML = tips.map(tip => `<li>${tip}</li>`).join('');
+            }
+
+            if (bizData.status === 'request_changes') {
+                statusIcon.innerText = '⚠️';
+                statusTitle.innerText = 'Changes Requested';
+                statusTitle.style.color = 'var(--warning)';
+                statusDesc.innerText = 'Your business application requires some updates before it can be approved.';
+                statusActions.innerHTML = '<a href="onboarding-1-basic.html" class="btn btn-outline" style="border-color: var(--warning); color: var(--warning);">Continue Editing</a>';
+                if(bizData.adminReason) {
+                    statusReason.style.display = 'block';
+                    statusReason.style.borderColor = 'var(--warning)';
+                    statusReason.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
+                    statusReason.innerText = `"${bizData.adminReason}"`;
+                }
+            } else if (bizData.status === 'declined' || bizData.status === 'reject') {
+                statusIcon.innerText = '⛔';
+                statusTitle.innerText = 'Application Declined';
+                statusTitle.style.color = 'var(--danger)';
+                statusDesc.innerText = 'Unfortunately, your business application has been declined.';
+                if(bizData.adminReason) {
+                    statusReason.style.display = 'block';
+                    statusReason.style.borderColor = 'var(--danger)';
+                    statusReason.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                    statusReason.innerText = `"${bizData.adminReason}"`;
+                }
+            } else if (bizData.status === 'pending') {
+                statusIcon.innerText = '⏳';
+                statusTitle.innerText = 'Pending Review';
+                statusTitle.style.color = 'var(--info)';
+                statusDesc.innerText = 'Your application is currently being reviewed by an administrator. We will notify you once a decision is made.';
+            } else if (bizData.status === 'approved' || bizData.status === 'verified') {
+                statusIcon.innerText = '✅';
+                statusTitle.innerText = 'Business Approved';
+                statusTitle.style.color = 'var(--success)';
+                statusDesc.innerText = 'Your business is live on the directory! You can manage your content in the Website Editor.';
+
+                statusUrlArea.style.display = 'flex';
+                let shareUrl = `https://business.dtech-services.co.za/business-profile.html?${bizData.slug}`;
+                const liveUrl = shareUrl;
+                const seoMsgDiv = document.getElementById('seo-status-msg');
+
+                if (bizData.seoPropagated) {
+                    seoMsgDiv.style.color = 'var(--success)';
+                    seoMsgDiv.style.background = 'rgba(16, 185, 129, 0.1)';
+                    seoMsgDiv.innerHTML = '✨ Your advanced SEO is ready! Sharing your URL will now show a beautiful preview.';
+                    shareUrl = `https://business.dtech-services.co.za/profile/${bizData.slug}.html`;
+                } else {
+                    seoMsgDiv.style.color = 'var(--warning)';
+                    seoMsgDiv.style.background = 'rgba(245, 158, 11, 0.1)';
+                    seoMsgDiv.innerHTML = '⏳ Your website is live, but please wait until SEO is propagated before sharing your URL to ensure link previews (images/titles) appear correctly on social media like WhatsApp.';
+                }
+
+                document.getElementById('approved-url-display').innerText = shareUrl;
+
+                statusActions.innerHTML = `
+                  <button id="copy-link-btn" class="btn btn-outline" style="border-color: var(--success); color: var(--success); margin-right: 8px;">Copy Link</button>
+                  <a href="${liveUrl}" target="_blank" class="btn btn-outline" style="border-color: var(--success); color: var(--success);">View Live Site</a>
+                `;
+
+                document.getElementById('copy-link-btn').onclick = function() {
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                        const origText = this.innerText;
+                        this.innerText = 'Copied!';
+                        setTimeout(() => this.innerText = origText, 2000);
+                    });
+                };
+            }
+        }
+      } catch (e) {
+          console.error(e);
+      }
+
+      const logoutBtn = document.querySelector('a.btn-outline[href="#"]');
+      if (logoutBtn && logoutBtn.innerText === 'Logout') {
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.removeItem('dtech_token');
+          window.location.href = '/login.html';
+        });
+      }
+    });
+  </script>
+</body>
+</html>
