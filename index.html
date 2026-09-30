@@ -137,8 +137,15 @@ document.addEventListener('DOMContentLoaded', () => {
     applyFilters();
   });
 
+  let searchTimeout;
+  // ⚡ Bolt Optimization: Debounce search input
+  // Why: Prevents applyFilters() (which iterators over allBusinesses) from running on every keystroke
+  // Impact: Reduces CPU usage and unnecessary re-renders while typing, especially with large lists
   searchInput.addEventListener('input', () => {
-    applyFilters();
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      applyFilters();
+    }, 300);
   });
 
   console.log("DTECH Main JS Loaded");
